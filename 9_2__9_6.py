@@ -437,3 +437,485 @@ url
 url = url.lower()
 url
 
+##############################################################################
+#9/3#
+#[문제 15] 반복문을 사용하지 않고 * 를 가로 10개 출력
+print('*'*10)
+#[문제 16] 반복문을 사용하지 않고 * 를 세로 10개 출력
+print('*\n'*10)
+#[문제 17] day 변수에 20190903을 입력하세요.
+#화면 출력은  2019년 09월 03일 출력하세요.
+day = '20190903'
+print(day[0:4]+'년 '+day[4:6]+'월 '+day[6:]+'일')
+print('{}년 {}월 {}일'.format(day[0:4],day[4:6],day[6:8]))
+print('%s년 %s월 %s일'%(day[0:4],day[4:6],day[6:8]))
+day2 = 20190903
+divmod(day2,10000)
+
+
+#python 자료형
+#1. list
+#- 서로 다른 데이터 타입을 갖을 수 있는 배열타입
+#- 중첩할 수 있다.
+#- [], list() 로 표현한다.
+#R : list(key = value, key = value)
+
+x = [] #R <- NULL
+type(x)#list
+
+y = list()
+type(y)#list
+
+x = [10, 20, 30]
+print(x)
+type(x)#list
+len(x)#3
+
+# list index
+x[0]#10
+x[-1]#30
+
+isinstance(x[0],int)#True
+isinstance(x[0],float)#False
+isinstance(x[0],str)#False
+
+#list 슬라이싱 [시작:끝-1]
+x[0:]
+x[0:2]
+x[:-1]
+x[-1:]
+
+#list 값 수정하는 방법
+#R : x[[0]] <- 100, x$기존의 key <- 100
+x[0] = 100
+x
+x[1:3] = [200,300]
+
+#list variable 끝에 값을 추가해 넣기
+#R : x$새로운 key <- 400
+x.append(400) 
+x#[100, 200, 300, 400]
+
+#기존 리스트 변수에 다른 리스트를 이어 붙일 때는 extend를 사용한다.
+x = [100, 200, 300, 400]
+x1 = [600, 700, 900]
+
+x.extend(x1)
+x#[100, 200, 300, 400, 600, 700, 900]
+
+#또는 + 로도 리스트 변수를 결합할 수 있다.
+x = x + x1
+x#[100, 200, 300, 400, 600, 700, 900]
+
+#append를 사용하면 리스트가 중첩되어서 추가된다.
+x.append(x1)
+x#[100, 200, 300, 400, [600, 700, 900]]
+x[-1]#[600, 700, 900]
+
+#삭제하기
+del x[-1]
+x#[100, 200, 300, 400]
+
+#x#[100, 200, 300, 400, 600, 700, 900]
+x[4]#600
+#인덱스를 사용하여 특정 위치에 값을 입력하는 방법
+x.insert(4,500)
+x[4]#500
+x#[100, 200, 300, 400, 500, 600, 700, 900]
+
+x[-1]#900
+#리스트 변수에 있는 값 중에 마지막 값을 제거하는 방법
+x.pop()
+x#[100, 200, 300, 400, 500, 600, 700]
+
+#특정한 인덱스 번호를 기준으로 제거하는 방법
+#R : x[[4]] <- NULL, x$기존의 key <- NULL
+x.pop(4)
+x#[100, 200, 300, 400, 600, 700]
+
+del x[3]
+x#[100, 200, 300, 600, 700]
+
+#변수를 제거하는 방
+del x
+x#error
+dir()
+
+drink = ['콜라','사이다','콜라','환타','사이다','콜라']
+len(drink)#6
+drink.count('콜라')#3
+drink.find('콜라')#error #find는 list일때는 사용할 수 없다.
+drink.index('콜라')#0
+drink.index('콜라',1)#2
+drink.index('콜라',3)
+
+#list 변수에 값을 기준으로 삭제하는 방법
+drink.remove('콜라')
+drink#['사이다', '콜라', '환타', '사이다', '콜라'] #하나만 지워진다.
+
+#중첩 리스트
+x = [1,2,3,['a','b','c'],4,5]
+type(x)
+type(x[0])#int
+type(x[3])#list
+x[3][0]#'a'
+type(x[3][0])#str
+x[3][0:2]#['a', 'b']
+x[3][-1]#'c'
+x[3].append('d')
+del x[3][-1]
+x[3][0] = x[3][0].upper()
+x[0] = x[0] * 10
+x#[10, 2, 3, ['A', 'b', 'c'], 4, 5]
+
+x[3][0] = x[3][0] * 2
+x#[10, 2, 3, ['AA', 'b', 'c'], 4, 5]
+
+#list 변수 값을 지우는 방법
+x.clear()
+x#[]
+type(x)#list
+dir()#x 있음 
+id(x)#메모리 주소값 
+
+del x
+dir()
+id(x)#error
+
+x = [1,5,3,4,2]
+#리스트 변수안에 값을 기준으로 정렬(기본값은 오름차순)
+x.sort()#'미리보기 아님' 에 주의하자 
+x#[1, 2, 3, 4, 5]
+
+x.sort(reverse=True)
+x#[5, 4, 3, 2, 1]
+
+#sort 를 미리보기만 하고 
+x = [1,5,3,4,2]
+
+sorted(x)#[1, 2, 3, 4, 5]
+x#[1,5,3,4,2]
+sorted(x, reverse = True)#[5, 4, 3, 2, 1]
+
+#리스트 인덱스 순서를 반대로 뒤집을때 사용하는 방법
+x[::-1]#[2, 4, 3, 5, 1]
+#
+x.reverse()
+x#[2, 4, 3, 5, 1]
+
+
+king =[['주몽','유리왕','대무신왕'],['태종무열왕','경덕왕'],
+	['온조왕','개로왕']]
+len(king)#3
+len(king[1])
+#[문제18] 1번 인덱스에 '원성왕' 추가하세요.
+king[1].append('원성왕')
+king
+#[문제19] 2번 인덱스에 '무왕' 추가하세요.
+king[2].append('무왕')
+king
+#[문제20] 0번 인덱스에 '대무신왕' 추가하세요.
+king[0].append('대무신왕')
+king
+#[문제21] 0번 인덱스에 '미천왕','미천왕','광개토대왕' 한꺼번에 추가하세요.
+king[0].extend(['미천왕','미천왕','광개토대왕'])
+king
+#[문제22] 2번 인덱스에 2번 위치에 '성왕' 추가하세요.
+king[2].insert(2,'성왕')
+king
+#[문제23] '미천왕' 갯수를 세어주세요.
+king[0].count('미천왕')#2
+#[문제24] 0번 인덱스에 마지막 데이터를 삭제해주세요.
+king[0].pop()
+king
+
+#list의 원소들을 정렬하기 
+king[0].sort()
+king[2].sort()
+king.sort()#이것도 정렬이 되는데, 기준이 각 list[0] 인가?
+king
+
+## 2.tuple(튜플) ##
+#-리스트와 유사하지만, 수정, 삭제, 추가를 할 수 없다.
+#상수와 비슷하다.
+#-() 
+lst = []
+type(lst)#list
+
+tuple1 = ()
+type(tuple1)#tuple
+
+tuple2 = 10, 20
+tuple2
+type(tuple2)#tuple
+
+x = (1,)
+type(x)#tuple
+
+tuple3 = (1,2,3,4,5)
+tuple4 = ('a','b',('ab','ac'))#tuple도 중첩이 가능하다.
+type(tuple4[2])#tuple
+
+tuple5 = (1,2,('a','b','c'),3,(1,2,3))
+type(tuple5[0])#int
+type(tuple5[2][0])#str
+
+#tuple 2개를 합치
+x = (1,2,3)
+y = (4,5,6)
+
+c = x + y
+type(c)#tuple
+c#(1, 2, 3, 4, 5, 6)
+#tuple은 수정, 삭제, 추가를 할 수 없다.
+c[10] = 10#error
+del c[0]#error
+c.append(7)#error
+
+c.index(1)
+c.count(1)
+
+#()없이도 tuple을 선언할 수 있다.
+a = 1,2,3
+type(a)#tuple
+#각각으로 분리되어 들어간다.
+one, two, three = a
+one#1
+two#2
+three#3
+
+#리스트도 가능하다.
+a = [1,2,3]
+type(a)
+#각각으로 분리되어 들어간다.
+one, two, three = a
+one#1
+two#2
+three#3
+
+#슬라이싱을 통해서 각각의 변수에 값을 넣을 수 있다.
+x , y = a[0:2]
+x
+y
+
+#수정, 삭제, 추가등의 기능이 없기 때문에 튜플이 리스트보다 처리속도가 빠르다.
+
+## 3.dictionary ##
+#- key, value 값을 가지는 자료형이다.
+#R : list가 key,value 있었다.
+#이름 = 홍길동, 전화번호 = 010-0000-1111, 주소 = 서울
+
+dic = {}
+dic
+type(dic)#dict
+
+dic = {'name'  : '홍길동',
+       'phone' : '010-0000-1111',
+       'addr'  : '서울시'}
+
+dic#{'name': '홍길동', 'phone': '010-0000-1111', 'addr': '서울시'}
+
+sports = {'축구':'메시','농구':'커리','야구':'박찬호'}
+
+sports['축구']#'메시'
+sports['농구']#'커리'
+sports['컬링'] = '김영미'
+sports
+#{'축구': '메시', '농구': '커리', '야구': '박찬호', '컬링': '김영미'}
+sports['컬링'] = ['김은정','김경애','김영미']
+sports
+#{'축구': '메시', '농구': '커리', '야구': '박찬호',
+# '컬링': ['김은정', '김경애', '김영미']}
+
+sports.keys()#dict_keys(['축구', '농구', '야구', '컬링'])
+sports.values()#dict_values(['메시', '커리', '박찬호', ['김은정', '김경애', '김영미']])
+sports.items()#(key, value) 식으로 묶겨서 나옴
+
+# key값에 대한 value 값 확인
+sports['농구']#'커리'
+sports.get('농구')#'커리'
+
+sports['골프']#error
+sports.get('골프')#키값이 없으면 아무것도 안 나옴 
+
+'골프' in sports.keys()#False
+'농구' in sports.keys()#True
+#R : %in%
+
+#값이 있으면 True, 없으면 False
+'커리' in sports.values()
+'김영미' in sports.values()#False!!!
+['김은정','김경애','김영미'] in sports.values()#True
+
+#키, 값을 삭제
+del sports['야구']
+sports
+
+#값만 삭제하려면 
+sports['축구'] = []
+sports
+
+#
+sports['축구'] = '손흥민'
+sports
+
+#변수안에 키, 값 내용 지우기
+sports.clear()
+sports#{}
+
+#dictionary 형은 wordcloud등을 이용하려고 단어수 빈도를 측정할때
+#사용한다.
+
+sports = {'축구':'박지성','농구':'조던'}
+
+v = sports.values()
+v
+type(v)#dict_values
+list(v)#['박지성', '조던']
+
+w = sports.keys()
+w
+type(w)#dict_keys
+list(w)#['축구', '농구']
+
+k, v = sports.items()
+k#('축구', '박지성')
+v#('농구', '조던')
+
+## 4.set ##
+#- 집합, 중복을 허용하지 않습니다.
+#- 리스트와 비슷하다. 인덱스의 순서가 없다.
+#선언은 {} 사용하는데 key, value 는 없다.
+s = {1,1,1,1,5,76,3,3,4,6,56,2,3,4,54,3,57,76,42,4,4,6,7}
+s#{1, 2, 3, 4, 5, 6, 7, 42, 54, 56, 57, 76}
+type(s)#set
+
+x = {1,2,3,5}
+y = {1,2,3,4,6}
+x
+y
+
+#합집합 #R : union(x,y)
+x.union(y)#{1, 2, 3, 4, 5, 6}
+x|y#{1, 2, 3, 4, 5, 6}
+
+#교집합 #R : intersect(x,y)
+x.intersection(y)#{1, 2, 3}
+x&y#{1, 2, 3}
+
+#차집합 #R : setdiff(x,y)
+x.difference(y)#{5}
+x-y#{5}
+
+y.difference(x)#{4, 6}
+y-x#{4, 6}
+
+#x나 y에만 포함되는 원소들은?
+x.difference(y).union(y.difference(x))#{4, 5, 6}
+x.symmetric_difference(y)#{4, 5, 6}
+
+#원소가 set안에 있는지 보자 
+1 in x#True
+7 in x#False
+44 in s#False
+
+#set은 index가 없다.
+s[0]#error
+
+# 집합변수의 값을 삭제
+x.remove(1)
+x#{2, 3, 5}
+
+# 집합변수의 값을 추가
+x.add(1)
+x.add(9)
+x
+#여러개의 값을 추가
+x.add([22,33])#error
+x.update([22,33])
+x#{1, 2, 3, 5, 9, 22, 33}
+
+##
+x = []
+y = ()
+z = {}
+type(x)#list
+type(y)#tuple
+type(z)#dict
+
+s = set()
+type(s)#set
+id(s)#메모리 할당주소 : 149245736
+
+## 5.bool ##
+#참(True), 거짓(False)을 나타내는 자료형 
+
+x = True
+y = False
+type(x)
+type(y)
+
+1 == 1
+x == y
+1 > 2
+2 >= 1
+1 <= 1
+1 < 2
+1 != 2
+
+# True 표현하는 방법
+bool(1)
+bool(-1)
+bool('이재훈')
+bool('python')
+bool([1,2,3])
+bool((1,2,3))
+bool({1,2,3})
+not 0
+not None
+
+#False 표현방법
+bool(0)
+bool([])
+bool(())
+bool({})
+bool(None)
+bool('')
+not 1
+not -1
+
+
+#복제를 할때 주의해야 할 점 
+a = [1,2,3]
+b = a
+b#[1, 2, 3]
+
+#메모리 위치는 같다. 새롭게 만든게 아니라 참조만 같이 해 놓았다.
+id(a)#123758152
+id(b)#123758152
+
+a[0] = 10
+a#[10, 2, 3]
+b#[10, 2, 3]
+#값이 같이 바뀌는걸  알 수 있다. #따로 값을 바꾸는 방법은?
+#따로 분리해서 사용하는 방법은?
+
+import copy
+c = copy.deepcopy(a)
+#다음 값이 다른게 확인된다.
+id(a)
+id(c)
+
+a.append(4)
+a#[10, 2, 3, 4]
+b#[10, 2, 3, 4]
+c#[10, 2, 3]
+
+#
+x = [1,2,3]
+y = x[:]
+id(x)#123944456
+id(y)#123934920
+x.append(4)
+x#[1, 2, 3, 4]
+y#[1, 2, 3]
