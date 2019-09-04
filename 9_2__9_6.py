@@ -919,3 +919,430 @@ id(y)#123934920
 x.append(4)
 x#[1, 2, 3, 4]
 y#[1, 2, 3]
+
+############################################################################
+#9/4#
+
+#input() 함수를 이용해서 사용자로 부터 입력을 
+#받아들여 프로그램에게 전달해주는데, 이때 전달되는 데이터의
+#형식은 문자열이다.
+
+x = input()#하고 console로 가서 값을 입력한다.
+y = input()
+x#'1000'
+y#'20'
+type(x)
+type(y)
+x + y#'100020'
+#숫자로 계산하고 싶으면 형변환을 한 뒤에 해야 한다.
+int(x) + int(y)
+
+x1 = input()
+x2 = input()
+
+int(x1) + int(x2)#error
+float(x1) + float(x2)
+
+#문구도 같이 나오게 하고 싶을때
+x = input('숫자를 입력하세요 :')
+#처음부터 형변환을 해서 입력되게 하자
+x = int(input('정수를 입력하세요:'))
+
+x
+
+#조건제어문
+#1. if문
+#if 조건문 : 
+#   수행해야할 문장
+
+#if 조건문 :
+#   수행해야할 문장
+#else:
+#   수행해야할 문장
+
+x = 10
+if x == 10:
+    print('x는 10이다')
+    print('오늘 하루도 행복하자')
+
+x = 20
+if x == 10:
+    print('x는 10이다')
+    print('오늘 하루도 행복하자')
+else:
+    print('x는 10아니다')
+    print('오늘 하루도 {}배 행복하자'.format(x))
+    
+x = 1
+if x:
+    print('참')
+else:
+    print('거짓')
+#참 
+x = 0
+if x:
+    print('참')
+else:
+    print('거짓')
+#거짓
+    
+x = '파이썬'
+if x:
+    print('참')
+else:
+    print('거짓')
+#참 
+x = []
+if x:
+    print('참')
+else:
+    print('거짓')
+#거짓
+
+#주의할 점
+x = 0
+if x > 10 and 1/x:
+    print('x는 10보다 크다')
+else:
+    print('x는 10보다 작다')
+#and는 앞에 false이면 뒤에 안 보고 false로 판별한다
+#그래서 에러가 나지 않고 작동한다.
+    
+x = 0
+if x > 10 & 1/x:
+    print('x는 10보다 크다')
+else:
+    print('x는 10보다 작다')
+#&는 뒤에도 보기 때문에 error:ZeroDivisionError: division by zero
+    
+#
+x = 0
+if x < 10 or 1/x:
+    print('x는 10보다 작다')
+else:
+    print('x는 10보다 크다')
+#or 역시 앞에만 true 인거 보고 작동한다.   
+x = 0
+if x < 10 | 1/x:
+    print('x는 10보다 작다')
+else:
+    print('x는 10보다 크다')
+#|는 뒤에도 보기 때문에 error:ZeroDivisionError: division by zero
+    
+num = int(input('점수를 입력해주세요 :'))
+
+if 90 <= num <= 10000:
+    grade = 'A'
+elif 80 <= num < 90:
+    grade = 'B'
+elif 70 <= num < 80:
+    grade = 'C'
+elif 60 <= num < 70:
+    grade = 'D'
+else:
+    grade = 'F'
+
+print('학점 : ' + grade)
+
+#[문제 25] 숫자를 입력값으로 받아서 그 값이 짝수면 짝수,
+#홀수면 홀수를 출력해주세요.
+x = int(input('정수를 입력하세요 :'))
+
+if x <= 0 :
+    print('자연수가 아닙니다.')
+elif x%2 == 0:
+    print('짝수입니다.')
+elif x%2 == 1:
+    print('홀수입니다.')
+    
+#[문제 26] 한글, alphabet만 입력받아서 그 문자를 출력하고
+#아니면 '다른 문자가 포함되어 있습니다' 출력해주세요 
+y = input("입력 :")
+    
+y.replace('[가-힣]','')#안되네 
+y.replace('[a-z]','')
+
+if y.isalpha():
+    print(y)
+else:
+    print('다른 문자가 포함되어 있습니다.')
+
+#[문제 27] 숫자를 입력값으로 받아서 숫자면 입력받은
+#숫자를 출력하고 아니면 입력값이 들어 오지 않았으면
+#"입력값이 없습니다" 출력하고 아니면"숫자이외의 문자가
+#포함되어 있습니다" 를 출력해주세요
+    
+x = input('숫자를 입력하세요 : ')
+#아무것도 입력하지 않고 엔터만 친 경우
+x#''
+x == None#False
+#'' 는 None 이 아니다.
+
+if x.isnumeric():
+    print(x)
+else:
+    if x == '':
+        print('입력값이 없습니다.')
+    else:
+        print('숫자이외의 문자가 포함되어 있습니다.')
+        
+x = None
+type(x)#NoneType ,무슨 타입인지 모르겟다
+x == ''#False
+
+y = ''
+type(y)#str
+
+if x == None:
+    print('값이 없습니다.')
+else:
+    print(x)
+
+if x is None:
+    print('값이 없습니다.')
+else:
+    print(x)
+    
+x = 1
+if isinstance(x, float):
+    print(x)
+else:
+    print('float형으로 입력하세요')
+    
+x = 1.4
+if isinstance(x, int):
+    print(x)
+else:
+    print('int형으로 입력하세요')
+    
+#list는 인덱스끼리 비교합니다.
+x = [1,2,3]
+y = [2,1,3]
+
+if x==y:
+    print('참')
+else:
+    print('거짓')
+
+#set일 때는   
+x = {1,2,3}
+y = {2,1,3}
+
+if x==y:
+    print('참')
+else:
+    print('거짓')
+
+sal = 1000
+comm = None
+sal * comm#error
+
+#한줄에 if 구조를 표현하는 방식 
+#(if)리턴값 if 조건 else (else)리턴값
+annual = sal if comm is None else sal*comm 
+print(annual)
+
+
+sal = 1000
+comm = 1.1
+annual = sal if comm is None else sal*comm 
+print(annual)
+
+#반복문
+##1. while ##
+#   조건이 True인 동안에 반복 수행한다.
+
+#while 조건문:
+#    반복수행할 문장
+
+i = 0
+while i <= 10:
+    print(i)
+    i = i + 1
+    
+#[문제 28] 1부터 100까지 합을 구하세요.
+
+i = 1
+sum = 0
+while i <= 100:
+    sum = sum + i
+    i = i + 1
+print(sum)
+
+i = 1
+sum = 0
+while i <= 100:
+    sum = sum + i
+    if i%10 == 0:
+        print(sum)
+    i = i + 1
+    
+#break : 반복문을 중단한다.
+while True:
+    print('행복하자')
+    break
+
+while True:
+    answer = input('반복할까요?[Y/N] : ')
+    if answer.upper() == 'Y':
+        print('반복을 계속합니다.')
+    elif answer.upper() == 'N':
+        print('반복을 종료합니다.')
+        break
+    else:
+        print('Y/N 입력하세요')
+        
+#[문제 29] 1부터 100까지 3의 배수를 출력하고
+#합도 구하세요
+i = 1
+sum = 0
+while i <= 100:
+    if i%3 == 0:
+        print(i)
+        sum = sum +i
+    i = i + 1
+print(sum)
+
+i=0
+sum = 0
+while i <100:
+    i += 3
+    if i > 100:
+        break
+    else:
+        sum += i
+        print(i)
+print(sum)
+
+#[문제 30] 1부터 10까지 홀수값만 출력해주세요
+i = 0
+while i <= 10:
+    if i % 2 == 1:
+        print(i)
+    i = i + 1
+
+#continue 하면 밑에 문장을 실행하지 않고 
+#바로 다음 반복부분으로 간다.
+i = 0
+while True:
+    i = i + 1
+    if i == 10:
+        break
+    else:
+        if i % 2 == 0:
+            continue
+    print(i)
+
+#[문제 31] 구구단을 입력값으로 받아서 구구단을 출력해주세요
+
+x = int(input('2~9 사이 숫자를 입력하세요 :'))
+
+i = 1
+while i < 10:
+    print('%d * %d = %d'%(x,i,x*i))
+    i = i + 1
+
+
+#[문제 32] 구구단을 출력해주세요
+i = 2
+j = 1
+while i < 10:
+    while j < 10:
+        print('%d * %d = %d'%(i,j,i*j))
+        j = j + 1
+    j = 1
+    i = i + 1
+
+dan = 2
+while dan <= 9:
+    i = 1
+    print("{} {}단 {}".format('*'*2, dan, '*'*2))
+    while i <= 9:
+        print("{} * {} = {}".format(dan, i, dan*i))
+        i += 1
+    dan += 1
+    
+#[문제 33] 2단을 가로로 출력해주세요
+#2 * 1 = 2 2 * 2 = 4 ... 2 * 9 = 18
+    
+dan = 2
+i = 1
+string = ''
+while  i <= 9:
+    string = string + (str(dan) + ' * ' + str(i) +' = '+ str(dan*i).ljust(5))
+    #ljust() 는 문자일때만 사용이 가능하다. 문자형으로 바꾸고 해야 한다.
+    i = i + 1
+print(string)
+
+#[문제 34] 구구단을 가로로 출력해주세요
+#2 * 1 = 2  3 * 1 = 3  4 * 1 = 4 ...
+#2 * 2 = 4  3 * 2 = 6  4 * 2 = 8 ...
+
+i = 1
+while i <= 9:
+    dan = 2
+    string = ''
+    while dan <= 9:
+        string = string + '{} * {} = {}'.format(dan, i, str(dan*i).ljust(5))
+        dan = dan + 1 
+    print(string)
+    i = i + 1
+
+i = 1
+string = ''
+while i <= 9:
+    dan = 2
+    while dan <= 9:
+        string = string + '{} * {} = {}'.format(dan, i, str(dan*i).ljust(5))
+        dan = dan + 1 
+    string = string + '\n'
+    i = i + 1
+print(string)
+
+
+##2. for문 ##
+#for 변수 in (리스트, 튜플, 문자열):
+#   수행해야할 문장
+
+#list 
+x = ['sql','plsql','R','Python']
+for i in x:
+    print(i)
+ 
+#문자열
+for i in '오늘 하루도 행복하자':
+    print(i)
+
+#tuple
+x = ('sql','plsql','R','Python')
+for i in x:
+    print(i)
+
+#list안에 tuple
+x = [(1,2),(3,4),(5,6)]
+type(x)
+type(x[0])
+
+for i in x:
+    print(i)
+#(1, 2)
+#(3, 4)
+#(5, 6)
+    
+for (a,b) in x:
+    print(a,b)
+#1 2
+#3 4
+#5 6
+    
+for (a,b) in x:
+    print(a+b)
+
+#[문제 35] 학생들의 점수가 90, 55, 63, 78, 80 점이다.
+#60점 이상이면 합격, 60점 미만이면 불합격을 출력해주세요
+score = [90, 55, 63 , 78, 80]
+for i in score:
+    if i >= 60:
+        print('합격')
+    else:
+        print('불합격')
