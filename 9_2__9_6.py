@@ -1346,3 +1346,314 @@ for i in score:
         print('합격')
     else:
         print('불합격')
+
+##############################################################
+#9/5#
+#range(시작점, 끝점 + 1,증가분:기본값 = 1)
+        
+list(range(1,101))
+
+for i in range(1,11):
+    print(i)
+    
+#[문제 36] 1부터 100까지 합을 구하세요. for문 이용
+sum = 0
+for i in range(1,101):
+    sum = sum + i
+print(sum)
+
+#[문제 37] 1부터 100까지 3의 배수이면서 동시에 
+#5의 배수인 수를 출력해주세요.
+for i in range(1,101):
+    if i % 3 == 0 and i % 5 == 0:
+        print(i)
+        
+#연산자 연산 순위가 &이 == 보다 높아서 ()해야한다.
+for i in range(1,101):
+    if (i % 3 == 0) & (i % 5 == 0):
+        print(i)
+        
+for i in range(1,101):
+    if i % 3 == 0:
+        if i % 5 == 0:
+            print(i)
+            
+
+#[문제 38] 1부터 10까지 4,8은 제외시킨 수를 출력하세요
+            
+for i in range(1,11):
+    if i != 4 and i != 8:
+        print(i)
+
+for i in range(1,11):
+    if i == 4 or i == 8:
+        continue
+    print(i)
+        
+for i in range(1,11):
+    if (i != 4) & (i != 8):
+        print(i)
+
+#[문제 39] 구구단을 출력해주세요       
+for i in range(2,10):
+    for j in range(1,10):
+        print('%d * %d = %d'%(i,j,i*j))
+        
+for j in range(1,10):
+    string = ''
+    for i in range(2,10):
+        string = string + str(i) + ' * ' + str(j) + ' = ' + str(i*j).ljust(5)
+    print(string)
+
+string = ''   
+for j in range(1,10):    
+    for i in range(2,10):
+        string = string + str(i) + ' * ' + str(j) + ' = ' + str(i*j).ljust(5)
+    string = string +'\n'
+print(string)
+
+#[문제 40] list변수에 a,b,c,d 값이 있습니다.
+#for문을 이용하여 아래 화면과 같이 출력하세요.
+#0번 a값이 있습니다.
+#1번 b값이 있습니다.
+#2번 c값이 있습니다.
+#3번 d값이 있습니다.
+
+lst = ['a','b','c','d']
+for i in range(0,4):
+    print('{}번 {}값이 있습니다.'.format(i,lst[i]))
+    
+lst = ('a','b','c','d')
+for i in range(0,4):
+    print('%d번 %s값이 있습니다.'%(i,lst[i]))
+    
+list(range(0,4))#[0, 1, 2, 3]
+list(range(4))#[0, 1, 2, 3]
+list(range(len(lst)))#[0, 1, 2, 3]
+lst = ['a','b','c','d']
+for i in range(len(lst)):
+    print('{}번 {}값이 있습니다.'.format(i,lst[i]))
+   
+
+#enumerate() : index, 실제값을 리턴하는 함수 
+enumerate(lst)#객체정보만 보이는데 실제로는 index와 값을 보내준다.
+for idx, value in enumerate(lst):
+    print('{}번 인덱스에 {}이 있습니다.'.format(idx,value))
+
+ 
+lst = {'a','b','c','d'}
+#본래 set은 index가 없다. enumerate를 사용하면 자동으로 index를 매겨서 출력한다.
+for idx, value in enumerate(lst):
+    print('{}번 인덱스에 {}이 있습니다.'.format(idx,value))
+    
+#[문제41] 리스트 변수에 18,2,3,1,4,5,7,8,9,10,11,15,16 값이 들어 있습니다.
+# 짝수만 합을 구하세요. 
+#1) while문
+#2) for문
+lst = [18,2,3,1,4,5,7,8,9,10,11,15,16]
+sum = 0
+i = 0
+while i < len(lst):
+    if lst[i] % 2 == 0:
+        sum = sum + lst[i]
+    i = i + 1
+print(sum)
+
+lst = [18,2,3,1,4,5,7,8,9,10,11,15,16]
+sum = 0
+i = 0
+while i, v in enumerate(lst):#안되넹 
+    if v % 2 == 0:
+        sum = sum + v
+    i = i + 1
+print(sum)
+
+lst = [18,2,3,1,4,5,7,8,9,10,11,15,16]
+sum = 0
+for value in lst:
+    if value % 2 == 0:
+        sum = sum + value
+print(sum)
+    
+#[문제42] 과일의 빈도수를 만들어 주세요.
+#(앞으로도 빈도수 체크를 할때 사용할 수 있습니다. 예) wordcloud를 사용할때)
+#fruit = ("사과","귤","오렌지","배","포도","바나나","키위","딸기","블루베리",
+# "망고","수박","사과","귤","키위","포도","바나나","사과","딸기","블루베리",
+# "망고","사과","귤","오렌지","배","포도","바나나","사과","딸기","파인애플")
+#{'사과': 5,
+# '귤': 3,
+# '오렌지': 2,
+# '배': 2,
+# '포도': 3,
+# '바나나': 3,
+# '키위': 2,
+# '딸기': 3,
+# '블루베리': 2,
+# '망고': 2,
+# '수박': 1,
+# '파인애플': 1}
+fruit = ("사과","귤","오렌지","배","포도","바나나","키위","딸기","블루베리",
+ "망고","수박","사과","귤","키위","포도","바나나","사과","딸기","블루베리",
+ "망고","사과","귤","오렌지","배","포도","바나나","사과","딸기","파인애플")
+
+dic = {}
+type(dic)
+for value in fruit:
+    #print(value)
+    if value in dic.keys():
+        dic[value] = dic[value] + 1
+    else:
+        dic[value] = 1
+print(dic)
+
+dic.keys()
+dic.values()
+dic.items()
+
+dic
+sorted(dic)#key 기준으로 정렬됨, value들은 안 나옴
+dic.items()
+
+for key, value in dic.items():
+    print(key, value)
+
+#key 기준으로 정렬되어 출력된다.    
+for key, value in sorted(dic.items()):
+    print(key, value)
+    
+#내림차순
+for key, value in sorted(dic.items(),reverse = True):
+    print(key, value)
+    
+#value 기준으로 정렬하려면
+import operator
+#key 기준
+for key, value in sorted(dic.items(),key = operator.itemgetter(0)):
+    print(key, value)
+#value 기준
+for key, value in sorted(dic.items(),key = operator.itemgetter(1)):
+    print(key, value)
+#value 기준, 내림차순
+for key, value in sorted(dic.items(),
+                         key = operator.itemgetter(1),
+                         reverse = True):
+    print(key, value)
+    
+#[문제 43] x 리스트 변수에 1부터 10까지 입력하세요
+#y변수는 x 변수의 값을 2곱한 값으로 입력해주세요
+
+x = [1,2,3,4,5,6,7,8,9,10]
+y = []
+for i in range(len(x)):
+    y.append(x[i]*2)
+    
+x = range(1,11)
+y = []
+for i in x:
+    y.append(i*2)
+print(y)
+
+#list 내장 객체 
+x = range(1,11)
+z = [i*2 for i in x]
+print(z)
+
+#[문제 44] x list 변수에 apple, banana, orange 입력하시고
+#이 값들의 문자의 길이를 출럭해 주세요
+x = ['apple','banana','orange']
+y = [len(i) for i in x]
+print(y)    
+
+#[문제 45] 
+lst1 = [1,2,3]
+lst2 = [4,5,6]
+#결과는 
+#4,5,6,8,10,12,12,15,18
+for i in lst1:
+    for j in lst2:
+        print(i*j)
+        
+z = [i*j for j in lst1 for i in lst2]
+print(z)
+
+#가로방향으로 한 번에 출력하려면 print에 end를 넣는다.
+for i in lst1:
+    for j in lst2:
+        print(i*j, end = ',')
+
+lst3 = []
+for i in lst1:
+    for j in lst2:
+        lst3.append(i*j)
+print(lst3)
+
+[i*j for i in lst1 for j in lst2]
+
+#[문제 46] 1부터 100까지 짝수만 x변수에 입력하기
+x = []
+for i in range(1,101):
+    if i % 2 == 0:
+        x.append(i)
+print(x)
+
+x = [i for i in range(1,101) if i % 2 == 0]
+print(x)
+
+#[문제 47] tuple 변수에 사과, 귤, 오렌지, 배, 포도, 바나나, 자몽,
+#키위, 딸기, 블루베리, 망고를 입력하시고 과일이름중에 세글자 이상인
+#과일만 fruit_lst 변수에 입력해주세요
+
+tup = ('사과','귤','오렌지','배','포도','바나나','자몽',
+       '키위','딸기','블루베리','망고')
+
+fruit_lst = []
+for i in tup:
+    if len(i) >= 3:
+        fruit_lst.append(i)
+print(fruit_lst)
+
+fruit_lst = []
+fruit_lst = [i for i in tup if len(i) >= 3]
+print(fruit_lst)
+
+#[문제 48] 과일판매 현황을 dictionary 변수로 생성하세요
+#과일이름은 키로 하고 수량은 값으로 표현한 후 과일 이름만
+#대문자로 출력해주세요
+#apple 100, banana 300, orange 300
+dic = {'apple' : 100, 'banana' : 300, 'orange' : 300}
+
+for key in dic.keys():
+    print(key.upper(), end = ',')
+    
+z = [key.upper() for key in dic.keys()]
+print(z)
+
+#[문제 49] 변수에 2, -1, 4, -10, 5, -9가 있습니다.
+#음수값만 negative 변수에 입력해주세요
+lst = [2, -1, 4, -10, 5, -9]
+negative = []
+for i in lst:
+    if i < 0:
+        negative.append(i)
+print(negative)
+
+negative = []
+negative = [i for i in lst if i < 0]
+print(negative)
+
+#[문제 50] x변수의 있는 값을 y변수에 아래와 같이 저장하세요
+#x = [2,-1,4,-10,5,-9]
+#y = [2,'음수',4,'음수',5,'음수']
+x = [2,-1,4,-10,5,-9]
+y = []
+for i in x:
+    if i < 0:
+        y.append('음수')
+    else:
+        y.append(i)
+print(y)
+
+z = []
+#모두 출력해야 하니까 if else 가 앞에 온다.
+z = [i if i > 0 else '음수' for i in x ]
+print(z)
