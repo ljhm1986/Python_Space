@@ -1657,3 +1657,377 @@ z = []
 #모두 출력해야 하니까 if else 가 앞에 온다.
 z = [i if i > 0 else '음수' for i in x ]
 print(z)
+
+##########################################################
+#9/6#
+#함수
+#기능의 프로그램
+#반복되는 코드를 하나로 묶어서 처리하는 방법
+#def 함수이름(형식매개변수, 인수, 인수):
+#       수행할 문장
+#       [return 값]
+#함수이름(인수, 인수)
+
+def message():
+    print('오늘 하루도 행복하게 살자')
+message()
+
+def message(arg1):
+    print('오늘 하루도 {}배 행복하게 살자'.format(arg1))
+    return "happy"*arg1
+word = message(100)
+word
+
+#[문제 51] 함수에 두개의 숫자를 인수값으로 받아서 값을 
+#비교하는 함수를 생성하세요
+#num_compare(10,20)
+#10은 20보다 작다
+
+def num_compare(int1, int2):
+    if (int1 > int2):
+        print('{}은 {}보다 크다.'.format(int1,int2))
+    elif (int1 == int2):
+        print('%d는 %d와 같다.'%(int1, int2))
+    else:
+        print('%f는 %f보다 작다'%(int1, int2))
+num_compare(11.9,20)
+
+#[문제 52] 두 인수값을 받아서 합한 값을 리턴하는
+#sum  함수를 생성하세요
+def sum1(int1, int2):
+    return int1 + int2
+
+sum1(2,3)
+
+#입력변수의 갯수가 달라지는 경우, 앞에 * 붙인다.
+def sum2(*arg):
+    total = 0
+    for i in arg:
+        total = total + i
+    return total
+
+sum2(1,2,3,4,5)
+sum2(5,6,3,5,6,7,3)
+
+#[문제 53] cal 함수를 생성하세요
+#def 함수이름( 인수1, *인수2):
+#       수행할 문장
+
+def cal(char, *arg):
+    if char.lower() == 'sum':
+        total = 0
+        for i in arg:
+            total = total + i
+        return total
+    elif char.lower() == 'multiply':
+        total = 1
+        for i in arg:
+            total = total*i
+        return total
+    else:
+        print('sum 또는 multiply중에서 입력해 주세요.')
+
+cal('sum',1,2,3,4,5)
+cal('multiply',1,2,3,4,5)
+cal('minus',1,2,3,4)
+
+#[문제 54] 여러숫자를 인수값으로 받아서 합과 평균을 
+#출력하는 aggF 함수를 생성하세요
+#aggF(1,2,3,4,5,6,7,8,9,10)
+#합 : 55
+#평균 : 5.5
+
+def aggF(*arg):
+    sum = 0
+    mean = 0
+    for i in arg:
+        sum = sum + i
+    print('합 : {}'.format(sum))
+    mean = sum/len(arg)
+    print('평균 : {}'.format(mean))
+
+aggF(1,2,3,4,5)
+aggF(1,2,3,4,5,6,7,8,9,10)
+
+#return 2개 사용?을 해 보자 
+def f1(x,y):
+    return x + y
+    return x * y
+
+f1(2,3)#위에 return 하나만 나온다.
+
+#다음과 같이 바꾸어서 해 보자 
+def f1(x,y):
+    return x + y, x * y
+
+sum, mul = f1(2,3)
+print(sum)
+print(mul)
+
+#return 을 만나면 바로 종료한다.
+def f2(x,y):
+    if y == 0:
+        return 
+    print(x/y, "값 입니다.")
+    
+f2(4,2)
+f2(4,0)
+
+#값이 들어오지 않을 경우를 대비해서 default 설정
+def f3(name, age, gender = "M"):
+    print('이름은 ',name)
+    print('나이는',age)
+    if gender == 'M':
+        print('남자')
+    else:
+        print('여자')
+        
+f3("홍길동",20)
+f3('이재훈',25)
+f3('유관순',20,'F')
+
+#전역변수(global) : 프로그램이 종료될 때까지 
+#어디서든지 사용할 수 있는 변수
+#지역변수(local) : 함수안에서만 사용하는 변수
+x = 10
+def f4(arg):
+    print('x변수 값은', arg)
+    x = 20
+    print('x변수 값은', x)
+
+f4(x)
+print(x)#10
+
+#함수 안에 global 넣으면 
+x = 10
+def f5(arg):
+    print('x변수 값은', arg)
+    global x
+    x = 20
+    print('x변수 값은', x)
+
+f5(x)
+print(x)#20
+
+#[문제 55] 입력값을 더하는 함수를 구하세요
+#print(add(2))
+#2
+#print(add(8))
+#10
+y = 0
+def add(x):
+    global y   
+    y = y + x
+    return y
+
+print(add(3))
+print(add(8))
+
+dir()
+
+#[문제 56] 아래와 같이 변수에 값이 들어 있습니다.
+#exchange함수에 x변수에 값을 넣으면 y로 변환하는
+#함수를 생성하세요
+x = ['귀도','반','로섬']
+y = ['Guido','van','Rossum']
+
+#함수안에서 복사할 때 주의할 점이 있다.
+def exchange(input):
+    x = input #동일한 메모리의 x 변수를 사용한다.
+    #index 해서 값을 넣으면 global 처럼 원래 x변수가 바뀐다.
+    for i in range(len(x)):
+        x[i] = y[i]
+    print(x)
+    
+exchange(x)
+print(x)    
+        
+#다음과 같이 바꾸자 
+def exchange2(input):
+    x = input[:]
+    for i in range(len(x)):
+        x[i] = y[i]
+    print(x)
+
+exchange2(x)
+print(x)
+
+#또는
+import copy
+
+def exchange3(input):
+    x = copy.deepcopy(input)
+    for i in range(len(x)):
+        x[i] = y[i]
+    print(x)
+
+exchange3(x)
+print(x)
+
+#다음과 같이 해도 x가 바뀐다. 주의하자 
+x = ['귀도','반','로섬']
+y = ['Guido','van','Rossum']
+
+def exchange4(input):    
+    for i in range(len(input)):
+        input[i] = y[i]
+    print(input)
+    
+exchange4(x)
+print(x)   
+
+#[문제 57] 약수를 구하는 divisor 함수를 생성하세요
+
+def divisor():
+    x = input('입력하세요 :')
+    if not int(x):
+        print('자연수를 입력하세요')
+    elif x <= 0:
+        print('자연수를 입력하세요')
+    else:
+        for i in range(1,x+1):
+            if x % i == 0:
+                print(i, end = ' ')
+
+def divisor2(x):
+    if not isinstance(x, int):
+        print('자연수를 입력하세요')
+    else:
+        y = int(x**(1/2))
+        for i in range(1,y+1):
+            if x % i == 0:
+                print(i, end = ' ')
+                if i != int(x/i):
+                    print(int(x/i), end = ' ')
+
+divisor()
+
+def divisor3(x):
+    num = []
+    for i in range(1,int(x/2)+1):
+        if x % i == 0:
+            num.append(i)
+    num.append(x)
+    return num
+    
+divisor3(90)
+
+#어 좀..
+def divisor4(x):
+    num = []
+    y = int(x**(1/2)+1)
+    for i in range(1,y):
+        if x % i == 0:
+            num.append(i)
+    l= len(num)
+    for j in num[l:0:-1]:
+        num.append(int(x / j))
+    num.append(x)
+    return num
+
+divisor4(1000)
+
+#[문제 58] 표준편차를 구하는 함수 만들기
+#stddev(2,3,1,7)
+#평균 mean : 관측값들의 합 / 관측값의 수
+#편차 = 관측값 - 평균
+#편차제곱합 = 편차**2+ ... +편차**2
+#분산 = 편차제곱합 / 관측값의 수 (자유)
+#표준편차 = math.sqrt(분산)
+
+def sumF(*x):
+    total = 0
+    for i in x:
+        total = total + i
+    return total
+
+def mean(*x):
+    sum_num = sumF(*x)
+    result = sum_num/len(x)
+    return result
+
+def variance(*y):
+    #가변으로 받았으면 가변으로 전해주어야 한다.
+    #가변으로 안 전하면 
+    #TypeError: unsupported operand type(s) for +: 'int' and 'tuple'
+    #에러가 난다.
+    mid = mean(*y)
+    dis = 0
+    for i in y:
+        dis = dis + (i - mid)**2
+    result = dis/len(y)
+    return result
+
+def variance2(*y):
+    total = 0
+    for i in y:
+        total = total + i
+    mid = total/len(y)
+    
+    dis = 0
+    for i in y:
+        dis = dis + (i - mid)**2
+    result = dis/len(y)
+    return result
+    
+import math 
+
+def stddev(*z):
+    var = variance(*z)
+    std = math.sqrt(var)
+    return std
+
+def stddev2(*z):
+    total = 0
+    for i in z:
+        total = total + i
+    mid = total/len(z)
+    
+    dis = 0
+    for i in z:
+        dis = dis + (i - mid)**2
+    result = dis/len(z)
+    var = result
+    std = math.sqrt(var)
+    return std
+
+mean(1,2,3,4)
+variance2(1,2,3,4)
+stddev2(1,2,3,4)
+
+variance(1,2,3,4)
+stddev(1,2,3,4)
+
+variance(2,2,2,2)
+stddev(3,3,3,3)
+
+#라이브러리 만들어 보기 
+#이제 위에 만든 함수들을 메모장에 옮겨서 저장하자
+#(주석은 제거하고 올린다.)
+#파일 확장자는 py로 함
+
+#
+import sys
+#폴더 확인
+sys.path
+#path에 폴더 추가 
+sys.path.append('C:\\Workspace\\Python_Space\\myPython')
+#라이브러리를 불러오자 
+import stats
+#stats에서 추가된 함수들을 확인하자 
+dir(stats)
+stats.sumF(2,3,4,5)
+
+#그리고 cmd에 가서도 해 보자 
+
+#만약 라이브러리 이름을 안 쓰고 싶으면
+from stats import mean, variance, stddev, sumF
+
+mean(2,3,4,5,6,7)
+variance(3,4,5,6,7)
+stddev(4,5,6,7,8,9)
+
+#시스템속성 추가
+#시스템변수에 PYTHONPATH, 폴더경로 로 추가하기 
+#하면 path에 폴더추가 안 해도 된다.
+
