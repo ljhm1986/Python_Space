@@ -149,6 +149,7 @@ y = '파이썬 개발자'
 type(x)#str
 x + y #문자 + 문자 = 문자 (연결연산자)
 
+#문자 * 숫자  = 문자가 숫자만큼 반복됨
 (x + y) * 2
 
 print("="*50)
@@ -195,9 +196,9 @@ len(x)#17
 x[0]
 x[-1]
 
-#슬라이싱 #R : [시작요소번호:종료요소번]
+#슬라이싱 #R : [시작요소번호:종료요소번호]
 x[:]
-x[0:5] #[시작요소번호:큰요소번호이전까]
+x[0:5] #[시작요소번호:종료요소번호(이전까지)]
 x[:5]
 x[5:]
 x[4:6]
@@ -247,13 +248,11 @@ x
 x = x.replace('리','이')
 
 x = 'hello world'
-#원본 문자열이 매개변수로 입력한 문자열로 시작되는지
-#판단하는 함수
+#원본 문자열이 매개변수로 입력한 문자열로 시작되는지 판단하는 함수
 x.startswith('h')
 x.startswith('H')
 
-#원본 문자열이 매개변수로 입력한 문자열로 끝나는지
-#판단하는 함수
+#원본 문자열이 매개변수로 입력한 문자열로 끝나는지 판단하는 함수
 x.endswith('ld')
 x[-2:] == 'ld'
 
@@ -261,32 +260,28 @@ x.endswith('D')
 x[-1] == 'D'
 x[len(x)-1] == 'D'
 
-#원본문자열안에서 매개변수로 입력한 문자열이
-#존재하는 위치를 앞에서부터 찾는다. 만약에 
-#존재하지 않으면 -1로 나온다.
+#원본문자열안에서 매개변수로 입력한 문자열이 존재하는 위치를 
+#앞에서부터 찾는다. 만약에 존재하지 않으면 -1로 나온다.
 #R : stringr :: str_replace(x,'w')
 x.find('w')#w가 처음 나오는 위치
 x.find('world')#world가 처음 나오는 위치
 x.find('W')#-1
 
+#문자열안에 l 이 여러개 있으면 다음처럼 반복한다.
 cn = x.find('l')
 cn
-
+cn = x.find('l',cn+1)
+cn
 cn = x.find('l',cn+1)
 cn
 
-cn = x.find('l',cn+1)
-cn
-
-#원본문자열안에서 매개변수로 입력한 문자열이
-#존재하는 위치를 앞에서부터 찾는다. 만약에 
-#존재하지 않으면 error
+#원본문자열안에서 매개변수로 입력한 문자열이 존재하는 위치를 
+#앞에서부터 찾는다. 만약에 존재하지 않으면 error
 x = 'hello world'
 x.index('w')
 x.index('a')#error가 나온다.
 
-#원본문자열안에 매개변수로 입력한 문자열이
-#몇 번 나오는지 껀수를 리턴하는 함수 
+#원본문자열안에 매개변수로 입력한 문자열이 몇 번 나오는지 껀수를 리턴하는 함수 
 #R : stringr :: str_count(string, pattern)
 x.count('l')
 
@@ -312,7 +307,7 @@ s.center(20)
 #원본 문자열을 지정한 공간에서 왼쪽에 배치하는 함수 
 s.ljust(20)
 
-#원본 문자열을 지정한 공간에서 왼쪽에 배치하는 함수 
+#원본 문자열을 지정한 공간에서 오른쪽에 배치하는 함수 
 s.rjust(20)
 
 x = '             hello               '
@@ -389,7 +384,7 @@ x.split(',')#['hello', ' world']
 #원본 글자 사이에 특정한 문자열을 추가하는 함수 
 x = 'abc'
 ','.join(x)#'a,b,c'
-''.join(x)#R : stringr :: str_c()
+''.join(x)#abc #R : stringr :: str_c()
 
 #이것 말고도 문자함수는 많습니다.~~
 
@@ -420,8 +415,7 @@ url = 'http://www.python.org'
 #[문제10] http:// 제거한 후 url 변수에 넣어 주세요.
 url = url.replace('http://','')
 url.lstrip('http://')#이건 맨 왼쪽에 있는것만 제거 
-#http:// 가 여러군데 나오면 위의 두 함수의 결과가
-#달라질 것이다.
+#http:// 가 여러군데 나오면 위의 두 함수의 결과가 달라질 것이다.
 url
 #[문제11] url변수에 있는 문자 데이터에 '.'을 기준으로 분리하세요.
 url = url.split('.')
@@ -456,7 +450,7 @@ divmod(day2,10000)
 #python 자료형
 #1. list
 #- 서로 다른 데이터 타입을 갖을 수 있는 배열타입
-#- 중첩할 수 있다.
+#- 중첩할 수 있다. [[],[]]...
 #- [], list() 로 표현한다.
 #R : list(key = value, key = value)
 
@@ -584,13 +578,13 @@ id(x)#error
 
 x = [1,5,3,4,2]
 #리스트 변수안에 값을 기준으로 정렬(기본값은 오름차순)
-x.sort()#'미리보기 아님' 에 주의하자 
+x.sort()#'미리보기 아님' 에 주의하자, x값이 달라진다.
 x#[1, 2, 3, 4, 5]
 
 x.sort(reverse=True)
 x#[5, 4, 3, 2, 1]
 
-#sort 를 미리보기만 하고 
+#sort 를 미리보기만 하려면 sorted()를 사용한다.
 x = [1,5,3,4,2]
 
 sorted(x)#[1, 2, 3, 4, 5]
@@ -636,8 +630,8 @@ king.sort()#이것도 정렬이 되는데, 기준이 각 list[0] 인가?
 king
 
 ## 2.tuple(튜플) ##
-#-리스트와 유사하지만, 수정, 삭제, 추가를 할 수 없다.
-#상수와 비슷하다.
+#-리스트와 유사하게 원소들을 나열한다. 다른점은 수정, 삭제, 추가를 할 수 없다.
+#-상수와 비슷하다.
 #-() 
 lst = []
 type(lst)#list
@@ -645,6 +639,7 @@ type(lst)#list
 tuple1 = ()
 type(tuple1)#tuple
 
+#()를 사용하지 않고 tuple을 선언할 수 있다.
 tuple2 = 10, 20
 tuple2
 type(tuple2)#tuple
@@ -678,11 +673,15 @@ c.count(1)
 #()없이도 tuple을 선언할 수 있다.
 a = 1,2,3
 type(a)#tuple
-#각각으로 분리되어 들어간다.
+#tuple 안의 값들이 각각 분리되어 들어간다.
 one, two, three = a
 one#1
 two#2
 three#3
+
+#다만 원소의 갯수와 분배하려는 요소들의 갯수가 같아야 한다.
+ga, na = a
+ga, na, da, la = a
 
 #리스트도 가능하다.
 a = [1,2,3]
@@ -702,7 +701,7 @@ y
 
 ## 3.dictionary ##
 #- key, value 값을 가지는 자료형이다.
-#R : list가 key,value 있었다.
+#R : list가 key, value 있었다.
 #이름 = 홍길동, 전화번호 = 010-0000-1111, 주소 = 서울
 
 dic = {}
@@ -755,7 +754,7 @@ sports
 sports['축구'] = []
 sports
 
-#
+#다시 값을 넣어보자 
 sports['축구'] = '손흥민'
 sports
 
@@ -979,6 +978,7 @@ if x:
 else:
     print('거짓')
 #참 
+
 x = 0
 if x:
     print('참')
@@ -991,7 +991,8 @@ if x:
     print('참')
 else:
     print('거짓')
-#참 
+#참
+
 x = []
 if x:
     print('참')
@@ -1124,7 +1125,7 @@ if x==y:
 else:
     print('거짓')
 
-#set일 때는   
+#set일 때는 원소가 다 같으면 된다.
 x = {1,2,3}
 y = {2,1,3}
 
@@ -1351,7 +1352,7 @@ for i in score:
 #9/5#
 #range(시작점, 끝점 + 1,증가분:기본값 = 1)
         
-list(range(1,101))
+list(range(1,101))#1부터 100까지 포함한 list
 
 for i in range(1,11):
     print(i)
@@ -1882,12 +1883,14 @@ def divisor():
     x = input('입력하세요 :')
     if not int(x):
         print('자연수를 입력하세요')
-    elif x <= 0:
-        print('자연수를 입력하세요')
     else:
-        for i in range(1,x+1):
-            if x % i == 0:
-                print(i, end = ' ')
+        x = int(x)
+        if x <= 0:
+            print('자연수를 입력하세요')
+        else:
+            for i in range(1,x+1):
+                if x % i == 0:
+                    print(i, end = ' ')
 
 def divisor2(x):
     if not isinstance(x, int):
@@ -2012,6 +2015,8 @@ import sys
 sys.path
 #path에 폴더 추가 
 sys.path.append('C:\\Workspace\\Python_Space\\myPython')
+#위의 폴더에 stats.py 파일을 만들고 저장하자
+#그 안에 위의 함수들이 있는데 주석은 빼고 넣자  
 #라이브러리를 불러오자 
 import stats
 #stats에서 추가된 함수들을 확인하자 
