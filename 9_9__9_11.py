@@ -967,6 +967,9 @@ for i in emp_csv:
     
 file.close()
 emp_50#중첩 list모양이 된다.
+print(emp_50)
+for i in emp_50:
+    print(i)
 
 import operator
 emp_50_sorted = sorted(emp_50, key = operator.itemgetter(7))
