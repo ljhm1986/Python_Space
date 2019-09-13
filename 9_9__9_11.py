@@ -995,3 +995,355 @@ emp_50_sorted = sorted(emp_50, key = operator.itemgetter(1))
 
 for i in emp_50_sorted:
     print(i[0],i[1])
+
+#############################################################
+#9/11#
+''' pickle: 변수 형태를 그대로 유지해서 파일에 저장하고 불러올 수 있는 모듈
+바이너리 형태로 저장된다. '''
+import pickle
+lst = ['a', 'b', 'c']
+file = open('C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'wb') # wb: 바이너리 형식으로 쓰기
+pickle.dump(lst, file)
+file.close()
+
+file = open('\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'rb') #rb: 바이너리 파일 읽기
+lst_temp = pickle.load(file)
+file.close()
+lst_temp
+
+
+
+''' lambda 함수
+- 이름 없는 한줄짜리 함수
+- 가독성이 좋다.
+- 성능도 좋다. '''
+def f1(x,y):
+    return x*y
+f1(2,3)
+
+(lambda x, y : x*y)(2,3)
+
+(lambda x,y,z : x+y+z)(4,5,6)
+
+#이건 안 되네 
+(lambda *arg :
+total = 0 
+for i in arg: 
+    total += i 
+total)(4,5,6,7)
+
+(lambda *arg : arg)(4,5,6,7,8,9)
+
+#이제 
+import collections
+#Counter() : dictionary의 일종, 원소는 key로 원소의 갯수는 value에 저장한다.
+collections.Counter(['A', 'B', 'AB', 'O', 'A', 'B', 'AB', 'O'])
+#Counter({'A': 2, 'B': 2, 'AB': 2, 'O': 2}) 각 원소의 갯수를 보여준다. 
+
+cnt = collections.Counter()
+type(cnt)
+cnt.update('aaaaaaaaaaaaaaaaaaaabbbbbbbbbbbbbbbbbcccccccgggggzzzzzzzzzzzzxx')
+print(cnt)#Counter({'a': 20, 'b': 17, 'z': 12, 'c': 7, 'g': 5, 'x': 2})
+cnt.update({'c': 3, 'y': 10})
+print(cnt)#Counter({'a': 20, 'b': 17, 'z': 12, 'c': 10, 'y': 10, 'g': 5, 'x': 2})
+cnt['a']
+for k, v in cnt.items():
+    print(k, v)
+
+cnt1 = collections.Counter(['a', 'b', 'c', 'd', 'b', 'a'])
+cnt2 = collections.Counter('aeroplane')
+cnt1 + cnt2
+cnt1 - cnt2
+cnt1 & cnt2 # 교집합
+cnt1 | cnt2 # 합집합, +와 결과가 같게 나왔다. 
+
+
+
+
+''' exception: 실행 중에 발생한 오류
+
+1. SyntaxError: 문법 오류
+x := 1
+print x
+print('happy)
+
+2. NameError: 참조하는 변수가 없을 경우
+x = 1
+y = 2
+print(z)
+
+3. IndexError: 인덱스 범위를 틀리게 입력할 경우
+x = [1,2,3]
+x[3]
+dic = {'name':'홍길동', 'addr':'서울시'}
+dic['age'] #KeyError : 'age'
+
+4. ZeroDivisionError: 0으로 나누는 경우
+10/0
+
+5. AttributeError: 모듈, 클래스에 있는 잘못된 속성을 사용하려는 경우
+import time
+time.time()
+time.month() #AttributeError: module 'time' has no attribute 'month'
+
+6. ValueError: 참조값이 없는 경우
+x = [10,20,30]
+x.remove(50)
+x.index(50)
+
+7. FileNotFoundError: 없는 파일을 읽어들이는 경우
+file = open('test.txt', 'r')
+
+8. TypeError: 자료형이 틀린 경우
+x = [1,2]
+y = (1,2)
+x + y
+
+'''
+
+def divide(x,y):
+    print('x: {}'.format(x))
+    print('y: {}'.format(y))
+    return x/y
+try:
+    z = divide(10,0)
+except ZeroDivisionError:
+    print("0으로 나눌 수 없습니다.")
+except:
+    print("오류가 발생했습니다.")
+else:
+    print("결과 {}".format(z))
+finally: # 오류의 발생과 관계없이 무조건 마지막에 수행됨
+    print("프로그램 종료") 
+
+#이거 안 되는데 
+def sum(*x, **y):
+    print('x : {}'.format(*x))
+    print('y : {}'.format(**y))
+    z = 0
+    for i in x:
+        for j in y:
+            z = z + 1
+    return z
+
+def errerTest(functionName, number1,number2):
+    result = 0.0
+    print('number1 : {}'.format(number1))
+    print('number2 : {}'.format(number2))
+    try:
+        if functionName == 'divide':
+            result = divide(number1,number2)
+        if functionName == 'sum':
+            result = sum(number1,number2)
+    except ZeroDivisionError:
+        print('ZeroDivisionError')   
+    except RuntimeError:
+        print('RuntimeError')
+    except:
+        print('errer')
+    else:
+        print(result)
+    finally:
+        print('exit')
+
+sum(6,7)
+divide(8,2)
+errerTest('divide',8,0)
+errerTest('sum',6,7)
+    
+''' raise: 사용자가 발생시키는 오류 '''
+def func(arg):
+    try:
+        if arg < 1 or arg > 10:
+            raise Exception("유효하지 않은 숫자입니다. {}".format(arg))
+        else:
+            print("입력한 숫자는 {}입니다.".format(arg))
+    except Exception as err:
+        print("오류가 발생했습니다. {}".format(err))
+        
+func(100)
+
+#문제
+
+''' [문제90] 부서별 급여의 총액을 구하시고 부서별로 오름차순 정렬하세요. '''
+import csv
+file = open("C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\emp.csv", "r")
+emp_csv = csv.reader(file)
+header = next(emp_csv)
+header
+
+#보면 모두 문자열로 저장되어 있다. 
+for i in emp_csv:
+    print(i)
+
+dept_sum = {} # key: 부서, value: 급여의 합
+for i in emp_csv:
+    if i[-1] in dept_sum.keys():
+        dept_sum[i[10] if i[10] != '' else '999'] = int(dept_sum[i[10]]) + int(i[7])
+    else:
+        dept_sum[i[10] if i[10] != '' else '999'] = int(i[7])
+# 부서번호가 없는 사원의 부서번호는 999로
+# 빈 문자열은 int로 변환이 안됨. -> 빈문자열을 먼저 제거하고 하면 될듯?
+for k, v in dept_sum.items():
+    print(k, v)
+
+# 나의 정렬 방법, list 사용
+#1. dept_sum의 key값만 뽑아내 list로 만들어서 sorted한다.
+dept_id = []
+for i in range(len(dept_sum)):   
+    dept_id.append(int(list(dept_sum.keys())[i]))
+dept_id = sorted(dept_id)
+dept_id #[10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 999]
+
+#2. list값에 맞는 값들을 순서대로 출력한다.
+for i in dept_id:
+    print(i, dept_sum[str(i)])
+
+# 선생님의 정렬 방법, dictionary 사용
+#1. 새로운 dictionary를 만든다.
+new = {}
+for k, v in dept_sum.items():
+    new[int(k)] = v
+
+#2. dictionary를 key값 기준으로 정렬한다.
+from operator import itemgetter
+new_sort = sorted(new.items(), reverse = False, key=itemgetter(0))
+for k, v in new_sort:
+    print(' ' if k == 999 else k, v)
+         
+''' [문제91] 단어, 알파벳을 입력값으로 넣어서 단어 안의 알파벳 수를 출력하세요. '''
+def wordF(word, alpha):
+    cn = 0
+    for i in range(len(word)):
+        if word[i] == alpha:
+            cn += 1
+    return cn
+wordF('happy', 'p')
+wordF('happy', 'e')
+
+#collections를 이용해서 풀어보자 
+import collections
+def wordF2(word, alpha):
+    cnt = collections.Counter()
+    cnt.update(word)
+    return cnt[alpha]
+
+wordF2('abcdefg','a')
+wordF2('happy', 'p')
+
+''' [문제92] 단어를 입력값으로 넣어서 알파벳을 출력하는데 중복되는 알파벳은 하나만
+출력하세요. '''
+def alphaF(word):
+    alphaset = set() # list여도 될듯
+    for i in word:
+        if i in alphaset:
+            continue
+        else:
+            alphaset.add(i)
+            print(i, end = ' ')
+alphaF('happy')
+alphaF('happy new year')
+
+
+def alphaF2(word):
+    alphaset2 = list()
+    for i in word:
+        if i in alphaset2:
+            continue
+        else:
+            alphaset2.append(i)
+            print(i, end = ' ')
+    print('\n')
+    print(alphaset2)
+
+alphaF2('happy new year')
+
+''' [문제93] 철자의 빈도수를 출력하세요.
+alphaF('intelligence')
+{'i': 2, 'n': 2, 't': 1, 'e': 3, 'l': 2, 'g': 1, 'c': 1} '''
+def alphaF3(word):
+    alphaset = dict()
+    for i in word:
+        if i in alphaset:
+            alphaset[i] = int(alphaset[i]) + 1
+        else:
+            alphaset[i] = 1
+    return alphaset
+alphaF3('intelligence')
+
+
+
+''' [문제94] 부서별 인원수를 출력해주세요. '''
+import csv
+import operator
+file = open("C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\emp.csv", "r")
+emp_csv = csv.reader(file)
+header = next(emp_csv)
+header
+dept_cn = {} # key: 부서, value: 인원수
+for i in emp_csv:
+    if i[10] == '':
+        i[10] = 999
+    else:
+        i[10] = int(i[10])
+        
+    if i[10] in dept_cn.keys():
+        dept_cn[i[10]] += 1 
+    else:
+        dept_cn[i[10]] = 1
+dept_cn
+dept_sort = sorted(dept_cn.items(), reverse = False, key=operator.itemgetter(0))
+for k, v in dept_sort:
+    print('-' if k == 999 else k, v)
+file.close()
+
+# lambda 사용한 선생님의 답
+file = open("C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\emp.csv", "r")
+emp_csv = csv.reader(file)
+header = next(emp_csv)
+header
+dept_cnt = {}
+for emp_list in emp_csv:
+    x = (lambda arg: int(arg) if arg != '' else 999)(emp_list[10])
+    if x in dept_cnt.keys():
+        dept_cnt[x] = dept_cnt[x] + 1
+    else:
+        dept_cnt[x] = 1
+dept_cnt_sorted = sorted(dept_cnt.items(), reverse=False, key=operator.itemgetter(0))
+for k,v in dept_cnt_sorted:
+        print('--' if k == 999 else k,v)
+file.close()
+
+
+
+''' [문제95] 숫자를 입력값으로 받은 후 숫자가 짝수인지 홀수인지 출력한 후에
+그 숫자값을 기준으로 짝수면 짝수형식으로 증값을 10개 출력,
+홀수면 홀수형식으로 10개 출력합니다.
+만약에 숫자가 들어 오지 않으면 예외사항처리를 해주세요. '''
+try:
+    arg = input("숫자를 입력해주세요 : ")
+    if not str(arg).isnumeric():
+        raise Exception("숫자를 입력해주세요.")
+    else:
+        for i in range(1,11):
+            print(int(arg) + 2*i, end = ' ')
+except Exception as err:
+    print("오류가 발생했습니다. {}".format(err))
+
+
+
+# 선생님의 답
+try:
+    num = int(input("숫자를 입력해주세요 :"))
+    if num % 2 == 0:
+        print("짝수")
+    else:
+        print("홀수")
+    count = 1
+    while count <= 10:
+        print(num)
+        num += 2
+        count += 1
+except ValueError as error:
+    print(error)
+    print("숫자를 입력해주세요")
