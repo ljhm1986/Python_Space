@@ -1012,7 +1012,6 @@ file.close()
 lst_temp
 
 
-
 ''' lambda 함수
 - 이름 없는 한줄짜리 함수
 - 가독성이 좋다.
