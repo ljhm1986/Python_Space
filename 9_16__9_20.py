@@ -24,12 +24,24 @@ import pandas as pd
 
 s1 = Series([10,20,30,40,50])
 s1
-type(s1)
+#0    10
+#1    20
+#2    30
+#3    40
+#4    50
+#dtype: int64
+type(s1)#pandas.core.series.Series
 s1.astype#내부의 성분값들과 데이터 타입이 나온다.
 
 s2 = Series(['10',20,30,40,50])
 s2
-type(s2)
+#0    10
+#1    20
+#2    30
+#3    40
+#4    50
+#dtype: object
+type(s2)#pandas.core.series.Series
 s2.astype
 #문자열을 object로 나타낸다. 
 
@@ -40,18 +52,19 @@ s2 + 10
 ### index 전체에 연산하는 것은 list에서는 에러 ###
 lst = [10,20,30]
 lst + 10
-###
+###다음과 같이 반복문을 사용해야한다.
 [i + 10 for i in lst]
 ###
 
 #index 정보 확인하기 
 s2.index#RangeIndex(start=0, stop=5, step=1)
 #값만 확인하기
-s2.values
+s2.values#array([10, 20, 30, 40, 50])
 #index를 수정하기 
 s2.index = ['a','b','c','d','e']
 s2.index#Index(['a', 'b', 'c', 'd', 'e'], dtype='object')
 
+#다음 연산들이 Series 전체의 각 요소에 작용한다.
 s2 - 1
 s2*2
 s2 / 4
@@ -68,7 +81,7 @@ s2[-1]
 s2 > 20
 s2[s2 > 20]
 
-#해당값이 index안에 있는가
+#해당값이 index안에 있는지 확인하기
 'a' in s2
 'f' in s2
 
@@ -80,10 +93,11 @@ s2['f'] = 500
 del s2['f']
 s2
 
-
+#
 s2['a'] = ''
-s2.astype#값이 object로 바뀌어 있다. 주의하자 
+s2.astype#dtype이 int64에서 object로 바뀌어 있다. 주의하자 
 s2 = s2.astype('int')
+#ValueError: invalid literal for int() with base 10: ''
 
 
 lst = [10,20,30]
@@ -110,10 +124,17 @@ s6
 ix = {'a','b','c','d'}
 s7 = Series(dict, index = ix)
 s7
-#d의 value가 NaN이 낭ㄴ다.
+#d    NaN
+#b    2.0
+#c    3.0
+#a    1.0
+#dtype: float64
+#d의 value가 NaN이 나온다.
 #NaN : 인덱스 값을 찾을 수 없기 때문에 NaN으로 저장
 
 import pandas as pd
+
+#NaN인것 찾기
 pd.isnull(s7)
 s7[pd.isnull(s7)]
 s7[pd.notnull(s7)]
@@ -134,13 +155,13 @@ s8['a'] = ''
 s8.astype#object type으로 바뀐다.
 s8.dtype
 
-pd.isnull(s8)#이것으로는 index 모두 false가 농ㄴ다.
-s8 == ''#하나 True로 나온다.
+pd.isnull(s8)#이것으로는 index 모두 false가 나온다
+s8 == ''#a row가 True로 나온다.
 
 s9 = Series(range(10,60,10))
 s9.index = ['a','b','c','d','e']
 s9
-s9['a']#nan
+s9['a']
 
 import numpy as np
 s9['a'] = np.NaN
@@ -158,7 +179,7 @@ s10
 
 city = {'서울','경기','제주','대전'}
 s11 = Series(dict, index = city)
-s11#대전 row는 NaN 들어있
+s11#대전 row는 NaN 들어있다
 
 s10 + s11#대전, 부산 : NaN
 #(밑에 나오는)dtype옆에 붙이기
@@ -168,6 +189,7 @@ s11
 s11.index.name = '지역명'
 s11
 
+##############################
 #DataFrame : 2차원 배열
 #- 각 컬럼의 서로 다른 종류 값을 표현 (문자, 숫자, 불리언)
 #- data.frame
@@ -181,15 +203,19 @@ type(data)
 df2 = DataFrame(data)
 df2
 
-type(df2)
+type(df2)#pandas.core.frame.DataFrame
+
 df2.astype
+#DataFrame의 column의 데이터 타입을 보여준다.
 df2.dtypes
+#DataFrame의 column의 이름을 보여준다.
 df2.columns
+#DataFrame의 index의 값을 보여준다.
 df2.index
+#DataFrame의 성분을 보여준다.
 df2.values
 
 #해당 column의 값을 보는 방법은 ? (R : data.frame$컬럼이름)
-df2.columns
 df2.columns = ['지역','가구수']
 df2.지역
 df2.가구수
@@ -266,8 +292,10 @@ obj4#f는 0
 list(range(4))
 
 import numpy as np
+#numpy 배열 생성 : 
+#arange : 숫자 생성 , arange(숫자갯수) ,arange(처음숫자, 종료숫자, 간격)
 np.arange(4)
-#reshape(행,열)
+#reshape(행,열) :행*열 형태를 갖춘다
 np.arange(4).reshape(2,2)
 np.arange(9).reshape(3,3)
 np.arange(12).reshape(4,3)
@@ -544,3 +572,398 @@ df3[(df3['PYTHON'] >= 80) | (df3['SQL'] >= 90)]
 #90점 이상인 데이터를 출력해주세요
 df3[(df3['PYTHON'] >= 80) & (df3['SQL'] >= 90)]
 
+##########################################################################
+#9/17#
+from pandas import Series, DataFrame
+#[문제 107] student 데이터 프레임을 생성하세요.
+student = DataFrame({'영어':[60,50,90],'수학':[80,70,80],'국어':[70,85,95]},
+                    index = ['홍길동','박찬호','손흥민'])
+student
+#     영어  수학  국어
+#홍길동  60  80  70
+#박찬호  50  70  85
+#손흥민  90  80  95
+student.info()
+
+student2 = DataFrame([[60,50,90],[80,70,80],[70,85,95]],
+                     index = ['홍길동','박찬호','손흥민'],
+                     columns = ['영어','수학','국어'])
+student2
+
+#[문제 108] student 데이터 프레임에 새로운 데이터를 생성하세요
+student.at['제임스','영어'] = 100
+student.at['제임스','수학'] = 50
+student.at['제임스','국어'] = 80
+student.info
+#<bound method DataFrame.info of         영어    수학    국어
+#홍길동   60.0  80.0  70.0
+#박찬호   50.0  70.0  85.0
+#손흥민   90.0  80.0  95.0
+#제임스  100.0  50.0  80.0>
+student.info()
+#<class 'pandas.core.frame.DataFrame'>
+#Index: 4 entries, 홍길동 to 제임스
+#Data columns (total 3 columns):
+#영어    4 non-null float64
+#수학    4 non-null float64
+#국어    4 non-null float64
+#dtypes: float64(3)
+#memory usage: 288.0+ bytes
+#모두 float64 type으로 변해있다. 이유는 처음에 NaN이 생기는데
+#다음에 무슨값이 들어올지 모르니까 int64를 float64로 바꾸어 놓는다.
+#int로 하고 싶으면 다음과 같이 변형하자 
+student.astype('int')
+
+#[문제 109] 제임스의 영어 점수를 출력해주세요
+student.ix['제임스']['영어']
+student.loc['제임스']['영어']
+student.iloc[3][0]
+student.at['제임스','영어']
+student.iat[3,0]
+
+#2개의 DataFrame을 붙여보자, columns 이 같은 DataFrame을 만들어서  
+student3 = DataFrame([[60,50,90],[80,70,80],[70,85,95]],
+                     index = ['유재석','게롤드','도바킨'],
+                     columns = ['영어','수학','국어'])
+student3
+student.append(student3)
+student = student.append(student3)
+#또는 pandas에서 제공하는 concat()을 사용하자
+import pandas as pd
+pd.concat([student, student3])
+
+#3개이상을 합치려면 append는 2개씩 합치는걸 반복해야 한다.
+#반면에 pd.concat은 list에 나열하면 된다.
+
+student['일본어'] = [100,90,80,70]
+student['한국사'] = 100#모든 row에 100으로 채워진다.
+student['음악'] = np.nan#모든 row에 NaN을 넣는다.
+
+#student에서 홍길동의 음악점수를 보기 
+student.ix['홍길동']['음악']
+student.ix[0][5]
+student.loc['홍길동']['음악']
+student.iloc[0][5]
+student.at['홍길동','음악']
+student.iat[0,5]
+
+#student에서 박찬호의 점수들을 보기
+student.ix['박찬호']
+student.loc['박찬호']
+student.at['박찬호']#error
+student.xs('박찬호')
+student.xs('박찬호', axis = 0)#row
+#student에서 영어 점수들을 보
+student.xs('영어',axis = 1)#column
+student.ix[:,'영어']
+student.loc[:,'영어']
+
+#index이름 수정
+student = student.rename(index={'박찬호':'찬호박'})
+student
+
+#column 이름 수정
+student = student.rename(columns = {'수학':'산수'})
+student
+
+#csv file을 pandas로 불러오기
+emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+emp
+#column의 type을 보자 
+emp.dtypes
+#
+emp.info()
+
+emp.ix[emp['EMPLOYEE_ID'] == 100,'SALARY']
+emp.loc[emp['EMPLOYEE_ID'] == 100,'SALARY']
+emp['SALARY'][emp['EMPLOYEE_ID'] == 100]
+
+#[문제 110] JOB_ID가 ST_CLERK인 사원의 LAST_NAME, SALARY를 출력해주세요
+emp.ix[emp['JOB_ID'] == 'ST_CLERK',['LAST_NAME','SALARY']]
+emp.loc[emp['JOB_ID'] == 'ST_CLERK',['LAST_NAME','SALARY']]
+emp[['LAST_NAME','SALARY']][emp['JOB_ID'] == 'ST_CLERK']
+
+#[문제 111] SALARY가 10000 이상인 사원들의 LAST_NAME, SALARY를 출력해주세요
+emp[emp.SALARY >= 10000][['LAST_NAME','SALARY']]
+
+emp.ix[emp.SALARY >= 10000,['LAST_NAME','SALARY']]
+emp.loc[emp.SALARY >= 10000,['LAST_NAME','SALARY']]
+
+
+#Series 간의 연산
+obj1 = Series([1,2,3,4,5], index = ['a','b','c','d','e'])
+obj2 = Series([2,4,6,8,10],index = ['a','b','c','d','e'])
+
+obj1 + obj2
+obj1.add(obj2, fill_value = 0)
+
+obj1 - obj2
+obj1.sub(obj2, fill_value = 0)
+
+obj1 * obj2
+obj1.mul(obj2, fill_value = 0)
+
+obj1 / obj2
+obj1.div(obj2, fill_value = 0)
+
+obj1 // obj2
+obj2 // obj1
+obj2 % obj1
+obj2.mod(obj1, fill_value = 0)
+
+obj1 ** obj2
+obj1.pow(obj2, fill_value = 0)
+##
+import numpy as np
+df1 = DataFrame(np.arange(6).reshape(2,3),
+                index=['2015','2016'],
+                columns=['python','sql','plsql'])
+#      python  sql  plsql
+#2015       0    1      2
+#2016       3    4      5
+
+df2 = DataFrame(np.arange(12).reshape(3,4),
+                index=['2014','2015','2016'],
+                columns=['python','r','sql','plsql'])
+#      python  r  sql  plsql
+#2014       0  1    2      3
+#2015       4  5    6      7
+#2016       8  9   10     11
+
+df1 + df2
+df1.add(df2, fill_value=0)
+df1.sub(df2, fill_value=0)
+df1.mul(df2, fill_value=1)
+df1.div(df2, fill_value=1)
+df2.mod(df1, fill_value=1)
+
+#sort() : Series와 DataFrame을 정렬
+obj = Series([2,3,7,8], index = ['d','a','b','c'])
+obj
+obj.reindex(['a','b','c','d'])
+obj.sort_index() # index를 기준으로 오름차순 정렬 
+obj.sort_index(ascending = False) # index를 기준으로 내차순 정렬 
+obj.sort_values() # value를 기준으로 오름차순 정렬
+obj.sort_values(ascending = False)# value를 기준으로 내림차순 정렬
+
+df = DataFrame(np.arange(8).reshape(2,4),
+               index = ['two','one'],
+               columns = ['d','a','c','b'])
+df
+#     d  a  c  b
+#two  0  1  2  3
+#one  4  5  6  7
+df.sort_index()
+df.sort_index(ascending = False)
+df.sort_index(axis = 0) # index, row
+#     d  a  c  b
+#one  4  5  6  7
+#two  0  1  2  3
+df.sort_index(axis = 1) # column
+#     a  b  c  d
+#two  1  3  2  0
+#one  5  7  6  4
+df.sort_index(ascending = False, axis = 1)
+df.sort_values() # error
+df.sort_values(by='b', axis=0, ascending=False)# b column 기준
+#     d  a  c  b
+#one  4  5  6  7
+#two  0  1  2  3
+df.sort_values(by='one', axis=1, ascending=False)# one row 기준
+#     b  c  a  d
+#two  3  2  1  0
+#one  7  6  5  4
+
+#[문제 112] SALARY가 10000이상인 사원들의 LAST_NAME, SALARY,
+#DEPARTMENT_ID를 출력하세요. 단 DEPARTMENT_ID를 기준으로 
+#오름차순 정렬하세요.
+
+emp
+type(emp)
+emp1 = emp[emp.SALARY >= 10000][['LAST_NAME', 'SALARY','DEPARTMENT_ID']]
+emp1.sort_index(by = 'DEPARTMENT_ID')
+emp1.sort_values(by = 'DEPARTMENT_ID')
+
+emp1.sort_values(by = ['DEPARTMENT_ID','SALARY'], ascending = [True, False])
+
+##
+obj = Series([78,80,88,60,50,90,79,99,68,80])
+obj.sort_values()
+obj.sort_values(ascending = False)
+
+#오름차순으로 등수를 보자 
+obj.rank()
+#내림차순으로 등수를 보자 
+
+obj.rank(ascending=False, method = 'average')
+obj.rank(ascending=False, method = 'min')
+obj.rank(ascending=False, method = 'max')
+#등수가 같을때, 앞쪽에 있는걸 높게 함 
+obj.rank(ascending=False, method = 'first')
+#등수가 중간에 빈 숫자가 없게 함
+obj.rank(ascending=False, method = 'dense')
+
+#순위와 점수가 있는 DataFrame 만들기
+obj = Series([78,80,88,60,50,90,79,99,68,80])
+df = DataFrame({'순위':obj.rank(ascending=False, method = 'dense'),
+                '점수':obj})
+df.sort_values(by='순위')
+df.astype('int')
+
+obj = Series([78,80,88,np.nan, 90])
+obj.sort_values()
+obj.sort_values(ascending = False)
+obj.sort_values(ascending = False, na_position = 'filst')
+
+obj.rank()
+
+obj.rank(appending=False)
+obj.rank(na_option='keep')
+
+df = DataFrame({'영어':[60,80,70],'수학':[50,60,70]},
+                index=['홍길동','김건모','이문세'])
+
+df.sort_values(by = '수학')
+df['수학'].sort_values(ascending = False)
+df.rank(ascending = False)
+df.rank(ascending = False, axis = 1)
+df['영어'].rank(ascending = False)
+df.loc['홍길동'].rank(ascending=False)
+
+#[문제 113] 급여를 많이 받는 순으로 10위까지 출력해주세요
+#emp[emp['SALARY'].rank(ascending = False) <= 10]
+
+emp1 = emp
+emp1['RANK'] = emp1['SALARY'].rank(ascending=False, method='dense')
+emp1[['RANK','EMPLOYEE_ID','SALARY']][emp['RANK'] <= 10].sort_values(by = 'RANK')
+
+emp1['RANK2'] = emp1['SALARY'].rank(ascending=False, method='first')
+emp1[['RANK2','EMPLOYEE_ID','SALARY']][emp['RANK2'] <= 10].sort_values(by = 'RANK2')
+
+##수학 점수가 50, 60점인 사람
+df['수학'].isin([50,60])
+df[df['수학'].isin([50,60])]
+#수학 점수가 50, 60점이 아닌 사람
+df[~df['수학'].isin([50,60])]
+
+#[문제 114] JOB_ID가 AD_VP, AD_PRES인 사원들의 LAST_NAME, SALARY, JOB_ID를 출력하세요
+emp['JOB_ID'].isin(['AD_VP','AD_PRES'])
+emp[emp['JOB_ID'].isin(['AD_VP','AD_PRES'])][['LAST_NAME','SALARY','JOB_ID']]
+emp.loc[emp['JOB_ID'].isin(['AD_VP','AD_PRES']),['LAST_NAME','SALARY','JOB_ID']]
+
+#[문제 114] JOB_ID가 AD_VP, AD_PRES가 아닌 사원들의 LAST_NAME, SALARY, JOB_ID를 출력하세요
+emp[~emp['JOB_ID'].isin(['AD_VP','AD_PRES'])][['LAST_NAME','SALARY','JOB_ID']]
+emp.loc[~emp['JOB_ID'].isin(['AD_VP','AD_PRES']),['LAST_NAME','SALARY','JOB_ID']]
+
+#null 처리
+from pandas import Series, DataFrame
+import pandas as pd
+import numpy as np
+from numpy import nan as NA
+
+obj1 = Series([1,2,3,None,5])
+obj2 = Series([1,2,3,np.nan,5])
+obj3 = Series([1,2,3,NA,5])
+#null인 부분 
+obj1.isnull()
+obj2.isnull()
+obj3.isnull()
+#null이 아닌 부분
+obj1.notnull()
+obj2.notnull()
+obj3.notnull()
+
+obj1[obj1.isnull()]
+obj1[obj1.notnull()]
+
+pd.isnull(obj1)
+pd.notnull(obj1)
+
+obj1 = obj1.fillna(0)#nan를 0으로 채우기
+obj2.dropna()#nan를 지우기, na row가 삭제된다.
+
+df = DataFrame([[1,2,3],[1,None,NA],[NA,NA,NA]])
+df
+df.dropna()
+#row가 전부 null인 row만 지우기 
+df.dropna(how='all',axis=0)
+df[2] = NA
+df
+#column이 전부 null인 column만 지우기 
+df.dropna(how='all',axis=1)
+#null에 전부 0 채우기
+df.fillna(0)
+df[0].fillna(0)
+#column마다 채워야 할 값들을 다르게 해보자 
+df.fillna({0:0,1:10,2:20})
+
+#미리보기가 아니라 바로 값을 채워넣으려면 
+df.fillna(0, inplace = True)
+df
+
+#df = DataFrame([[1,2,3],[1,None,NA],[NA,NA,NA]])
+#앞의 값으로 채우기
+df.fillna(method = 'ffill')
+df.fillna(method = 'pad')
+#뒤의 값으로 채우기 
+df.fillna(method = 'bfill')
+df.fillna(method = 'backfill')
+
+#[문제 116] commission_pct가 null인 사원의 LAST_NAME, SALARY를 출력하세요
+emp['COMMISSION_PCT'].isnull()
+emp.loc[emp['COMMISSION_PCT'].isnull(),['LAST_NAME','SALARY']]
+#[문제 117] commission_pct가 null이 아닌 사원의 LAST_NAME, SALARY를 출력하세요
+emp.loc[emp['COMMISSION_PCT'].notnull(),['LAST_NAME','SALARY']]
+
+#[문제 118] LAST_NAME 첫글자가 S로 시작되는 LAST_NAME을 출력하세요
+
+[emp['LAST_NAME'][i] for i in range(len(emp)) if emp['LAST_NAME'][i][0].upper() == 'S']
+
+for i in range(len(emp)):
+    if emp['LAST_NAME'][i][0].upper() == 'S':
+        print(emp['LAST_NAME'][i])
+        
+for i in emp['LAST_NAME']:
+    if i[0] == 'S':
+        print(i)
+
+[i[0] == 'S' for i in emp['LAST_NAME']]
+emp['LAST_NAME'][[i[0] == 'S' for i in emp['LAST_NAME']]]
+
+emp.loc[[i[0] == 'S' for i in emp['LAST_NAME']],'LAST_NAME']
+
+#R에서 apply계열 사용한것 처럼
+s = Series([1,2,3])
+s
+s ** 2
+
+def square(arg):
+    return arg ** 2
+
+square(s)
+square(5)
+
+#for문을 사용하지 않고 해보기 
+#apply() : 행과 열값을 인수값으로 받아서 반복하며 함수를 적용한다.
+#pandas에서 제공한다.
+s.apply(square)
+s.apply(lambda arg : arg ** 2)
+
+df = DataFrame([[1,2,3],[4,5,6]])
+df.apply(square)
+df.apply(lambda arg : arg ** 2)
+
+emp[emp['LAST_NAME'].apply(lambda arg : arg[0] == 'S')]['LAST_NAME']
+emp.loc[emp['LAST_NAME'].apply(lambda arg : arg[0] == 'S'),'LAST_NAME']
+#startswith()를 이용하면 
+emp[emp['LAST_NAME'].apply(lambda x : x.startswith('S'))]['LAST_NAME']
+
+#
+def first_character_S(x):
+    if x[0] == 'S':
+        return True
+    else:
+        return False
+    
+emp['LAST_NAME'][[first_character_S(i) for i in emp['LAST_NAME']]]
+emp['LAST_NAME'][emp['LAST_NAME'].apply(first_character_S)]
