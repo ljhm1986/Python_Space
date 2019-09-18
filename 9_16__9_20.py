@@ -967,3 +967,386 @@ def first_character_S(x):
     
 emp['LAST_NAME'][[first_character_S(i) for i in emp['LAST_NAME']]]
 emp['LAST_NAME'][emp['LAST_NAME'].apply(first_character_S)]
+
+##########################################################################
+#9/18#
+from pandas import Series, DataFrame
+import pandas as pd
+import numpy as np
+from numpy import nan as NA
+#[문제 119] g로 끝나는 LAST_NAME을 출력하세요
+emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+
+emp['LAST_NAME'].apply(lambda x : x[-1] == 'g')
+emp[emp['LAST_NAME'].apply(lambda x : x[-1] == 'g')]['LAST_NAME']
+emp.loc[emp['LAST_NAME'].apply(lambda x : x[-1] == 'g')]['LAST_NAME']
+#
+emp[emp['LAST_NAME'].apply(lambda x : x.endswith('g'))]['LAST_NAME']
+emp.loc[emp['LAST_NAME'].apply(lambda x : x.endswith('g'))]['LAST_NAME']
+#
+for i in emp['LAST_NAME']:
+    if i[-1] == 'g':
+        print(i)
+#
+[emp['LAST_NAME'][i] for i in range(len(emp)) if emp['LAST_NAME'][i][-1] == 'g']
+[i for i in emp['LAST_NAME'] if i[-1] == 'g']
+#
+x = [i[-1] == 'g' for i in emp['LAST_NAME']]
+emp['LAST_NAME'][x]
+emp.loc[x,'LAST_NAME']
+
+#함수에 입력변수가 2개일때 apply() 사용  
+def last_character(x,y):
+    if x[-1] == y:
+        return True
+    else:
+        return False
+[i for i in emp['LAST_NAME'] if last_character(i,'g')]
+#
+emp['LAST_NAME'][emp['LAST_NAME'].apply(last_character, y='g')]       
+#
+
+#[문제 120] 관리자 사원들의 LAST_NAME, SALARY를 출력하세요
+emp.columns
+emp['MANAGER_ID']
+emp['EMPLOYEE_ID']
+#1.pandas를 이용해서 해결
+emp['EMPLOYEE_ID'].isin(emp['MANAGER_ID'])
+emp[emp['EMPLOYEE_ID'].isin(emp['MANAGER_ID'])][['LAST_NAME','SALARY']]
+#2.pandas를 사용하지 않고 해결
+#emp 자체가 pandas가 필요했네...
+for i in range(len(emp)):
+    for j in range(len(emp)):
+        if emp['EMPLOYEE_ID'][i] == emp['MANAGER_ID'][j]:
+            print(emp['LAST_NAME'][i],emp['SALARY'][i])
+            break
+#선생님의 풀이 
+import csv
+#1. list를 하나 만들어서 manager_id를 저장하자 
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+v_mgr = []
+for i in emp_csv:
+    if (not i[9] in v_mgr) & (i[9] != ''):
+        v_mgr.append(i[9])
+file.close()
+
+#2. list에 포함되는 employee_id인 last_name, salary를 출력하자 
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+for i in emp_csv:
+    for mgr in v_mgr:
+        if i[0]  == mgr:
+            print(i[2],i[7])
+            
+file.close()
+#
+
+##
+import numpy as np
+s = Series([3,4,2,None,6])
+
+#sum() : 합, nan 가 있으면 제외하고 계산을 한다.
+s.sum()
+s.sum(skipna = True) #default
+s.sum(skipna = False) #
+#평균 
+s.mean()
+#분산
+s.var()
+#표준편차
+np.sqrt(s.var())
+s.std()
+#
+s.max()
+#
+s.min()
+#최대값
+s.idxmax()
+#최소값
+s.idxmin()
+
+s[s.idxmax()]
+s[s.idxmin()]
+
+#예전에 쓰던 것, 요즘 안 씀 
+#s.argmax()
+#s.argmin()
+#누적 합
+s.cumsum()
+#누적 곱
+s.cumprod()
+
+#
+s = Series([3,4,2,5,np.nan,6,2,6])
+#해당 index까지 중에서 최소값
+s.cummin()
+#해당 index까지 중에서 최대값
+s.cummax()
+
+s.max()
+s.min()
+
+#보면 해당 index가 하나만 나온다.
+s.idxmax()
+s.idxmin()
+s[s.idxmax()]
+s[s.idxmin()]
+#다음과 같이 하면 중복되는 최대,최소값들을 다 볼 수 있다.
+s[s == s.max()]
+s[s == s.min()]
+
+s[s == s.max()].index
+s[s == s.max()].values
+
+s.count()#nan 제외한 건수
+len(s)#nan 포함한 건수
+
+#다음의 여러가지 값을 한 번에 출력함 
+s.describe()
+#count    7.000000
+#mean     4.000000
+#std      1.732051
+#min      2.000000
+#25%      2.500000
+#50%      4.000000
+#75%      5.500000
+#max      6.000000
+#dtype: float64
+
+df = DataFrame([[44,65,93],[64,12,70],[98,43,33]],
+               index = ['머신러닝','도바킨','게롤드'],
+               columns = ['영어','수학','국어'])
+df
+#연산의 기본값이 각 column에 row를 더한다.
+df.sum()
+df.sum(axis = 0)
+df.sum(axis = 'rows')
+
+df.sum(axis = 1)
+df.sum(axis = 'columns')
+
+df.mean()
+
+df.at['카카로트','영어'] = 84
+df.at['카카로트','수학'] = np.nan
+df.at['카카로트','국어'] = 90
+
+df.sum()
+df.mean()
+df.mean(axis = 1, skipna = False)
+df['영어'].sum()
+df.describe()
+
+s = Series([1,2,3,5,23,5,6,7,1,4,2,None,5,4,2,7,5,4,2,4,5,7,69,None,1,3,4,9,41,
+            5,6,54,98,5,6])
+s.unique()
+s.value_counts()
+s.value_counts(dropna = False)
+s.value_counts(sort = True)
+s.value_counts(sort = False)
+
+pd.value_counts(s)
+pd.value_counts(s,sort=False)
+
+df = DataFrame({'a':['a1','a2','a3','a5','a2','a1'],
+                'b':['b4','b2','b6','b4','b8',np.nan]})
+df
+df['a'].unique()
+df['b'].unique()
+df['a'].value_counts()
+df['b'].value_counts()
+df['b'].value_counts(dropna=False)
+
+#[문제 121] 최고급여, 최저급여를 출력하세요
+#1. pandas를 이용하는 방법
+emp['SALARY'].max()
+emp['SALARY'].min()
+#2. pandas를 이용하지 않는 방법 
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+max_value = emp['SALARY'][0]
+for i in emp['SALARY']:
+    if i > max_value:
+        max_value = i
+print(max_value)
+file.close()
+
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+min_value = emp['SALARY'][0]
+for i in emp['SALARY']:
+    if i < min_value:
+        min_value = i
+print(min_value)
+file.close()
+
+#위에는 emp['SALARY'] 가 pandas 사용한 것...;; 다시 해보자 
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+max_value = int(next(emp_csv)[7])
+for i in emp_csv:
+    if int(i[7]) > max_value:
+        max_value = int(i[7])
+print(max_value)
+file.close()
+
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+min_value = int(next(emp_csv)[7])
+for i in emp_csv:
+    if int(i[7]) < min_value:
+        min_value = int(i[7])
+print(min_value)
+file.close()
+
+#옆자리 서민형씨 풀이
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+lst = []
+for i in emp_csv:
+    lst.append(int(i[7]))
+lst.sort(reverse = True)
+print(lst[0])
+print(lst[-1])
+file.close()
+
+#[문제 122] 20번 부서 사원들의 급여의 합을 구하세요
+#1. pandas 이용해서 해결
+emp.info()
+emp['DEPARTMENT_ID'] == 20
+emp[emp['DEPARTMENT_ID'] == 20]['SALARY'].sum()
+
+#2. pandas 이용하지 않고 해결
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+sum_salary = 0
+for i in emp_csv:
+    if i[-1] == '20':
+        sum_salary += int(i[7])
+print(sum_salary)
+file.close()
+
+#[문제 123] 부서번호를 입력하면 그 부서의 급여의 총액을 구하는 
+#함수를 생성하세요
+#dept_sum_sal(50)
+#답..
+#dept_sum_sal(1000)
+#부서가 없습니다.
+emp.info()
+###
+for i in emp:
+    print(i)
+#EMPLOYEE_ID
+#FIRST_NAME
+#LAST_NAME
+#EMAIL
+#PHONE_NUMBER
+#HIRE_DATE
+#JOB_ID
+#SALARY
+#COMMISSION_PCT
+#MANAGER_ID
+#DEPARTMENT_ID
+
+
+def dept_sum_sal(dept_id):
+    
+    emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+    lst = emp['DEPARTMENT_ID'].unique()
+    #null인거 없에자 
+    lst = lst[pd.notnull(lst)]
+    
+    if not dept_id in lst:
+        print('부서가 없습니다.')
+        return
+    
+    sum_salary = 0
+    for i in range(len(emp)):
+        if emp['DEPARTMENT_ID'][i] == dept_id:
+            sum_salary += emp['SALARY'][i]
+    print(sum_salary)
+    
+dept_sum_sal(20)
+dept_sum_sal(40)
+dept_sum_sal(200)
+dept_sum_sal(None)
+dept_sum_sal(np.nan)
+dept_sum_sal(NA)
+
+#선생님의 풀이 
+def dept_sum_sal2(dept_id):
+    
+    emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+    lst = emp['DEPARTMENT_ID'].unique()
+    #null인거 없에자 
+    lst = lst[pd.notnull(lst)]
+    
+    if dept_id in lst:
+        return emp['SALARY'][emp['DEPARTMENT_ID'] == float(dept_id)].sum()
+    else:
+        print('부서가 없습니다.')
+        return
+    
+dept_sum_sal2(20)
+dept_sum_sal2(40)
+dept_sum_sal2(200)
+
+#[문제 124] s변수에 값들 중에 unique한 값만 s_unique 변수에 넣어주세요
+s = [1,2,3,4,1,2,3,4,5,1,2,3,4,5,6,'']
+s
+type(s)
+#set
+s_unique = [i for i in set(s) if i != '']
+s_unique
+#list
+s
+s_unique = []
+for i in s:
+    if (not i in s_unique) & (i != ''):
+        s_unique.append(i)
+
+s_unique
+
+#dictionary 로 껀수(빈도수) 세기 
+dic = dict()
+dic
+
+for i in s:
+    if i in dic:
+        dic[i] += 1
+    elif i != '':
+        dic[i] = 1
+
+dic.keys()
+dic.values()
+dic.items()
+
+#Series로 바꾸기, 이때 공백문자를 null로 
+#list 내장객체에서 for 앞에 if 쓰면 변경해서 출력하기
+#for 뒤에 if 쓰면 걸러내기 
+lst = [np.nan if i == '' else i for i in s]
+
+Series(lst).unique()
+Series(lst).value_counts(dropna=False)
+
+s_unique = Series(lst).unique()
+s_unique[pd.notnull(s_unique)]
+type(s_unique)
+s_unique.dropna()#error
+#dropna 는 Series나 DataFrame에서만 된다.
+Series(s_unique).dropna()
