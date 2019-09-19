@@ -1061,7 +1061,7 @@ elif x%2 == 1:
 y = input("입력 :")
     
 y.replace('[가-힣]','')#안되네 
-y.replace('[a-z]','')
+y.replace('[a-z]','')#안되네 
 
 if y.isalpha():
     print(y)

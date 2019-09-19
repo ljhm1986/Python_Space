@@ -20,7 +20,7 @@ import pandas as pd
 #- 1차원 배열
 #- 인덱스(색인) 배열의 데이터에 연관된 이름을 가지고 있다. 
 #(pl/sql에서 index 배열을 기억하면...)
-#- R의 백터 자료형하고 유사하다. 
+#- R의 백터(vector) 자료형하고 유사하다. 
 
 s1 = Series([10,20,30,40,50])
 s1
@@ -258,7 +258,7 @@ df4
 df4.서울
 df4.index
 df4.values
-#전
+#전치 transpose
 df5 = df4.T
 df5
 df5.dtypes
@@ -268,7 +268,7 @@ df4['서울'].dtype
 df4.info
 df4.info()
 
-#index를 지정해서 Series를 만들때 row가 index순서대로 만들어 지지 않는다.
+#index를 지정해서 Series를 만들때 row가 반드시 index 순서대로 만들어 지지 않는다.
 dict = {'a':10,'b':20,'c':30,'d':40}
 ix = {'a','b','c','d'}
 s = Series(dict, index = ix)
@@ -303,6 +303,7 @@ np.arange(12).reshape(4,3)
 df = DataFrame(np.arange(9).reshape(3,3),
                index=['a','b','c'], columns=['x','y','z'])
 df
+#reindex : index를 변경, 추가, 삭제한다. 
 df2 = df.reindex(['a','b','c','d'])
 df2#d row는 모두 NaN으로 값이 채워진다.
 #method = 'ffill' or 'pad' : 앞줄을 기준으로 채우기
@@ -405,10 +406,15 @@ df.iloc['w']#error
 
 df.ix['x','one']
 df.loc['x','one']
+df.loc['one','x']#error
 df.iloc[1,'one']#error
 df.ix[1,'one']
 df.ix[1,['one','two']]
 df.ix[['x','y'],['one','two']]
+df.loc['x']['one']
+df.loc[['x','y']]['one']
+df.loc['one'][['x','y']]#error
+df.iloc[1][1:]
 df.ix[[1,2]]
 df.ix[0:2,0:2]
 df.ix[:,0:2]
@@ -453,6 +459,10 @@ df1 = DataFrame([[60,90,50],[80,65,75],[70,75,85]])
 df1.columns = ['PYTHON','R','SQL']
 df1.index = [2014,2015,2016]
 df1
+#      PYTHON   R  SQL
+#2014      60  90   50
+#2015      80  65   75
+#2016      70  75   85
 type(df1)
 df1.astype
 df1.dtypes
@@ -466,7 +476,7 @@ df2 = DataFrame(data1)
 df2.index = [2014,2015,2016]
 df2
 
-#선생님 풀
+#선생님 풀이 
 df3 = DataFrame({'PYTHON':[60,80,70],'R':[90,65,75],'SQL':[50,75,85]},
                  index = ['2014','2015','2016'])
 df3
@@ -1154,6 +1164,7 @@ pd.value_counts(s,sort=False)
 df = DataFrame({'a':['a1','a2','a3','a5','a2','a1'],
                 'b':['b4','b2','b6','b4','b8',np.nan]})
 df
+type(df['a'])#pandas.core.series.Series
 df['a'].unique()
 df['b'].unique()
 df['a'].value_counts()
@@ -1350,3 +1361,359 @@ type(s_unique)
 s_unique.dropna()#error
 #dropna 는 Series나 DataFrame에서만 된다.
 Series(s_unique).dropna()
+
+#####################################################################
+#9/19#
+from pandas import Series, DataFrame
+import pandas as pd
+import numpy as np
+from numpy import nan as NA
+#[문제 125] commission_pct가  null인 사원들의 급여의 총합을 출력하세요
+
+#1. pandas 이용해서 해결
+emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+emp['COMMISSION_PCT']
+emp['COMMISSION_PCT'].isnull()
+emp.loc[emp['COMMISSION_PCT'].isnull()]['SALARY'].sum()
+
+#2. pandas 사용하지 않고 해결
+import csv
+file = open('C:\\WorkSpace\\Python_Space\\data\\emp.csv','r')
+emp_csv = csv.reader(file)
+next(emp_csv)
+
+sum_salary = 0
+for i in emp_csv:
+    if i[8] == '':
+        sum_salary += int(i[7])
+print(sum_salary)
+
+file.close()
+
+#[문제 126] 부서별 급여 총액 구하세요
+
+emp[emp['DEPARTMENT_ID'] == 20]['SALARY'].sum()
+dept_list = emp['DEPARTMENT_ID'].unique()
+#dept_list.dropna() Series에서만 됨, Series가 아니면 na가 0이 된다.
+dept_list2 = dept_list[pd.notnull(dept_list)]
+
+for i in dept_list2:
+    dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'] == i].sum()
+    print('{}번 부서 급여 총액 : {}'.format(int(i),dept_sum))
+#
+dept_list3 = Series(dept_list)
+dept_list3 = dept_list3.dropna()        
+
+for i in dept_list3.sort_values():
+    dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'] == i].sum()
+    print('{}번 부서 급여 총액 : {}'.format(int(i),dept_sum))
+    
+#소속부서가 없는 사원도 계산하여 출력하려면 ? 
+emp['SALARY'][emp['DEPARTMENT_ID'].isnull()].sum()
+#na가 있으면 data type이 float 이다. int로 형변환이 안 된다.
+dept_list4 = Series(dept_list)
+np.isnan(dept_list4)
+
+
+for i in dept_list4.sort_values():
+    if np.isnan(i):
+        dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'].isnull()].sum()
+        print('{}번 부서 급여 총액 : {}'.format(i,dept_sum))
+    else:
+        dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'] == i].sum()
+        print('{}번 부서 급여 총액 : {}'.format(int(i),dept_sum))
+ 
+# isnull을 사용해도 되지 않을까?  
+dept_list4.isnull()
+dept_list4.notnull()
+       
+for i in dept_list4.sort_values():
+    if i.isnull():#이걸로는 error 
+        dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'].isnull()].sum()
+        print('{}번 부서 급여 총액 : {}'.format(i,dept_sum))
+    else:
+        dept_sum = emp['SALARY'][emp['DEPARTMENT_ID'] == i].sum()
+        print('{}번 부서 급여 총액 : {}'.format(int(i),dept_sum))
+ 
+#isnull() 이 안되는 이유는 무엇일까?       
+x = Series([1,2,3,np.nan, None])
+x
+x.isnull()
+np.isnan(x)
+#isnull() 은 Series용이기 때문이다.
+x[0].isnull()#error
+np.isnan(x[0])
+np.isnan(x[4])
+
+#list를 만들어서 해 보자 
+y = [1,2,3,np.nan,None]
+type(y)        
+y.isnull()
+np.isnan(y)#error
+np.isnan(y[2])
+np.isnan(y[3])
+np.isnan(y[4])#error, None은 pandas에서만 제공해서 
+
+#pandas에서 제공하는 함수를 사용하자 
+pd.isna(x[4])
+pd.isna(x)
+pd.isnull(x)
+pd.notnull(x)
+
+#group by 기능을 가진 함수를 사용하자 
+emp['SALARY'].groupby(emp['DEPARTMENT_ID']).sum()
+emp['SALARY'].groupby(emp['DEPARTMENT_ID']).mean()
+emp['SALARY'].groupby(emp['DEPARTMENT_ID']).max()
+emp['SALARY'].groupby(emp['DEPARTMENT_ID']).min()
+emp['SALARY'].groupby(emp['DEPARTMENT_ID']).count()
+
+#select department_id, job_id, sum(salary)
+#from employees
+#group by department_id, job_id
+#처럼 하려면 
+emp['SALARY'].groupby([emp['DEPARTMENT_ID'],emp['JOB_ID']]).sum()
+
+#sql에서 pivot를 했었다.
+emp['SALARY'].groupby([emp['DEPARTMENT_ID'],emp['JOB_ID']]).sum().unstack()
+#select *
+#from
+#(select department_id, job_id, salary
+#from employees)
+#pivot(sum(salary) for job_id in ('AC_ACCOUNT','AC_MGR',...,'ST_CLERK','ST_MAN'));
+
+#... 없에려면
+import pandas as pd
+pd.set_option('display.max_columns',100)
+#그럼 중간에  ... 없이 모든 column 들이 모두 나타난다.
+
+#너비 확장
+pd.set_option('display.width',1000)
+
+pd.set_option('display.max_rows',1000)
+
+#pd.set_option('display.height',1000)
+
+#다른 group by 
+emp.groupby('DEPARTMENT_ID')['SALARY'].sum()
+#select department_id, sum(salary)
+#from employees
+#group by department_id;
+emp.groupby(['DEPARTMENT_ID','JOB_ID'])['SALARY'].sum()
+#select department_id, job_id, sum(salary)
+#from employees
+#group by department_id, job_id;
+emp.groupby(['DEPARTMENT_ID','JOB_ID'])['SALARY'].sum().unstack()
+#select *
+#from
+#(select department_id, job_id, salary
+#from employees)
+#pivot(sum(salary) for job_id in ('AC_ACCOUNT','AC_MGR',...,'ST_CLERK','ST_MAN'));
+
+emp['SALARY'].groupby([emp['DEPARTMENT_ID'].fillna(0), emp['JOB_ID']]).sum()
+
+emp.fillna(0)
+
+emp.groupby('DEPARTMENT_ID')
+
+for name, group in emp.groupby('DEPARTMENT_ID'):
+    print(name)
+    print(group)
+    
+for (name1, name2), group in emp.groupby(['DEPARTMENT_ID','JOB_ID']):
+    print(name1, name2)
+    print(group)
+    
+for (name1, name2), group in emp[['LAST_NAME',
+    'DEPARTMENT_ID','JOB_ID']].groupby(['DEPARTMENT_ID','JOB_ID']):
+    print(name1, name2)
+    print(group)
+    
+emp.groupby('DEPARTMENT_ID')['SALARY'].sum()
+emp.groupby('DEPARTMENT_ID')['SALARY'].mean()
+emp.groupby('DEPARTMENT_ID')['SALARY'].aggregate(['sum','mean'])
+emp.groupby('DEPARTMENT_ID').aggregate({'SALARY':'sum',
+           'HIRE_DATE':['max','min']})
+    
+#Header가 없는 csv 파일을 읽어들여보자
+emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp_new.csv',
+            names = ['empid','name','job','mgr','hire_date',
+                     'sal','comm','deptno'])
+dept = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\dept_new.csv',
+                   names = ['deptno','dname','mgr','loc'])
+
+emp.shape
+emp.columns
+emp.dtypes
+#deptno      int64
+#dname      object
+#mgr       float64
+#loc         int64
+#dtype: object
+dept.dtypes
+#empid          int64
+#name          object
+#job           object
+#mgr          float64
+#hire_date     object
+#sal          float64
+#comm         float64
+#deptno       float64
+#dtype: object
+
+#두 DataFrame을 join하고 싶다. 
+#(sql에서는 join과 merge가 다르지만 여기서는 같은 의미이다.)
+pd.merge(emp, dept, on = 'deptno')
+#join할 column만 골라서 해 보자 
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']], on = 'deptno')
+#두 DataFrame의 deptno의 deta type이 다른데 작동한다...?
+#데이터 형이 다르면 작동하지 않는 경우가 있다.
+emp['deptno'].astype('float')
+
+#두 column이 다른경우에는 left_no, right_no 를 사용한다.
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']],
+         left_on = 'deptno', right_on = 'deptno')
+#select e.empid, e.deptno, d.dname
+#from employees e, departments d
+#where e.deptno = d.deptno;
+
+#기본 join (inner join, simple join, equi join, 등가조인)
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']],
+         on = 'deptno', how = 'inner')
+
+#left outer join
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']],
+         on = 'deptno', how = 'left')
+#select e.empid, e.deptno, d.dname
+#from employees e, departments d
+#where e.deptno = d.deptno(+);
+#select e.empid, e.deptno, d.dname
+#from employees e left outer join departments d
+#where e.deptno = d.deptno;
+
+#right outer join
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']],
+         on = 'deptno', how = 'right')
+#select e.empid, e.deptno, d.dname
+#from employees e, departments d
+#where e.deptno(+) = d.deptno;
+#select e.empid, e.deptno, d.dname
+#from employees e right outer join departments d
+#where e.deptno = d.deptno;
+
+#full outer join
+pd.merge(emp[['name','deptno']],dept[['deptno','dname']],
+         on = 'deptno', how = 'outer')
+#select e.empid, e.deptno, d.dname
+#from employees e full outer join departments d
+#where e.deptno = d.deptno;
+
+dept = DataFrame({'dname':['관리팀','마케팅팀','구매팀','인사팀',
+                           '경영지원팀','기술지원팀','홍보팀','기획팀',
+                           '재무팀','회계팀']},
+                    index = [10,20,30,40,50,60,70,80,90,100])   
+dept
+#하나는 column, 하나는 index를 기준으로 join한다.
+pd.merge(emp[['name','deptno']], dept,
+         left_on = 'deptno', right_index = True)
+
+df1 = DataFrame([[54,34,87],[95,34,76],[92,86,73],[8,444,54]],
+                index = ['홍길동','박찬호','손흥민','한조'],
+                columns = ['영어','수학','국어'])
+df1
+df2 = DataFrame([[54,34,87],[95,34,76],[92,86,73],[66,55,30]],
+                index = ['홍길동','박찬호','손흥민','겐지'],
+                columns = ['과학','음악','체육'])
+df2
+#index를 기준으로 join한다.
+pd.merge(df1, df2, left_index = True, right_index = True)
+#     영어  수학  국어  과학  음악  체육
+#홍길동  54  34  87  54  34  87
+#박찬호  95  34  76  95  34  76
+#손흥민  92  86  73  92  86  73
+#한조는 안 나온다. left outer join을 해서 나오게 하자 
+pd.merge(df1, df2, left_index = True, right_index = True, how = 'left')
+#     영어   수학  국어    과학    음악    체육
+#홍길동  54   34  87  54.0  34.0  87.0
+#박찬호  95   34  76  95.0  34.0  76.0
+#손흥민  92   86  73  92.0  86.0  73.0
+#한조    8  444  54   NaN   NaN   NaN
+
+df1.join(df2, how = 'inner')
+df1.join(df2, how = 'outer')
+df1.join(df2)#left outer join
+
+#[문제 127] emp에서 job이 AD_VP, AD_PRES인 사원들의 이름, 급여, 부서코드,
+#부서이름을 출력해주세요 
+table1 = pd.merge(emp[['name','job','sal','deptno']],
+         dept, left_on = 'deptno', right_index = True)
+
+table1
+type(table1)
+table1['job'].isin(['AD_VP','AD_PRES'])
+table1[table1['job'].isin(['AD_VP','AD_PRES'])]
+
+table2 = pd.merge(emp[emp['job'].isin(['AD_VP','AD_PRES'])]
+                      [['job','name','sal','deptno']],dept,
+                    left_on = 'deptno', right_index = True)
+table2
+
+#[문제 128] 부서이름별 급여 총액을 출력해주세요
+dept_list = table1['dname'].unique()
+dept_list
+
+for i in dept_list:
+    sum_sal = table1['sal'][table1['dname'] == i].sum()
+    print('{} 총 급여 : {}'.format(i,sum_sal))
+    
+dept_sal = emp['sal'].groupby(emp['deptno']).sum()
+#merge하기 전에 DataFrame으로 바꾸자 
+dept_sal = DataFrame(dept_sal)
+
+pd.merge(dept_sal, dept, left_on = 'deptno', 
+         right_index = True)[['dname','sal']]
+
+dept_sal2 = emp['sal'].groupby(emp['deptno'].fillna(0)).sum()
+#merge하기 전에 DataFrame으로 바꾸자 
+dept_sal2 = DataFrame(dept_sal2)
+
+pd.merge(dept_sal2, dept, left_on = 'deptno', 
+         right_index = True, how='right')[['dname','sal']]
+
+#[문제 129] 50번 부서 사원중에 급여가 5000 이상인 사원이름, 부서이름을 출력하세요
+emp_50 = emp[(emp['sal'] >= 5000) & (emp['deptno'] == 50)][['name','deptno']]
+pd.merge(emp_50, dept, left_on = 'deptno', right_index = True)[['name','dname']]
+pd.merge(emp_50, dept[['deptno','dname']], on = 'deptno')[['name','dname']]
+
+
+#2개의 DataFrame을 불러들이자 
+df1 = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp1.csv',
+            names = ['empid','name','hire_date','sa','deptno'])
+df1
+df2 = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp2.csv',
+            names = ['empid','name','hire_date','sa','deptno'])
+df2
+
+#2개의 DataFrame을 한 DataFrame에 넣어보자 
+df3 = pd.DataFrame()
+for i in range(1,3):
+    file = 'C:\\WorkSpace\\Python_Space\\data\\emp{}.csv'.format(i)
+    temp = pd.read_csv(file,names = ['empid','name','hire_date','sa','deptno'])
+    df3 = df3.append(temp)
+df3
+
+df3.groupby('deptno').aggregate({'sa':'sum','hire_date':['max','min']})
+#생각해보면  emp 뒤에 3,6,8 등 하면 반복문으로 하기 힘들다.
+
+#새로운 폴더를 만들어 놓고 
+import glob
+file = 'C:\\WorkSpace\\Python_Space\\csv\\emp*.csv'
+#해당 폴더에 가서 emp로 시작하는 csv파일명들의 목록을 만든다.
+file_lst = glob.glob(file)
+
+#아까 반복문을 수정해서 작동해보자 
+df4 = pd.DataFrame()
+for i in file_lst:
+    temp = pd.read_csv(i,names = ['empid','name','hire_date','sa','deptno'])
+    df4 = df4.append(temp)
+df4
+

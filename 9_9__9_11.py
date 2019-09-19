@@ -1166,7 +1166,7 @@ func(100)
 
 ''' [문제90] 부서별 급여의 총액을 구하시고 부서별로 오름차순 정렬하세요. '''
 import csv
-file = open("C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\emp.csv", "r")
+file = open("C:\\WorkSpace\\Python_Space\\data\\emp.csv", "r")
 emp_csv = csv.reader(file)
 header = next(emp_csv)
 header
@@ -1185,6 +1185,8 @@ for i in emp_csv:
 # 빈 문자열은 int로 변환이 안됨. -> 빈문자열을 먼저 제거하고 하면 될듯?
 for k, v in dept_sum.items():
     print(k, v)
+
+file.close()
 
 # 나의 정렬 방법, list 사용
 #1. dept_sum의 key값만 뽑아내 list로 만들어서 sorted한다.
