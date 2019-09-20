@@ -1717,3 +1717,350 @@ for i in file_lst:
     df4 = df4.append(temp)
 df4
 
+#############################################################
+#9/20#
+from pandas import Series, DataFrame
+import pandas as pd
+import numpy as np
+from numpy import nan as NA
+#[문제 130] 2010년도에 태어난 아이 이름, 성별 상관없이 상위 10명 출력하세요.
+
+year2010 = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year2010.csv',
+                       names=['name','gender','number'])
+year2010
+type(year2010)
+year2010.dtypes
+year2010.info()
+
+#rank 사용
+year2010['number'].rank(ascending=False, method='dense')
+year2010['number'].rank(ascending=False, method='first')
+year2010[year2010['number'].rank(ascending=False, method='first') <= 10]
+#            name gender  number
+#0       Isabella      F   22731
+#1         Sophia      F   20477
+#2           Emma      F   17179
+#3         Olivia      F   16860
+#19698      Jacob      M   21875
+#19699      Ethan      M   17866
+#19700    Michael      M   17133
+#19701     Jayden      M   17030
+#19702    William      M   16870
+#19703  Alexander      M   16634
+
+#sort_values사용
+rank10 = year2010['number'].sort_values(ascending = False)[0:10]
+type(rank10)#Series
+rank10.values[-1]
+year2010[year2010['number'] >= rank10.values[-1]]
+
+#column 추가 
+year2010['rankFirst'] = year2010['number'].rank(ascending=False, method='first')
+year2010[year2010['rankFirst'] <= 10]
+#            name gender  number  rankFirst
+#0       Isabella      F   22731        1.0
+#1         Sophia      F   20477        3.0
+#2           Emma      F   17179        5.0
+#3         Olivia      F   16860        9.0
+#19698      Jacob      M   21875        2.0
+#19699      Ethan      M   17866        4.0
+#19700    Michael      M   17133        6.0
+#19701     Jayden      M   17030        7.0
+#19702    William      M   16870        8.0
+#19703  Alexander      M   16634       10.0
+
+#[문제 131] 2010년도에 태어난 아이 이름, 성별 따로 상위 5명 출력하세요.
+year2010 = year2010.loc[:,['name','gender','number']]
+
+#rank 사용
+year2010['gender'] == 'M'
+year2010M = year2010[year2010['gender'] == 'M']
+year2010F = year2010[year2010['gender'] == 'F']
+year2010M[year2010M['number'].rank(ascending=False, method='first') <= 5]
+year2010F[year2010F['number'].rank(ascending=False, method='first') <= 5]
+
+#sort_values 사용
+year2010[year2010['gender'] == 'M'].sort_values(
+        by = 'number',ascending = False)[:5]
+year2010[year2010['gender'] == 'F'].sort_values(
+        by = 'number',ascending = False)[:5]
+
+#한 DataFrame에서 출력할 방법은? groupby를 이용하자 
+year2010.groupby('gender')['number'].rank(ascending=False, method='first')
+year2010_gender_10 = year2010[year2010.groupby('gender')['number'].rank(
+        ascending=False, method='first') <= 5]
+
+year2010_gender_10
+#           name gender  number
+#0      Isabella      F   22731
+#1        Sophia      F   20477
+#2          Emma      F   17179
+#3        Olivia      F   16860
+#4           Ava      F   15300
+#19698     Jacob      M   21875
+#19699     Ethan      M   17866
+#19700   Michael      M   17133
+#19701    Jayden      M   17030
+#19702   William      M   16870
+    
+#[문제 132] 2010년도에 태어난 아이 이름, 성별 상관없이 상위 10위까지 출력하세요.
+#rank 사용
+year2010[year2010['number'].rank(ascending=False, method='dense') <= 10]
+#            name gender  number
+#0       Isabella      F   22731
+#1         Sophia      F   20477
+#2           Emma      F   17179
+#3         Olivia      F   16860
+#19698      Jacob      M   21875
+#19699      Ethan      M   17866
+#19700    Michael      M   17133
+#19701     Jayden      M   17030
+#19702    William      M   16870
+#19703  Alexander      M   16634
+
+#sort_values 사용
+year2010.sort_values(by='number', ascending = False)[:10]
+#            name gender  number
+#0       Isabella      F   22731
+#19698      Jacob      M   21875
+#1         Sophia      F   20477
+#19699      Ethan      M   17866
+#2           Emma      F   17179
+#19700    Michael      M   17133
+#19701     Jayden      M   17030
+#19702    William      M   16870
+#3         Olivia      F   16860
+#19703  Alexander      M   16634
+
+#column 을 추가
+year2010['rankDense'] = year2010['number'].rank(ascending=False, method='dense')
+year2010[year2010['rankDense'] <= 10]
+#            name gender  number  rankDense
+#0       Isabella      F   22731        1.0
+#1         Sophia      F   20477        3.0
+#2           Emma      F   17179        5.0
+#3         Olivia      F   16860        9.0
+#19698      Jacob      M   21875        2.0
+#19699      Ethan      M   17866        4.0
+#19700    Michael      M   17133        6.0
+#19701     Jayden      M   17030        7.0
+#19702    William      M   16870        8.0
+#19703  Alexander      M   16634       10.0
+
+#[문제 133] 2010년도에 태어난 아이 이름, 성별 따로 상위 5위까지 출력하세요.
+year2010 = year2010.loc[:,['name','gender','number']]
+
+year2010M[year2010M['number'].rank(ascending=False, method='dense') <= 5]
+year2010F[year2010F['number'].rank(ascending=False, method='dense') <= 5]
+
+#groupby를 이용
+year2010.groupby('gender')['number'].rank(ascending=False, method='dense')
+year2010_gender_10 = year2010[year2010.groupby('gender')['number'].rank(
+        ascending=False, method='dense') <= 5]
+
+#상위 10명이나 상위 10위나 여기서는 결과가 같다. 중복되는 값이 없기 때문이다.
+
+#[문제 134] 2001년 ~ 2016년도 년도별 출생수 
+import glob
+file = 'C:\\WorkSpace\\Python_Space\\csv\\yob*.csv'
+file_lst = glob.glob(file)
+file_lst[0][-11:-4]
+
+df_yob = DataFrame()
+year = 2000
+year_birth = []
+for i in file_lst:
+    temp = DataFrame()
+    temp = pd.read_csv(i, names = ['name','gender','number'])
+    temp['year'] = year
+    df_yob = df_yob.append(temp)
+    year_birth.append([year, temp['number'].sum()])
+    year += 1
+
+df_yob
+df_yob.info()
+year_birth
+
+
+#선생님 풀이, 출력하며 저장해보자 
+with open('C:\\WorkSpace\\Python_Space\\data\\year.txt','w') as f:
+    for x, y in year_birth:
+        data = '%s, %s\n'%(x,y)
+        print(data)
+        f.write(data)
+
+#년도별 출생자수 
+df_yob.groupby(['year'])['number'].sum()
+#년도와 성별 출생자수
+df_yob.groupby(['year','gender'])['number'].sum()
+df_yob.groupby(['year','gender'])['number'].sum().unstack()
+
+
+df_yob.groupby(['year']).aggregate({'number':['sum']})
+
+#[문제 135] 2000년 ~ 2016년 태어난 아이 이름 성별 상관없이 상위 10위까지 출력하세요
+df_yob['number'].rank(ascending = False)
+df_yob[df_yob['number'].rank(ascending = False) <= 10]
+df_yob[df_yob['number'].rank(ascending = False, method = 'dense') <= 10]
+df_yob[df_yob['number'].rank(ascending = False, method = 'mean') <= 10]
+##
+#년도별 합쳐서 이름을 성별에 상관없이 10위까지 
+df_yob.groupby('name')['number'].sum()
+rankName = df_yob.groupby('name')['number'].sum().rank(
+        ascending = False, method = 'dense')
+pd.merge(df_yob, rankName, on = 'name')
+
+df_yob.groupby(['name','gender'])['number'].sum()
+name_gender = df_yob.groupby(['name','gender'])['number'].sum()
+name_gender[name_gender.rank(ascending = False, method = 'dense') <= 10]
+
+#[문제 136] 2000년 ~ 2016년 태어난 아이 이름 성별 따로 상위 5위까지 출력하세요
+year2010 = year2010.loc[:,['name','gender','number']]
+df_yob_sum = df_yob.groupby(['name','gender'])['number'].sum()
+df_yob_sum
+type(df_yob_sum)
+df_yob_sum[df_yob_sum.rank(ascending = False, method = 'dense') <= 10]
+#name     gender
+#Andrew   M         284683
+#Daniel   M         303484
+#Emily    F         314233
+#Emma     F         319903
+#Ethan    M         314794
+#Jacob    M         400578
+#Joshua   M         315248
+#Matthew  M         315179
+#Michael  M         360013
+#William  M         310448
+#Name: number, dtype: int64
+
+
+## 선생님의 풀이 ##
+file = 'C:\\WorkSpace\\Python_Space\\csv\\yob*.csv'
+file_lst = glob.glob(file)
+#우선 2000년도와 2001년도를 marge 해 보자 
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\csv\\yob2000.csv',
+                 names = ['name','gender','birth'])
+df
+
+year = pd.read_csv('C:\\WorkSpace\\Python_Space\\csv\\yob2001.csv',
+                   names = ['name','gender','birth'])
+year
+#위에 2개를 merge를 해 보자, 2000년도 출생수는 birth_x column에
+#2001년도 출생수는 birth_y column에 생긴다.
+x = pd.merge(df,year,on=['name','gender'], how = 'outer')
+x
+x.iloc[:,2]#2000년도 출생수
+x.iloc[:,3]#2001년도 출생수
+#birth column에 두 column의 수를 더하자 
+x['birth'] = x.iloc[:,2].add(x.iloc[:,3], fill_value = 0)
+x
+#이제 name, gender, birth column만 꺼내어 df를 구성하자 
+df = x.loc[:,['name','gender','birth']]
+df
+
+#그러면 위와 같은 과정을 2000년 부터 2016년도 까지 for문을 이용해서 반복하면 된다.
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\csv\\yob2000.csv',
+                 names = ['name','gender','birth'])
+
+for i in file_lst[1:]:
+    year = pd.read_csv(i, names = ['name','gender','birth'])
+    x = pd.merge(df,year,on=['name','gender'], how = 'outer')
+    x['birth'] = x.iloc[:,2].add(x.iloc[:,3], fill_value = 0)
+    df = x.loc[:,['name','gender','birth']]
+    
+df
+df['rank'] = df['birth'].rank(ascending = False, method = 'dense')
+df[df['rank'] <= 10].sort_values('rank') 
+#          name gender     birth  rank
+#17653    Jacob      M  400578.0   1.0
+#17654  Michael      M  360013.0   2.0
+#16        Emma      F  319903.0   3.0
+#17656   Joshua      M  315248.0   4.0
+#17655  Matthew      M  315179.0   5.0
+#17677    Ethan      M  314794.0   6.0
+#0        Emily      F  314233.0   7.0
+#17663  William      M  310448.0   8.0
+#17661   Daniel      M  303484.0   9.0
+#17659   Andrew      M  284683.0  10.0
+
+
+#[문제 137] 2000년 ~ 2016년 성별 출생현황을 출력해 주세요 
+df_yob.groupby(['gender','year'])['number'].sum().unstack()
+df_yob.groupby(['year','gender'])['number'].sum().unstack()
+df_yob_y_g = df_yob.groupby(['year','gender'])['number'].sum().unstack()
+df_yob_y_g.dtypes
+df_yob_y_g.info()
+df_yob_y_g.iloc[0,:]
+df_yob_y_g.index[0]
+
+list1 = []
+for i in range(len(df_yob_y_g)):
+    x,y = df_yob_y_g.iloc[i,:]
+    z = df_yob_y_g.index[i]
+    print(z,x,y)
+    list1.append([z,x,y])
+list1
+
+for i in list1:
+    print('{}년도 여자 : {}명, 남자 : {}명'.format(i[0],i[1],i[2]))
+
+df_yob.groupby(['gender'])['number'].sum()
+df_yob.groupby(['year'])['number'].sum()
+
+#선생님의 풀이
+file = 'C:\\WorkSpace\\Python_Space\\csv\\yob*.csv'
+file_lst = glob.glob(file)
+year = 2000
+
+with open('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt',
+          'w') as f:#encoding = 'utf-8'
+    f.write('{},{},{}\n'.format('년도','여자','남자'))
+    #f.write에서 빈칸 띄우면 다른 column name 이 된다.... 
+    for i in file_lst:
+        df = pd.read_csv(i, names = ['name','gender','birth'])
+        gender_cn = df['birth'].groupby(df['gender']).sum()
+        data = '%s,%s,%s\n'%(year, gender_cn.loc['F'],
+                             gender_cn.loc['M'])
+        f.write(data)
+        year += 1
+
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt') 
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt',
+                 encoding = 'CP949')
+df.info() 
+df.columns
+df['여자']
+df['남자'].sum()
+
+#다른 풀이, import os 를 해서 ~ 
+import csv
+import os
+
+#파일경로중에서 파일이름.확장자 를 뽑아낸다.
+os.path.basename('C:\\WorkSpace\\Python_Space\\csv\\yob2000.csv')#'yob2000.csv'
+
+'yob2000.csv'.split('.')#['yob2000', 'csv']
+'yob2000.csv'.split('.')[0]#'yob2000'
+
+with open('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt',
+          'w',
+          newline='',
+          encoding='utf-8') as f:
+    #newline 없으면 빈 줄이 있는 상태로 저장된다.
+    writer = csv.writer(f, delimiter = ',')#열을 ,로 나눈다.
+    writer.writerow(['년도','여자','남자'])#행을 입력한다.
+    for y in range(2000,2017):
+        filename = 'C:\\WorkSpace\\Python_Space\\csv\\yob%d.csv'%y
+        name = os.path.basename(filename)
+        name = name.split('.')[0]
+        df = pd.read_csv(filename, names = ['name','gender','birth'])
+        gender_cn = df['birth'].groupby(df['gender']).sum()
+        writer.writerow([name[3:], gender_cn.loc['F'], gender_cn.loc['M']])
+
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt')
+df.info() 
+df.columns
+df['여자']
+df['남자'].sum()
+
+
