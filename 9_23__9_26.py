@@ -516,3 +516,693 @@ c.execute("""
           group by department_id
           having sum(salary) > 100000""")
 c.fetchall()
+
+########################################################################
+#9/24#
+from pandas import Series, DataFrame
+import pandas as pd
+import sqlite3
+conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\insa.db")
+c = conn.cursor()
+#
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()#[] 있다면 지워주고 시작 
+
+c.execute("create table emp_1(id integer, name text, sal integer)")
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()
+c.execute("insert into emp_1(id, name, sal) values (1,'로드호그',1000)")
+c.fetchone()
+conn.commit()
+c.close()
+conn.close()
+
+#
+conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\insa.db")
+c = conn.cursor()
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()
+c.execute("select * from emp_1")
+c.fetchall()
+#[(1, '로드호그', 1000)]
+c.execute("insert into emp_1(id,name,sal) values(?,?,?)",\
+          (2,'라인하르트',2000))
+c.execute("select * from emp_1")
+c.fetchall()
+#[(1, '로드호그', 1000), (2, '라인하르트', 2000)]
+
+#?: 값을 넣으려는곳의 자리표시자, 넣으려는 값은 다음 tuple에서 나타난다.
+insert_sql = "insert into emp_1(id, name, sal) values (?,?,?)"
+c.execute(insert_sql,(3,'겐지',3000))
+c.execute("select * from emp_1")
+c.fetchall()#[(1, '로드호그', 1000), (2, '라인하르트', 2000), (3, '겐지', 3000)]
+conn.commit()
+
+c.execute("select * from emp_1")
+c.fetchmany(2)#2개만 출력하자
+#[(1, '로드호그', 1000), (2, '라인하르트', 2000)]
+
+c.execute("update emp_1 set sal = 5000 where id = 1")
+c.execute("select * from emp_1 where id = 1")
+c.fetchone()
+conn.rollback()
+c.execute("select * from emp_1 where id = 1")
+c.fetchone()
+c.execute("delete from emp_1 where id = 1")
+c.execute("select * from emp_1")
+c.fetchall()
+conn.rollback()
+c.execute("select * from emp_1")
+c.fetchall()
+c.execute("alter table emp_1 add column deptno integer")
+#table의 정보를 보자 
+c.execute("PRAGMA table_info(emp_1)")
+c.fetchall()
+#[(0, 'id', 'integer', 0, None, 0),
+# (1, 'name', 'text', 0, None, 0),
+# (2, 'sal', 'integer', 0, None, 0),
+# (3, 'deptno', 'integer', 0, None, 0)]
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()
+c.execute("drop table emp_1")
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()#[]
+
+#table 2개를 만들자 
+c.execute("create table emp(id integer, name text, sal integer, deptno integer)")
+c.execute("insert into emp(id, name, sal, deptno) values(1,'루시우',1000,10)")
+c.execute("insert into emp(id, name, sal, deptno) values(2,'솔져',1500,20)")
+c.execute("insert into emp(id, name, sal, deptno) values(3,'리퍼',2000,30)")
+c.execute("insert into emp(id, name, sal, deptno) values(4,'디바',2500,40)")
+c.execute("insert into emp(id, name, sal, deptno) values(5,'겐지',3000,50)")
+c.execute("select * from emp")
+c.fetchall()
+conn.commit()
+
+c.execute("create table dept(deptno integer, dname text)")
+c.execute("insert into dept(deptno,dname) values(10,'힐러부')")
+c.execute("insert into dept(deptno,dname) values(20,'공격부')")
+c.execute("insert into dept(deptno,dname) values(30,'선발부')")
+c.execute("insert into dept(deptno,dname) values(40,'탱커부')")
+c.execute("insert into dept(deptno,dname) values(50,'딜러충부')")
+c.execute("select * from dept")
+c.fetchall()
+conn.commit()
+
+#join : 두 개 이상의 table에서 데이터를 가져오는 방법
+#1. cartesian product : join조건이 없을때, 조건이 잘못되었을떄 
+#각 테이블 행을 모두 곱함 
+c.execute("select id,name,dname from emp,dept")
+c.fetchall()
+c.execute("select id,name,dname from emp cross join dept")
+c.fetchall()
+
+#2.equi join, inner join, simple join, 등가조인
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e, dept d
+          where e.deptno = d.deptno""")
+c.fetchall()
+#ANSI 표준으로는 join on, inner join, join using 
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e join dept d on e.deptno = d.deptno""")
+c.fetchall()
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e inner join dept d on e.deptno = d.deptno""")
+c.fetchall()
+c.execute("""
+          select id, name, deptno, dname
+          from emp e join dept d using(deptno)
+          """)
+c.fetchall()
+#natural join 조인조건을 자동으로 만듬
+c.execute("""
+          select id, name, deptno, dname
+          from emp e natural join dept d
+          """)
+c.fetchall()
+#3. outer join
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e left outer join dept d 
+          on e.deptno = d.deptno
+          """)
+c.fetchall()
+#sqlite에서는 right outer join은 지원하지 않는다.
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e right outer join dept d 
+          on e.deptno = d.deptno
+          """)
+#OperationalError: RIGHT and FULL OUTER JOINs are not currently supported
+c.fetchall()
+
+#full outer join 하려면 두개의 left outer join을 union 한다.
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e left outer join dept d 
+          on e.deptno = d.deptno
+          union
+          select id, name, e.deptno, dname
+          from dept d left outer join emp e
+          on e.deptno = d.deptno
+          """)
+c.fetchall()
+#중복을 체크하지 않고 합치려면 unoin all 
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e left outer join dept d 
+          on e.deptno = d.deptno
+          union all
+          select id, name, e.deptno, dname
+          from dept d left outer join emp e
+          on e.deptno = d.deptno
+          """)
+c.fetchall()
+#교집합을 구하려면 insersect
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e left outer join dept d 
+          on e.deptno = d.deptno
+          intersect
+          select id, name, e.deptno, dname
+          from dept d left outer join emp e
+          on e.deptno = d.deptno
+          """)
+c.fetchall()
+#차집합을 구하려면 except
+c.execute("""
+          select id, name, e.deptno, dname
+          from emp e left outer join dept d 
+          on e.deptno = d.deptno
+          except
+          select id, name, e.deptno, dname
+          from dept d left outer join emp e
+          on e.deptno = d.deptno
+          """)
+c.fetchall()
+
+#4.non equi join
+#새로운 table(job_grades) 을 만들자  
+c.execute('drop table job_grades')
+c.execute("""
+          create table job_grades
+          (grade_level, text, lowest_sal integer, highest_sal integer)
+          """)
+c.execute("""
+          insert into job_grades
+          (grade_level, lowest_sal, highest_sal) values('A', 1000, 2999)
+          """)
+c.execute("""
+          insert into job_grades
+          (grade_level, lowest_sal, highest_sal) values('B', 3000, 6999)
+          """)
+c.execute("""
+          insert into job_grades
+          (grade_level, lowest_sal, highest_sal) values('C', 6000, 9999)
+          """)
+c.execute("""
+          insert into job_grades
+          (grade_level, lowest_sal, highest_sal) values('D', 10000, 14999)
+          """)
+c.execute("""
+          insert into job_grades
+          (grade_level, lowest_sal, highest_sal) values('F', 15000, 29990)
+          """)
+c.execute("select * from job_grades")
+c.fetchall()
+
+#csv file을 불러와서 db파일에 저장하자 
+data = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\emp.csv")
+data.to_sql('employees',conn,index = False)
+c.execute('PRAGMA table_info(employees)')
+c.fetchall()
+
+#직원들의 급여에 등급을 매기자 
+c.execute("""
+          select e.employee_id, e.salary, j.grade_level
+          from employees e join job_grades j
+          on e.salary between j.lowest_sal and j.highest_sal
+          """)
+c.fetchall()
+
+#5.self join
+#직원과 해당 상급자 
+c.execute("""
+          select e1.employee_id, e1.last_name, e2.employee_id, e2.last_name
+          from employees e1 join employees e2
+          on e1.manager_id = e2.employee_id
+          """)
+c.fetchall()
+c.execute("""
+          select e1.employee_id, e1.last_name, e2.employee_id, e2.last_name
+          from employees e1 left outer join employees e2
+          on e1.manager_id = e2.employee_id
+          """)
+c.fetchall()
+
+#sqlite 에서 group 함수
+c.execute("""
+          select sum(salary), avg(salary), max(salary),
+          min(salary), count(*), count(department_id)
+          from employees
+          """)
+c.fetchall()
+
+#부서번호와 직업번호와 급여총합이 10000 넘는 것만 출력 
+c.execute("""
+          select department_id, job_id, sum(salary)
+          from employees
+          group by department_id
+          having sum(salary) > 10000
+          order by department_id asc, job_id
+          """)
+c.fetchall()
+#group_concat : 포함된것들을 모두 나열하여 보여줌 
+c.execute("""
+          select department_id, group_concat(last_name)
+          from employees
+          group by department_id
+          """)
+c.fetchall()
+#tuple 2번째 칸에 last_name들이 한 문자열로 나열되어 있다. 
+c.execute("""
+          select department_id, group_concat(distinct job_id)
+          from employees
+          group by department_id
+          """)
+c.fetchall()
+#[(None, 'SA_REP'),
+# (10.0, 'AD_ASST'),
+# (20.0, 'MK_MAN,MK_REP'),
+# (30.0, 'PU_MAN,PU_CLERK'),
+# (40.0, 'HR_REP'),
+# (50.0, 'ST_MAN,ST_CLERK,SH_CLERK'),
+# (60.0, 'IT_PROG'),
+# (70.0, 'PR_REP'),
+# (80.0, 'SA_MAN,SA_REP'),
+# (90.0, 'AD_PRES,AD_VP'),
+# (100.0, 'FI_MGR,FI_ACCOUNT'),
+# (110.0, 'AC_MGR,AC_ACCOUNT')]
+
+#자신이 속한 부서의 평균임금보다 임금이 높은 직원은?
+#inline view 
+c.execute("""
+          select e1.employee_id, e1.last_name, e1.salary
+          from employees e1, 
+          (select department_id, avg(salary) avg_sal
+          from employees
+          group by department_id) e2
+          where e1.salary >= e2.avg_sal and
+          e1.department_id = e2.department_id
+          order by 1
+          """)       
+c.fetchall()
+#상호관련서브쿼리 
+c.execute("""
+          select e1.employee_id, e1.last_name, e1.salary
+          from employees e1
+          where salary >=
+          (select avg(salary)
+          from employees
+          where department_id = e1.department_id)
+          order by 1
+          """)
+c.fetchall()       
+
+#[문제 145] 2006년도에 입사한 사원들의 부서이름별로 급여의 총액, 평균을 구하세요.
+data2 = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\dept.csv")
+data2
+data2.to_sql('departments',conn,index = False)
+conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\insa.db")
+c = conn.cursor()
+c.execute("select name from sqlite_master where type = 'table'")
+c.fetchall()
+c.execute("select * from emp")
+c.fetchall()
+c.execute("select * from employees")
+c.fetchall()
+c.execute("select * from departments")
+c.fetchall()
+c.execute("PRAGMA table_info(employees)")
+c.fetchall()
+c.execute("""
+          select e.sum_sal, e.avg_sal, d.department_name
+          from departments d,
+          (
+          select department_id, round(sum(salary)) sum_sal,
+          round(avg(salary)) avg_sal
+          from employees
+          where substr(hire_date,1,4) = '2006'
+          group by department_id) e
+          where d.department_id = e.department_id
+          """)
+c.fetchall()
+
+#[문제 146] 사원들의 employee_id, salary, department_name, grade_level
+#을 출력해주세요
+c.execute("select * from job_grades")
+c.fetchall()
+
+c.execute("""
+          select 
+          e.employee_id, e.salary, j.grade_level, d.department_name
+          from employees e left outer join departments d
+          on e.department_id = d.department_id
+          left outer join job_grades j        
+          on (e.salary between j.lowest_sal and j.highest_sal)
+          """)
+c.fetchall()
+
+#[문제 147] last_name에 a가 2개 이상 포함되어 있는 사원들의 
+#employee_id, last_name, salary, department_name, grade_level을 
+#출력하세요
+c.execute("""
+          select employee_id, last_name,salary
+          from employees
+          where last_name like '%a%a%'
+          """)
+c.fetchall()
+
+c.execute("""
+          select 
+          e.employee_id, e.salary, j.grade_level, d.department_name
+          from employees e, job_grades j, departments d
+          where (e.salary between j.lowest_sal and j.highest_sal)
+          and (e.department_id = d.department_id)
+          and last_name like '%a%a%'
+          """)
+c.fetchall()
+
+#[문제 148] 회사에서 최고 급여를 받는 사원들의 employee_id, salary,
+#department_name을 출력하세요
+c.execute("""
+          select e1.employee_id, e1.salary,d.department_name
+          from employees e1,
+          (select max(salary) max_sal
+          from employees) e2, departments d
+          where e1.salary == e2.max_sal
+          and e1.department_id = d.department_id
+          """)
+c.fetchall()
+
+#[문제 149] King에게 보고하는 사원들의 last_name, salary를 출력하세요
+#1.subquery
+c.execute("""
+          select e.last_name, e.salary
+          from employees e
+          where e.manager_id in
+          (select employee_id
+          from employees
+          where upper(last_name) == 'KING')
+          order by 1
+          """)
+c.fetchall()          
+#2.join
+c.execute("""
+          select e1.last_name, e1.salary
+          from employees e1, employees e2
+          where e1.manager_id = e2.employee_id
+          and upper(e2.last_name) = 'KING'
+          """)
+c.fetchall() 
+##이제 sql은 여기까지 하고 ~
+
+###Numpy###
+#-과학 계산을 위한 라이브러리로 다차원배열을 처리하는데 필요한 기능을 제공한다.
+import numpy as np
+
+z1 = np.array([1,2,3])
+z1#array([1, 2, 3])
+type(z1)#numpy.ndarray
+z1.dtype#dtype('int32')
+
+z2 = np.array([[1,2,3,4],[4,2,6,4]])
+z2
+#array([[1, 2, 3, 4],
+#       [4, 2, 6, 4]])
+type(z2)
+z2.dtype
+z2.shape#(2,4)
+
+#list로 ndarray를 만들자 
+lst = [[2,5,3],[4,7,6],[8,54,7]]
+type(lst)
+z3 = np.array(lst)
+z3
+#array([[ 2,  5,  3],
+#       [ 4,  7,  6],
+#       [ 8, 54,  7]])
+z3.shape#(3,3)
+#z3[행,열]
+z3[0]
+z3[1]
+z3[2]
+
+z3[:,0]
+z3[:,1]
+z3[:,2]
+z3[0:2,0]
+
+z3[1:,1:]
+z3[0:2,0:2]
+z3[0,0]
+z3[1,1]
+z3[2,2]
+
+#
+lst = [[1,2,3],[4,5,6],[7,8,9]]
+n = np.array(lst)
+n
+b = np.array([[False, True, False],[True, False, True],[False, True, False]])
+type(b)
+b.dtype #dtype('bool')
+b.shape
+
+#True인 index만 골라내기 
+n[b] #array([2, 4, 6, 8])
+n[n%2 == 0] #array([2, 4, 6, 8])
+
+#변수에 True/False 넣어서 하기 
+r = n%2 == 0
+n[r] #array([2, 4, 6, 8])
+
+#ndarray 에 자동으로 숫자넣어서 만들기
+np.zeros((3,3))
+#array([[0., 0., 0.],
+#       [0., 0., 0.],
+#       [0., 0., 0.]])
+np.ones((3,3))
+#array([[1., 1., 1.],
+#       [1., 1., 1.],
+#       [1., 1., 1.]])
+np.full((4,4),2)
+#array([[2, 2, 2, 2],
+#       [2, 2, 2, 2],
+#       [2, 2, 2, 2],
+#       [2, 2, 2, 2]])
+np.eye(3)
+#array([[1., 0., 0.],
+#       [0., 1., 0.],
+#       [0., 0., 1.]])
+np.eye(4)
+np.eye(4)
+
+list(range(20))
+z = np.array(range(20))
+z.shape
+#1차원 배열이니까 2차원 배열로 만들어 보자 
+z = z.reshape((4,5))
+z
+z = z.reshape((20,))
+z
+
+#1차원 배열들의 연산
+x = np.array([1,2,3])
+y = np.array([4,5,6])
+
+x[0] + y[0]
+x[1] + y[1]
+x[2] + y[2]
+#같은 index끼리 더해진다.
+x + y#array([5, 7, 9])
+np.add(x,y)#array([5, 7, 9])
+
+x - y#array([-3, -3, -3])
+np.subtract(x,y)#array([-3, -3, -3])
+
+x * y#array([ 4, 10, 18])
+np.multiply(x,y)#array([ 4, 10, 18])
+
+x / y#array([0.25, 0.4 , 0.5 ])
+np.divide(x,y)#array([0.25, 0.4 , 0.5 ])
+
+#2차원 배열들의 연산
+lst1 = [[1,2],[3,4]]
+lst2 = [[5,6],[7,8]]
+
+x = np.array(lst1)
+y = np.array(lst2)
+
+x.shape
+y.shape
+
+x[0,0] + y[0,0]
+x[0][0] + y[0][0]
+x[0,0] - y[0,0]
+
+x + y
+np.add(x,y)
+
+x - y
+np.subtract(x,y)
+
+x * y
+np.multiply(x,y)
+
+x / y
+np.divide(x,y)
+
+#행렬의 곱
+np.dot(x,y)
+
+x = np.array([[1,2],[3,4]])
+x
+#array([[1, 2],
+#       [3, 4]])
+#x안의 원소들을 모두 더하고 싶을 때 
+np.sum(x)#10
+
+np.sum(x, axis = 0)#열 기준 합 array([4, 6])
+np.sum(x, axis = 1)#행 기준 합 array([3, 7])
+np.mean(x)#2.5
+np.var(x)#1.25
+np.var(x, axis = 0)
+np.var(x, axis = 1)
+np.std(x)
+np.std(x, axis = 0)
+np.std(x, axis = 1)
+np.max(x)
+np.max(x, axis = 0)
+np.max(x, axis = 1)
+np.min(x)
+np.min(x ,axis = 0)
+np.min(x, axis = 1)
+
+#모든 원소들의 최대값과 최소값을 구해보자 
+x = np.array([[1,2],[3,0],[5,6]])
+x
+#array([[1, 2],
+#       [3, 0],
+#       [5, 6]])
+x.shape
+np.argmin(x)#index 번호가 나옴 
+np.argmin(x.reshape((6,)))
+np.argmin(x, axis = 0)#열마다 최소값 #array([0, 1], dtype=int64)
+np.argmin(x, axis = 1)#행마다 최소값 #array([0, 1, 0], dtype=int64)
+
+np.argmax(x) 
+np.argmax(x.reshape((6,)))
+np.argmax(x, axis = 0)#array([2, 2], dtype=int64)
+np.argmax(x, axis = 1)#array([1, 0, 1], dtype=int64)
+
+#누적합 구하기 
+np.cumsum(x.reshape((6,)))
+np.cumsum(x)
+np.cumsum(x, axis = 0)
+#array([[1, 2],
+#       [4, 2],
+#       [9, 8]], dtype=int32)
+np.cumsum(x, axis = 1)
+#array([[ 1,  3],
+#       [ 3,  3],
+#       [ 5, 11]], dtype=int32)
+
+#누적곱 구하기 
+np.cumprod(x.reshape((6,)))
+np.cumprod(x)
+np.cumprod(x, axis = 0)
+#array([[ 1,  2],
+#       [ 3,  0],
+#       [15,  0]], dtype=int32)
+np.cumprod(x, axis = 1)
+#array([[ 1,  2],
+#       [ 3,  0],
+#       [ 5, 30]], dtype=int32)
+
+np.prod(x)
+np.prod(x, axis = 0)#array([15,  0])
+np.prod(x, axis = 1)#array([ 2,  0, 30])
+
+x = np.arange(5)
+x.dtype
+type(x)
+#int32
+2**31#2147483648
+#int64
+2**63#9223372036854775808
+
+#기본값이 int32로 되어서 만들어진다. float형식으로 만들어 보자 
+f = np.array(5, dtype = 'f')
+f.dtype
+type(f)
+
+x = np.arange(3,10,dtype='f')
+x
+type(x)
+x.dtype
+
+x = np.arange(10)
+x.shape
+x.reshape((5,2))
+x.reshape((5,2), order = 'C') #행우선으로 값이 채워진다. 기본값
+#array([[0, 1],
+#       [2, 3],
+#       [4, 5],
+#       [6, 7],
+#       [8, 9]])
+x.reshape((5,2), order = 'F') #열우선으로 값이 채워진다. 
+#array([[0, 5],
+#       [1, 6],
+#       [2, 7],
+#       [3, 8],
+#       [4, 9]])
+
+x = np.arange(10).reshape((5,2), order = 'F')
+x
+#array([[0, 5],
+#       [1, 6],
+#       [2, 7],
+#       [3, 8],
+#       [4, 9]])
+x.reshape((10,), order = 'C')
+x.flatten()
+
+x.reshape((10,), order = 'F')
+x.flatten('f')
+
+x.ravel()
+x.ravel('C')
+x.ravel('F')
+
+#
+x = np.array([[5,7,22],[6,54,2]])
+y = np.array([[8,77,12],[4,66,3]])
+x
+y
+np.concatenate([x,y], axis = 0)
+#array([[ 5,  7, 22],
+#       [ 6, 54,  2],
+#       [ 8, 77, 12],
+#       [ 4, 66,  3]])
+np.concatenate([x,y], axis = 1)
+#array([[ 5,  7, 22,  8, 77, 12],
+#       [ 6, 54,  2,  4, 66,  3]])
+np.vstack((x,y))
+#array([[ 5,  7, 22],
+#       [ 6, 54,  2],
+#       [ 8, 77, 12],
+#       [ 4, 66,  3]])
+#np.vstack((x,y), axis = 1)
