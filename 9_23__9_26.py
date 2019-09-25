@@ -1206,3 +1206,471 @@ np.vstack((x,y))
 #       [ 8, 77, 12],
 #       [ 4, 66,  3]])
 #np.vstack((x,y), axis = 1)
+
+#################################################################
+#9/25#
+#[문제 150] 원소의 값은 1 ~ 12 까지 행우선으로 3행4열 배열을 생성하세요
+import pandas as pd
+import numpy as np
+x = np.array(range(12)).reshape((3,4), order = 'C')+1
+x
+y = np.array(range(1,13)).reshape((3,4), order = 'C')
+y
+y.shape
+y.size # 행렬의 원소 개수
+y.ndim # 차원의 수 
+y.itemsize#원소 하나가 차지하는 바이트 값 
+y.nbytes#배열 전체가 차지하는 바이트 값
+
+vector_row = np.array([1,2,3])
+vector_row.shape
+
+vector_col = np.array([[1],[2],[3]])
+vector_col.shape
+
+x = np.arange(3)
+x.repeat(2)#2번씩 반복
+#array([0, 0, 1, 1, 2, 2])
+x.repeat([2,3,4])#0번 원소는 2번 반복, 1번 원소는 3번 반복, 2번 원소는 4번 반복 
+#array([0, 0, 1, 1, 1, 2, 2, 2, 2])
+
+z = np.array([[1,2],[3,4]])
+z.shape
+z.repeat(2)
+z.repeat(2, axis = 0)#열방향 반복
+z.repeat(2, axis = 1)#행방향 반복
+
+np.tile(z,2)
+np.tile(x,2)
+
+lst = [10,20,10,5,4,40,60,80,5,20,110,30]
+from pandas import Series, DataFrame
+Series(lst).unique()
+Series(lst).nunique()#유일한 원소들의 갯수 
+Series(lst).duplicated()#중복된 원소(앞에서 부터 해야려서 )
+
+np.unique(lst)
+
+lst = ['a','a','b','c','b','c']
+np.unique(lst)
+np.unique(lst, return_counts = True)
+index, cn = np.unique(lst, return_counts = True)
+print(index, cn)
+
+u = np.array([[1,0,0],[1,0,0],[1,0,0]])
+u
+np.unique(u)#array([0, 1])
+np.unique(u, axis = 0)#유일한 행
+#array([[1, 0, 0]])
+np.unique(u, axis = 1)#유일한 열 
+#array([[0, 1],
+#       [0, 1],
+#       [0, 1]])
+
+w = np.array([[1,1,1,1],[1,1,2,2],[1,2,2,2],[1,2,2,2]])
+w
+#array([[1, 1, 1, 1],
+#       [1, 1, 2, 2],
+#       [1, 2, 2, 2],
+#       [1, 2, 2, 2]])
+np.unique(w)
+np.unique(w, axis = 0)#
+#array([[1, 1, 1, 1],
+#       [1, 1, 2, 2],
+#       [1, 2, 2, 2]])
+np.unique(w, axis = 1)
+#array([[1, 1, 1],
+#       [1, 1, 2],
+#       [1, 2, 2],
+#       [1, 2, 2]])
+
+x = np.arange(0, 20, 2)
+y = np.arange(0, 30, 3)
+x
+y
+np.maximum(x,y)#둘중 큰수
+np.minimum(x,y)#둘중 작은수
+
+np.union1d(x,y)#합집합
+np.intersect1d(x,y)#교집합
+np.setdiff1d(x,y)#차집합
+
+x = np.array([50,30,40,10,20])
+x[:]
+x[::]
+x[:-1]
+x[::-1]#역순으로 나열된다.
+x.argsort()#정렬한 index 
+x[x.argsort()]#오름차순
+x[x.argsort()][::-1]#내림차순 
+x[x.argsort()[::-1]]
+
+#시각화를 해 보자
+#matplotlib - 시각화 패키지
+import matplotlib.pylab as plt
+labels = ['삼성전자','SK하이닉스','LG전자','네이버','카카오']
+ratio = [50,20,10,10,10]
+
+plt.pie(ratio, labels = labels)
+plt.show()
+#한글이 깨져서 나온다.
+#폰트에 한글폰트를 설정하자 
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties \
+(fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
+rc('font',family = font_name)
+plt.pie(ratio, labels = labels)
+plt.show()
+
+#pie(x(array): data 조각 크기, labels(list,) : 각 x의 label,
+# explode(array): 각 x가 중심에서 떨어질 거리, 
+# colors(array) : 색상, autopct(string, function) : 각 x의 안에 넣는 값
+# textprops(dict) : text 설정)
+
+colors = ['gold','yellowgreen','lightcoral','lightskyblue','red']
+explode = [0.0,0.1,0.0,0.0,0.0]
+plt.pie(ratio,
+        labels = labels,
+        explode = explode,
+        colors = colors)
+plt.show()
+
+plt.pie(ratio, labels = labels, explode = explode,
+        colors = colors, 
+        autopct = '%1.1f%%')#전체대비 비율값이 들어간다. 
+plt.show()
+
+
+plt.figure(figsize = (10,10))
+plt.pie(ratio, labels = labels, explode = explode,
+        colors = colors, autopct = '%1.1f%%',
+        textprops = {'fontsize': 20})#글자 크기가 바뀐다.
+
+#[문제 151] blood.csv file을 읽어들여서 도수분포표 작성 
+blood = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\blood.csv')
+blood
+blood1 = DataFrame(blood)
+blood1
+blood1['GENDER'].value_counts()
+x = blood1['BLOODTYPE'].value_counts()
+x
+
+plt.pie(x, labels = x.index, colors = colors,
+        autopct = '%1.1f%%',
+        textprops = {'fontsize':20})
+plt.title("혈액형 현황",fontsize = 20)
+plt.show()
+
+#emp 를 불러와서 그래프를 그려보자 
+emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
+emp.info()
+emp['DEPARTMENT_ID'].value_counts()
+emp['DEPARTMENT_ID'].value_counts(dropna = False)
+#부서별 인원 
+y = emp['DEPARTMENT_ID'].value_counts()
+
+plt.figure(figsize = (10,10))
+plt.pie(y, labels = y.index, colors = colors, autopct = '%1.1f%%',
+        textprops = {'fontsize':20})
+plt.title("부서별 인원 현황",fontsize = 20)
+plt.show()
+
+#직업별 인원
+y = emp['JOB_ID'].value_counts()
+
+plt.figure(figsize = (10,10))
+plt.pie(y, labels = y.index, colors = colors, autopct = '%1.1f%%',
+        textprops = {'fontsize':20})
+plt.title("직업별 인원 현황",fontsize = 20)
+plt.show()
+
+#부서별 인원 
+z = ['부서x' if pd.isnull(i) else str(int(i))+'부서' 
+     for i in emp['DEPARTMENT_ID']]
+z = Series(z).value_counts()
+z
+
+plt.figure(figsize = (10,10))
+plt.pie(z, labels = z.index, colors = colors, autopct = '%1.1f%%',
+        textprops = {'fontsize':20})
+plt.title("부서별 인원 현황",fontsize = 20)
+plt.show()
+
+##Counter()를 이용해보자 
+import collections
+z = ['부서x' if pd.isnull(i) else str(int(i))+'부서' 
+     for i in emp['DEPARTMENT_ID']]
+cnt = collections.Counter(z)
+cnt.values()
+cnt.keys()
+#
+plt.figure(figsize = (10,10))
+plt.pie(cnt.values(), labels = cnt.keys(),
+        colors = colors, autopct = '%1.1f%%',
+        textprops = {'fontsize':20})
+plt.title("부서별 인원 현황",fontsize = 20)
+plt.show()
+
+##막대그래프를 만들어 보자 
+x = ['SQL','R','PLSQL']
+y = [90,78,65]
+plt.bar(x,y, color=['orange','green','blue'])
+plt.title('과목별 점수 현황',
+          fontsize = 20)#font로도 가능 
+plt.xlabel('과목', size = 15)
+plt.ylabel('점수', size = 15)
+plt.grid(True)#격자선 
+plt.show()
+
+#
+xlabel = ['SQL','R','PLSQL']
+x = [1,2,3]
+y = [90,78,65]
+plt.bar(x,y, color=['orange','green','blue'])
+plt.title('과목별 점수 현황', fontsize = 20)
+plt.xticks(x,xlabel)
+plt.xlabel('과목', size = 15)
+plt.ylabel('점수', size = 15)
+plt.grid(True)
+plt.show()
+
+#막대가 누워서 만들어진다. 
+plt.barh(x,y,color=['orange','green','blue'], alpha = 0.8)
+plt.title('과목별 점수 현황', fontsize = 20)
+plt.yticks(x,xlabel)
+plt.ylabel('과목', size = 15)
+plt.xlabel('점수', size = 15)
+plt.grid(True)
+plt.show()
+
+#부서별 인원을 구해서 막대 그래프를 그려보자 
+x = emp['DEPARTMENT_ID'].index
+y = emp['DEPARTMENT_ID'].value_counts(dropna = False)
+type(y)#Series
+y.index
+y.values
+y1 = y.index
+y1
+#Float64Index([50.0, 80.0, 30.0, 100.0, 60.0, 90.0, 110.0, 20.0, 70.0, 40.0,
+#              10.0, nan],dtype='float64')
+y2 = y.values
+y2
+#array([45, 34,  6,  6,  5,  3,  2,  2,  1,  1,  1,  1], dtype=int64)
+y1 = y1.fillna(-1)#'부서x'로 하니 object 형이라 안된다고 error
+plt.figure(figsize = (6,6))
+plt.bar(y1, y2, width =7)#width=0.8이 기본값, 너무 가늘었음 
+plt.title('부서별 인원 현황', fontsize = 20)#font로도 가능 
+plt.xlabel('부서번호', size = 15)
+plt.ylabel('인원', size = 15)
+plt.grid(True)
+plt.show()
+#
+plt.figure(figsize = (6,6))
+plt.barh(y1,y2,alpha = 0.8,#alpha 는 투명도 
+         height = 7)
+##list 내장 객체 사용
+y1 = y.index
+y2 = y.values
+y1 = ['부서없음' if pd.isnull(i) else str(int(i))+'부서' 
+      for i in y.index]
+plt.figure(figsize = (8,8))
+plt.bar(y1, y2)
+plt.title('부서별 인원 현황', fontsize = 20)#font로도 가능 
+plt.xlabel('부서번호', size = 15)
+plt.ylabel('인원', size = 15)
+plt.grid(True)
+plt.show()
+##Counter 사용 
+z = ['부서없음' if pd.isnull(i) else str(int(i))+'부서' 
+     for i in emp['DEPARTMENT_ID']]
+z = collections.Counter(z)
+z.keys()
+z.values()
+
+plt.figure(figsize = (8,8))
+plt.bar(z.keys(), z.values())
+plt.title('부서별 인원 현황', fontsize = 20)#font로도 가능 
+plt.xlabel('부서번호', size = 15)
+plt.ylabel('인원', size = 15)
+plt.grid(True)
+plt.show()
+
+##다른 방법으로는 
+z = ['부서없음' if pd.isnull(i) else str(int(i))+'부서' 
+     for i in emp['DEPARTMENT_ID']]
+z = Series(z).value_counts()
+#다음과 같이 종류만 입력해서 그릴 수 있다. 
+z.plot(kind = 'bar')
+z.plot(kind = 'barh')
+
+#선 그래프를 그려보자 
+plt.plot([0,5,10,15,20,25,30,20,5])
+plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+         color = 'y') #r,g,b,c,m,y,k,w 등의 약자들이 있다. 
+#r = red, g = green, b = blue, c = cyan, m = magenta, y = yellow,
+#k = black, w = white
+plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+         color = 'k')
+plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+         color = '0.75')
+plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+         color = 'b', linestyle = 'dotted')
+#linestyle = 'dotted','solid','dashed','dashot'
+plt.plot([100,200,300,400,500],[1,5,10,15,20],'-g')#직선이 된다
+plt.plot([100,200,300,400,500],[1,5,10,15,20],'--c')#점선이 된다.
+plt.plot([100,200,300,400,500],[1,5,10,15,20],'-.k')#반점선이 된다.
+plt.plot([100,200,300,400,500],[1,5,10,15,20],':r')#점선이 된다
+plt.plot([100,200,300,400,500],[1,5,10,15,20],'r1--')#
+
+data = {"도바킨":[15,13,11],"게롤드":[13,14,15],"프랭클린":[10,9,12]} 
+data
+df = DataFrame(data, index = [2015,2016,2017])
+df
+df.rank()
+df.rank(axis = 0)#열별 순위, 기본값
+df.rank(axis = 1)#행별 순위 
+
+df.columns
+x = df.rank(ascending = True, axis = 1)
+x
+plt.plot(x)#x가 년도를 의도했는데 수열처럼 숫자가 나와있다.
+##
+plt.plot(x.iloc[:,0], label = '도바킨')
+plt.plot(x.iloc[:,1], label = '게롤드', linestyle = '--')
+plt.plot(x.iloc[:,2], label = '프랭클린', linestyle = ':')
+plt.title('기록 순위 비교 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('순위',fontsize = 10)
+plt.xticks(x.index, ['2015년','2016년','2017년'])
+plt.yticks([1,2,3],['1등','2등','3등'])
+plt.legend()#범례 
+
+#emp에서 년도별 입사인원 보기
+emp.info()
+emp['HIRE_DATE']
+years = pd.to_datetime(emp['HIRE_DATE']).dt.year
+years
+type(years)#Series
+
+x = years.value_counts()
+type(x)
+x = x.sort_index()
+plt.plot(x)
+
+#[문제 153] 2000 ~ 2016 년까지 성별 출생현황을 그래프로 생성하세요
+#지난주에 했던 방식대로 데이터를 불러와 저장하자  
+import glob
+file = 'C:\\WorkSpace\\Python_Space\\csv\\yob*.csv'
+file_lst = glob.glob(file)
+
+df_yob = DataFrame()
+year = 2000
+year_birth = []
+for i in file_lst:
+    temp = DataFrame()
+    temp = pd.read_csv(i, names = ['name','gender','number'])
+    temp['year'] = year
+    df_yob = df_yob.append(temp)
+    year_birth.append([year, temp['number'].sum()])
+    year += 1
+
+df_yob
+df_yob.info()
+year_birth
+#
+x = df_yob.groupby(['year','gender'])['number'].sum().unstack()
+type(x)
+type(x.index)
+#x의 index를 수정하자 
+x.index = [str(i) + '년' for i in x.index]
+##
+plt.figure(figsize = (12,6))
+plt.plot(x.iloc[:,0], label = '여성')
+plt.plot(x.iloc[:,1], label = '남성')
+plt.title('년도별 출생 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('출생',fontsize = 10)
+#plt.yticks(range(0,2100000,100000))
+plt.legend()
+
+
+#지난주에 했던 137번 문제를 다시 보고 해보자
+import csv
+import os
+
+with open('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt',
+          'w',
+          newline='',
+          encoding='utf-8') as f:
+    #newline 없으면 빈 줄이 있는 상태로 저장된다.
+    writer = csv.writer(f, delimiter = ',')#열을 ,로 나눈다.
+    writer.writerow(['년도','여자','남자'])#행을 입력한다.
+    for y in range(2000,2017):
+        filename = 'C:\\WorkSpace\\Python_Space\\csv\\yob%d.csv'%y
+        name = os.path.basename(filename)
+        name = name.split('.')[0]
+        df = pd.read_csv(filename, names = ['name','gender','birth'])
+        gender_cn = df['birth'].groupby(df['gender']).sum()
+        writer.writerow([name[3:], gender_cn.loc['F'], gender_cn.loc['M']])
+
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt')
+df.info() 
+df
+#
+plt.figure(figsize = (12,6))
+plt.plot(df.iloc[:,1], label = '여성')
+plt.plot(df.iloc[:,2], label = '남성')
+plt.title('년도별 출생 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('출생',fontsize = 10)
+plt.xticks(df.index, df.iloc[:,0])
+plt.legend()
+
+##
+#나라지표에서 데이터를 가져옴 
+data = pd.read_excel('C:\\WorkSpace\\Python_Space\\data\\gdp.xls')
+data.info()#DataFrame
+data.index#RangeIndex(start=0, stop=2, step=1)
+data.columns
+#Index(['Unnamed: 0', '2010', '2011', '2012', '2013', '2014', '2015', '2016',
+#       '2017'],dtype='object')
+data.iloc[0]
+data.iloc[1]
+data.iloc[:,0]
+#우선 문자열안에 , 를 제거하자, replace는 문자에 사용하는 함수 
+data.iloc[0] = [i.replace(',','') for i in data.iloc[0]]
+data.iloc[0]
+#문자를 숫자형으로 바꾸자 
+data.iloc[0,1:] = [int(i) for i in data.iloc[0,1:]]
+data.iloc[1,1:] = [float(i) for i in data.iloc[1,1:]]
+#이제 그래프를 그려보자 
+plt.figure(figsize = (12,6))
+plt.plot(data.iloc[0,1:], label = data.iloc[0,0])
+plt.title('년도별 gdp',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel(data.iloc[0,0],fontsize = 10)
+plt.legend()
+##
+plt.figure(figsize = (12,6))
+plt.plot(data.iloc[1,1:], label = data.iloc[1,0])
+plt.title('년도별 경제성장률',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel(data.iloc[1,0],fontsize = 10)
+plt.legend()
+##
+plt.plot(data.columns[1:], data.iloc[0,1:],
+         color = 'b',marker='o', linestyle = 'solid')
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel(data.iloc[0,0],fontsize = 10)
+plt.legend()
+
+#다음과 같이 한 번에 변형하는 pandas 함수가 있다.
+data = pd.read_excel('C:\\WorkSpace\\Python_Space\\data\\gdp.xls') 
+y = data.iloc[0].str.replace(',','')
+type(y)#Series
+y.iloc[1:].astype('int')
+
+plt.plot(y[1:],label = data.iloc[0,0])
+plt.title('년도별 gdp',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel(data.iloc[0,0] +'(단위 10억원)',fontsize = 10)
