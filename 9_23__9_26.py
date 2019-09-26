@@ -1192,12 +1192,13 @@ x = np.array([[5,7,22],[6,54,2]])
 y = np.array([[8,77,12],[4,66,3]])
 x
 y
-np.concatenate([x,y], axis = 0)
+#2차원 array 합치기 
+np.concatenate([x,y], axis = 0)#row합치기, column갯수 같아야 함
 #array([[ 5,  7, 22],
 #       [ 6, 54,  2],
 #       [ 8, 77, 12],
 #       [ 4, 66,  3]])
-np.concatenate([x,y], axis = 1)
+np.concatenate([x,y], axis = 1)#column합치기, row갯수 같아야 함 
 #array([[ 5,  7, 22,  8, 77, 12],
 #       [ 6, 54,  2,  4, 66,  3]])
 np.vstack((x,y))
@@ -1221,6 +1222,13 @@ y.size # 행렬의 원소 개수
 y.ndim # 차원의 수 
 y.itemsize#원소 하나가 차지하는 바이트 값 
 y.nbytes#배열 전체가 차지하는 바이트 값
+
+z = np.array(range(1,37)).reshape((3,4,3))
+z
+z.size
+z.ndim
+z.itemsize
+z.nbytes
 
 vector_row = np.array([1,2,3])
 vector_row.shape
@@ -1366,7 +1374,7 @@ emp = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\emp.csv')
 emp.info()
 emp['DEPARTMENT_ID'].value_counts()
 emp['DEPARTMENT_ID'].value_counts(dropna = False)
-#부서별 인원 
+#부서별 인원 그래프
 y = emp['DEPARTMENT_ID'].value_counts()
 
 plt.figure(figsize = (10,10))
@@ -1375,7 +1383,7 @@ plt.pie(y, labels = y.index, colors = colors, autopct = '%1.1f%%',
 plt.title("부서별 인원 현황",fontsize = 20)
 plt.show()
 
-#직업별 인원
+#직업별 인원 그래프
 y = emp['JOB_ID'].value_counts()
 
 plt.figure(figsize = (10,10))
@@ -1384,7 +1392,7 @@ plt.pie(y, labels = y.index, colors = colors, autopct = '%1.1f%%',
 plt.title("직업별 인원 현황",fontsize = 20)
 plt.show()
 
-#부서별 인원 
+#부서별 인원, 부서가 없는 사원도 고려해보자 
 z = ['부서x' if pd.isnull(i) else str(int(i))+'부서' 
      for i in emp['DEPARTMENT_ID']]
 z = Series(z).value_counts()
@@ -1411,7 +1419,7 @@ plt.pie(cnt.values(), labels = cnt.keys(),
 plt.title("부서별 인원 현황",fontsize = 20)
 plt.show()
 
-##막대그래프를 만들어 보자 
+##막대그래프를 만들어 보자 ##
 x = ['SQL','R','PLSQL']
 y = [90,78,65]
 plt.bar(x,y, color=['orange','green','blue'])
@@ -1428,13 +1436,16 @@ x = [1,2,3]
 y = [90,78,65]
 plt.bar(x,y, color=['orange','green','blue'])
 plt.title('과목별 점수 현황', fontsize = 20)
+#xticks(ticks(array 같은거) : 위치의 list들,
+#labels(array 같은거) : 주여진 위치에 나타내고 싶은 이름들)
 plt.xticks(x,xlabel)
+#이렇게 하면 x축에 1,2,3이 나오는게 아니라 SQL, R, PLSQL이 나온다.
 plt.xlabel('과목', size = 15)
 plt.ylabel('점수', size = 15)
 plt.grid(True)
 plt.show()
 
-#막대가 누워서 만들어진다. 
+#barh() : 막대가 누워서 만들어진다. 
 plt.barh(x,y,color=['orange','green','blue'], alpha = 0.8)
 plt.title('과목별 점수 현황', fontsize = 20)
 plt.yticks(x,xlabel)
@@ -1504,16 +1515,18 @@ z.plot(kind = 'bar')
 z.plot(kind = 'barh')
 
 #선 그래프를 그려보자 
-plt.plot([0,5,10,15,20,25,30,20,5])
-plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+#plot(**args, scalex=True, scaley=True, data=None, **kwargs)
+plt.plot([0,5,10,15,20,25,30,20,5])#y축 값, x축 값은 자동으로 할당된다. 
+plt.plot([100,120,150,500,600,800],#x축 값
+         [1,5,7,9,15,33],#y축 값
          color = 'y') #r,g,b,c,m,y,k,w 등의 약자들이 있다. 
 #r = red, g = green, b = blue, c = cyan, m = magenta, y = yellow,
 #k = black, w = white
 plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
          color = 'k')
-plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+plt.plot([100,120,150,500,600,900],[1,5,7,9,15,33],
          color = '0.75')
-plt.plot([100,120,150,500,600,800],[1,5,7,9,15,33],
+plt.plot([10,12,15,50,60,80],[1,5,7,9,15,33],
          color = 'b', linestyle = 'dotted')
 #linestyle = 'dotted','solid','dashed','dashot'
 plt.plot([100,200,300,400,500],[1,5,10,15,20],'-g')#직선이 된다
@@ -1526,9 +1539,21 @@ data = {"도바킨":[15,13,11],"게롤드":[13,14,15],"프랭클린":[10,9,12]}
 data
 df = DataFrame(data, index = [2015,2016,2017])
 df
+#      도바킨  게롤드  프랭클린
+#2015   15   13    10
+#2016   13   14     9
+#2017   11   15    12
 df.rank()
 df.rank(axis = 0)#열별 순위, 기본값
+#      도바킨  게롤드  프랭클린
+#2015  3.0  1.0   2.0
+#2016  2.0  2.0   1.0
+#2017  1.0  3.0   3.0
 df.rank(axis = 1)#행별 순위 
+#      도바킨  게롤드  프랭클린
+#2015  3.0  2.0   1.0
+#2016  2.0  3.0   1.0
+#2017  1.0  3.0   2.0
 
 df.columns
 x = df.rank(ascending = True, axis = 1)
@@ -1548,12 +1573,14 @@ plt.legend()#범례
 #emp에서 년도별 입사인원 보기
 emp.info()
 emp['HIRE_DATE']
+#입사날짜 년도만 뽑아내자 
 years = pd.to_datetime(emp['HIRE_DATE']).dt.year
 years
 type(years)#Series
 
 x = years.value_counts()
 type(x)
+#년도 순서대로 정렬하고 그리기 
 x = x.sort_index()
 plt.plot(x)
 
@@ -1674,3 +1701,329 @@ plt.plot(y[1:],label = data.iloc[0,0])
 plt.title('년도별 gdp',fontsize=15)
 plt.xlabel('년도',fontsize = 10)
 plt.ylabel(data.iloc[0,0] +'(단위 10억원)',fontsize = 10)
+
+#################################################################
+#9/26#
+import pandas as pd
+import numpy as np
+import matplotlib.pylab as plt
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties \
+(fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
+rc('font',family = font_name)
+
+#어제 했던거 다시 보면서, 그룹형 막대그래프를 그려보자   
+data = {"도바킨":[15,13,11],"게롤드":[13,14,15],"프랭클린":[10,9,12]} 
+data
+df = DataFrame(data, index = [2015,2016,2017])
+df
+x = df.rank(ascending = True, axis = 1)
+
+x.plot(kind = 'bar')
+
+plt.title('기록 순위 비교 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('순위',fontsize = 10)
+plt.xticks(range(3), ['2015년','2016년','2017년'])
+plt.yticks([1,2,3],['1등','2등','3등'])
+#그럼 연도별로 모두의 등수가 표시된다. 비교해서 보기 좋다.
+
+#이제 어제 년도별로 남녀 출생수를 보왔던걸 그룹형 막대그래프로 그려보자 
+#다시 전에 했던 방식대로 불러온다. 
+import glob
+file = 'C:\\WorkSpace\\Python_Space\\csv\\yob*.csv'
+file_lst = glob.glob(file)
+
+df_yob = DataFrame()
+year = 2000
+year_birth = []
+for i in file_lst:
+    temp = DataFrame()
+    temp = pd.read_csv(i, names = ['name','gender','number'])
+    temp['year'] = year
+    df_yob = df_yob.append(temp)
+    year_birth.append([year, temp['number'].sum()])
+    year += 1
+
+df_yob
+df_yob.info()
+year_birth
+
+x = df_yob.groupby(['year','gender'])['number'].sum().unstack()
+x
+#x의 index를 수정하자 
+x.index = [str(i) + '년' for i in x.index]
+##
+x.plot(kind = 'bar')
+plt.title('년도별 출생 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('출생',fontsize = 10)
+plt.legend()
+
+#또는 
+import csv
+import os
+
+with open('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt',
+          'w',
+          newline='',
+          encoding='utf-8') as f:
+    #newline 없으면 빈 줄이 있는 상태로 저장된다.
+    writer = csv.writer(f, delimiter = ',')#열을 ,로 나눈다.
+    writer.writerow(['년도','여자','남자'])#행을 입력한다.
+    for y in range(2000,2017):
+        filename = 'C:\\WorkSpace\\Python_Space\\csv\\yob%d.csv'%y
+        name = os.path.basename(filename)
+        name = name.split('.')[0]
+        df = pd.read_csv(filename, names = ['name','gender','birth'])
+        gender_cn = df['birth'].groupby(df['gender']).sum()
+        writer.writerow([name[3:], gender_cn.loc['F'], gender_cn.loc['M']])
+
+df = pd.read_csv('C:\\WorkSpace\\Python_Space\\data\\year_gender_total.txt')
+df.info() 
+df
+#
+x.plot(kind = 'bar', color = ['r','g'])
+plt.title('년도별 출생 그래프',fontsize=15)
+plt.xlabel('년도',fontsize = 10)
+plt.ylabel('출생',fontsize = 10)
+plt.xticks(df.index, df.iloc[:,0])
+plt.legend()
+
+#
+x.plot(kind = 'bar', stacked = True)
+df.iloc[:,1:3].plot(kind = 'bar')
+plt.xticks(range(17), [str(i) + '년' for i in range(2000,2017)])
+plt.show()
+
+###
+#death,csv : 사망원인 질병 번호 
+#csv 파일을 ndarray 로 불러들이고 싶다. 
+death = np.loadtxt(fname = 'C:\\WorkSpace\\Python_Space\\csv\\death.csv',
+                   delimiter = ',',#데이터 구분 기준 
+                   dtype = np.int)#불러들인 데이터 타입
+type(death)
+death.size#130
+#130명을 임의로 추출하여 사망원인을 10가지로 분류한 결과 
+#1 : 감염성 질환
+#2 : 각종 암
+#3 : 순환기 질환
+#4 : 호흡기 질환
+#5 : 소화기 질환
+#6 : 각종 사고사 
+#7 : 비뇨기 질환
+#8 : 정신병
+#9 : 노환
+#10 : 신경계 질환 
+
+#빈도표를 만들어 보자 
+table = pd.crosstab(index = death, #불러들일 값
+                    colnames = ['질병'], #index 이름
+                    columns = '도수') #빈도수 체크한 column 이름 
+table
+table.index
+#index 이름들을 교체하자 
+table.index = ['감염성 질환','각종 암','순환기 질환','호흡기 질환','소화기 질환',
+               '각종 사고사 ','비뇨기 질환','정신병','노환','신경계 질환']
+table.columns
+#
+table.plot(kind = 'bar')
+#
+table.plot(kind = 'barh')
+plt.xlabel('사망건수',fontsize = 10)
+
+#데이터와 구간을 직접 설정해서 막대그래프를 그려보자 
+ages = [1,9,10,11,14,20,27,29,31,37,39,40,42,45,50,51]
+bins = [0,10,20,30,40,50,60]
+
+#ages들의 값들이 다음처럼 구간에 들어가서 막대그래프가 그려지게 해아한다.
+#0 < ages <= 10 10 < ages <= 20 20 < ages <= 30 
+#30 < ages <= 40 40 < ages <= 50 50 < ages <= 60
+
+#cut(x(array), bins(int,) : , right)
+pd.cut(ages, bins, right = True)
+#[(0, 10], (0, 10], (0, 10], (10, 20], (10, 20], ..., (30, 40],
+# (40, 50], (40, 50], (40, 50], (50, 60]]
+#Length: 16
+#Categories (6, interval[int64]): [(0, 10] < (10, 20] <
+# (20, 30] < (30, 40] < (40, 50] < (50, 60]]
+
+pd.cut(ages, bins, right = False)
+#Categories 의 구간이 [,)로 바뀌게 된다. 
+
+pd.cut(ages, bins = [50,60,70,80])
+#bins 안에 있지않는 데이터들은 모두 NaN로 표시된다. 
+#NaN로 나오는 데이터들은 나중에 막대그래프를 그릴때 나오지 않는다. 
+
+#
+age_cut = pd.cut(ages, bins, right = True)
+age_cut.codes#ages의 원소들의 어느 bin에 있는지 보임, bins의 index 값으로 나옴 
+#array([0, 0, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5], dtype=int8)
+age_cut.categories
+pd.value_counts(age_cut)
+pd.value_counts(age_cut).sort_index()
+#(0, 10]     3
+#(10, 20]    3
+#(20, 30]    2
+#(30, 40]    4
+#(40, 50]    3
+#(50, 60]    1
+#dtype: int64
+
+type(ages)#list 
+#hist : histogram 을 그리는 함수
+#hist(x(array) : 입력값, bins : 구간들)
+#hist의 return : n(구간 막대의 값), bins(array), patches(list)
+plt.hist(ages, bins = 6, facecolor = 'blue', alpha = 0.5)
+plt.hist(ages, bins = 'auto', facecolor = 'blue',alpha= 0.5)
+plt.hist(ages, bins = [50,60,70,80], facecolor = 'blue', alpha = 0.5)
+
+#weight 정보를 불러들이자 
+weight = np.loadtxt('C:\\WorkSpace\\Python_Space\\data\\weight.txt')
+weight
+type(weight)#ndarray
+weight.shape#(5,10) 형태를 바꾸어보자 
+weight = weight.reshape((50,))
+weight
+
+ranges = [50,55,60,65,70,75,80,85,90]
+
+plt.hist(weight, bins = 'auto')
+plt.hist(weight, bins = ranges)
+
+#
+pd.cut(weight, ranges, right = True)
+
+#
+x = Series(weight).sort_values()
+x
+plt.figure(figsize = (12,6))
+x.plot(kind = 'bar')
+
+#히스토그램의 여려 변수의 값들을 확인하자 
+n, bins, patches = plt.hist(
+        ages, bins = 6, facecolor = 'blue', alpha = 0.5, rwidth = 0.9)
+print(n)#[2. 3. 1. 3. 4. 3.]#구간당 수치
+n.max()
+print(bins)#구간의 경계값
+#[ 1.          9.33333333 17.66666667 26.         34.33333333 
+#42.66666667 51.        ]
+for i in patches:
+    print(i)
+#Rectangle(xy=(1.41667, 0), width=7.5, height=2, angle=0)
+#Rectangle(xy=(9.75, 0), width=7.5, height=3, angle=0)
+#Rectangle(xy=(18.0833, 0), width=7.5, height=1, angle=0)
+#Rectangle(xy=(26.4167, 0), width=7.5, height=3, angle=0)
+#Rectangle(xy=(34.75, 0), width=7.5, height=4, angle=0)
+#Rectangle(xy=(43.0833, 0), width=7.5, height=3, angle=0)
+#    
+n, bins, patches = plt.hist(
+        weight, bins = ranges, facecolor = 'blue', alpha = 0.5, rwidth = 0.9)
+print(n)
+print(bins)
+for i in patches:
+    print(i)
+
+##
+plt.figure(figsize = (10,6))
+n, bins, patches = plt.hist(
+        ages, bins = 6, facecolor = 'blue', alpha = 0.9, rwidth = 0.9)
+#막대기마다 위에 숫자를 출력하게 하자 
+for i in range(0, len(n)):
+    plt.text(x = (bins[i] + bins[i+1])/2 - 1, y = n[i] + 0.1,#문자가 위치할 좌표
+             s = '{}'.format(n[i]),#넣을 문자 
+             fontsize = 12, 
+             color = 'red')
+#x축에 막대기마다 구간값이 출력되게 하자 
+plt.yticks([])
+plt.xticks([(bins[i] + bins[i+1])/2 for i in range(0, len(bins) - 1)],
+            ["{:.1f} ~ {:.1f}".format(bins[i], bins[i+1]) 
+            for i in range(0, len(bins) - 1)])
+y_min, y_max = plt.ylim()
+plt.ylim(y_min, y_max + 0.5)
+##
+##
+plt.figure(figsize = (10,6))
+n, bins, patches = plt.hist(
+        weight, bins = 6, facecolor = 'blue', alpha = 0.9, rwidth = 0.9)
+#막대기마다 위에 숫자를 출력하게 하자 
+for i in range(0, len(n)):
+    plt.text(x = (bins[i] + bins[i+1])/2 - 1,
+             y = n[i] + n.max()*0.02,
+             s = '{}'.format(n[i]),#넣을 문자 
+             fontsize = 12, 
+             color = 'red')
+#x축에 막대기마다 구간값이 출력되게 하자 
+plt.yticks([])
+plt.xticks([(bins[i] + bins[i+1])/2 for i in range(0, len(bins) - 1)],
+            ["{:.1f} ~ {:.1f}".format(bins[i], bins[i+1]) 
+            for i in range(0, len(bins) - 1)])
+y_min, y_max = plt.ylim()
+plt.ylim(y_min, y_max + 0.5)
+##
+
+Series(weight).describe()
+Series(weight).plot.box()
+
+plt.boxplot(weight, flierprops = 
+            dict(marker = 'o',markersize = 10, markerfacecolor = 'r'))
+plt.show()
+
+quartile = np.percentile(weight, [0,25,50,75,100])#각 %에 해당되는 값이 나온다. 
+quartile#array([52.  , 68.25, 74.5 , 79.  , 93.  ])
+
+#사분위의 범위
+iqr = quartile[3] - quartile[1]
+iqr
+
+#이상치를 찾는 기준
+lf = quartile[1] - 1.5 * iqr
+uf = quartile[3] + 1.5 * iqr
+lf#52.125
+uf#95.125
+weight < lf
+weight[weight < lf]#array([52.])
+weight > uf
+weight[weight > uf]#array([], dtype=float64)
+
+##선생님의 풀이##
+import math
+import numpy as np
+#데이터를 불러온다
+weight = np.loadtxt('C:\\WorkSpace\\Python_Space\\data\\weight.txt')
+weight.shape
+weight = weight.reshape((50,))
+
+#데이터를 정렬한다. 
+weight = weight[np.argsort(weight)]
+weight
+
+m = np.median(weight)#중앙값(데이터의 갯수가 짝수이면 실제 데이터 값이 아니다.)
+Q1 = np.percentile(weight, 25, axis=0)#제1사분위 
+Q3 = np.percentile(weight, 75, axis=0)#제3사분위
+IQR = Q3 - Q1
+
+#이상치를 찾을 기준과 이상치들 
+lf = weight[weight <= Q1 - 1.5 * IQR]#lower fence
+uf = weight[weight >= Q3 + 1.5 * IQR]#upper fence 
+
+#중앙값을 기준으로 해서 경계값들을 찾는다 
+upper_wisker = np.median(weight) + 1.5 * IQR
+lower_wisker = np.median(weight) - 1.5 * IQR
+weight[(weight <= lower_wisker) & (weight > lf)]
+weight[(weight >= upper_wisker)]#여기서는 uf가 없어서 & 안함 
+
+#이제 박스 그래프에 해당 숫자가 나오게 하자 
+plt.boxplot(weight)
+plt.text(1.01,lf,#(x,y)좌표
+         s='{}'.format(float(lf)))#해당 위치에 넣을 값 
+plt.text(1.01,lower_wisker,
+         s='{}'.format(float(weight[(weight <= lower_wisker) & (weight > lf)])))
+plt.text(1.01,upper_wisker,
+         s='{}'.format(float(weight[(weight >= upper_wisker)])))
+plt.text(1.01,Q1,
+         s='{}'.format(float(weight[math.ceil(len(weight)*0.25)])))
+plt.text(1.01,Q3,
+         s='{}'.format(float(weight[math.ceil(len(weight)*0.75)])))
+plt.text(1.01,m
+         s='{}'.format(float(np.median(weight))))
