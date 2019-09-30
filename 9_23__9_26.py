@@ -1705,6 +1705,7 @@ plt.ylabel(data.iloc[0,0] +'(단위 10억원)',fontsize = 10)
 #################################################################
 #9/26#
 import pandas as pd
+from pandas import Series, DataFrame
 import numpy as np
 import matplotlib.pylab as plt
 from matplotlib import font_manager, rc
@@ -1720,7 +1721,6 @@ df
 x = df.rank(ascending = True, axis = 1)
 
 x.plot(kind = 'bar')
-
 plt.title('기록 순위 비교 그래프',fontsize=15)
 plt.xlabel('년도',fontsize = 10)
 plt.ylabel('순위',fontsize = 10)
@@ -2025,5 +2025,5 @@ plt.text(1.01,Q1,
          s='{}'.format(float(weight[math.ceil(len(weight)*0.25)])))
 plt.text(1.01,Q3,
          s='{}'.format(float(weight[math.ceil(len(weight)*0.75)])))
-plt.text(1.01,m
+plt.text(1.01,m,
          s='{}'.format(float(np.median(weight))))
