@@ -308,8 +308,17 @@ html
 soup = BeautifulSoup(html, "html.parser")
 soup.html.body.h1.string
 
+#soup.find(name, attrs, recursive, string, **kwargs)
 soup.find(id = 'title')#<h1 id="title"> beautifulsoup</h1>
+type(soup.find(id = 'title'))#bs4.element.Tag
+#.string : 해당값에 대한 태그가 하나만 있고 type이 NavigableString일때 가능 
 soup.find(id='title').string#' beautifulsoup'
+
+#soup.find_all(name, attrs, recursive, string, limit, **kwargs)
+soup.find_all(id='title')#[<h1 id="title"> beautifulsoup</h1>]
+type(soup.find_all(id='title'))#bs4.element.ResultSet
+#.string은 ResultSet일때 되지 않는다 
+soup.find_all(id='title').string
 
 html="""
 <html>
@@ -325,6 +334,8 @@ soup.html.body.ul.li.a.string#'아이티윌'
 
 li1 = soup.html.body.ul.li
 li1.string#'아이티윌'
+#.next_sibling : 같은 레벨의 태그중 뒤에 것 
+#.previous_sibling : 같은 레벨의 태그중 앞의 것
 li2 = li1.next_sibling.next_sibling
 li2.a.string#'네이버'
 
@@ -333,6 +344,8 @@ li2.a.attrs['href']
 
 link = soup.find_all('a')
 link
+type(link)#bs4.element.ResultSet
+link[0]
 
 for i in link:
     print(i.attrs['href'])
@@ -374,7 +387,9 @@ with open('C:\\WorkSpace\\Python_Space\\data\\a.html') as html:
         print(i.get_text())
 
 soup.find('body')
+type(soup.find('body'))
 soup.find('body').string#출력되는게 없다. 
+type(soup.find('body').string)
 
 #각 p 테그에 있는 글을 보려면 
 for i in soup.find('body'):
@@ -406,7 +421,7 @@ for i in soup.find_all('a'):
     url.append(i.attrs['href'])
 url
 
-#a 테그 class="cafe1" 만 
+#a 테그 class="cafe1" 만 골라내기 
 soup.find('a',{'class':'cafe1'})
 soup.find('a',{'class':'cafe1'}).attrs['href']
 
@@ -422,7 +437,6 @@ for i in soup.findAll(['a','p']):
     print(i.get_text())
 
 #문자가 포함된 부분을 출력함 
-#import re 했었는데 안 될때가 있다. 다시 import를 하자 
 soup.find(text = re.compile('환영'))
 soup.findAll(text = re.compile('이'))
 
@@ -755,10 +769,15 @@ html = """
 
 soup = BeautifulSoup(html, "html.parser")
 soup.find('li',id='세종').get_text()
+soup.select_one('li#세종')
+type(soup.select_one('li#세종'))#bs4.element.Tag
 soup.select_one('li#세종').text
-               
+soup.select('li#세종')
+type(soup.select('li#세종'))#list 
+type(soup.select('li#세종')[0])#bs4.element.Tag          
         
 soup.select_one('li:nth-of-type(1)').text
+soup.select_one('li:nth-of-type(1)').text.strip()
 
 soup.select_one('li') #find
 soup.select('li') #find_all, findAll
@@ -822,3 +841,256 @@ for i in soup.select("div#harmonyContainer p"):
 news_article
 len(news_article)
 
+#########################################################################
+#10/2#
+#네이버금융 - 국내증시 - 검색상위종목
+#검색상위종목 회사들의 데이터들이 테이블 표 처럼 되어있다.
+#<table> 테그 안에 데이터들이 들어가 있다. 
+import urllib.request as req
+from bs4 import BeautifulSoup
+
+url = "https://finance.naver.com/sise/lastsearch2.nhn"
+html = req.urlopen(url)
+soup = BeautifulSoup(html, "html.parser")
+type(soup)
+
+table = soup.select('table.type_5')
+type(table)
+table[0].select('tr.type1 > th')
+
+for i in table[0].select('tr.type1 > th'):
+    print(i.string)
+
+#DataFrame을 만들기 위해서 columns들을 먼저 만들자 
+column_name = []
+for i in table[0].select('tr.type1 > th'):
+    column_name.append(i.string)
+
+column_name
+
+#데이터들의 특성을 파악하자, 공백줄을 어떻게 넘어갈 것인가 
+table[0].select('tr')
+len(table[0].select('tr'))
+table[0].select('tr')[1]
+table[0].select('tr')[2].select('td.no')
+table[0].select('tr')[3]
+table[0].select('tr')[4]
+table[0].select('tr')[5]
+table[0].select('tr')[6]
+table[0].select('tr')[7]
+table[0].select('tr')[8]
+
+#<td class="no"> 테그가 있을때에만 데이터가 있다.
+for i in range(len(table[0].select('tr'))):
+    print(table[0].select('tr')[i].select_one('td.no'))
+
+#데이터를 추출하기 
+for i in table[0].select('tr')[2].select('td'):    
+    #<span> 안에 있을경우에는 
+    if i.string is None:
+        print(i.select('span')[0].string.strip())
+    #<td>안에 있을 경우에는 
+    else:
+        print(i.string)
+
+#위의 2가지를 합쳐서 list 에 데이터를 저장하도록 하자 
+data_list = []#데이터를 저장할 중첩list
+for i in range(len(table[0].select('tr'))):
+    #임시 저장소 
+    temp_list = []
+    #<td class="no"> 테그가 있을때에만 보자 
+    if table[0].select('tr')[i].select_one('td.no') is not None:
+        #데이터를 추출하고 list에 저장하기 
+        for j in table[0].select('tr')[i].select('td'):
+            #<span> 안에 있을경우에는
+            if j.string is None:
+                temp_list.append(j.select('span')[0].string.strip())
+            #<td>안에 있을 경우에는
+            else:
+                temp_list.append(j.string)
+    #<td class="no"> 테그가 없으면 통과 
+    else:
+        continue
+    data_list.append(temp_list)
+
+data_list
+
+#이제 중첩list를 DataFrame에 저장하자 
+from pandas import Series, DataFrame
+import pandas as pd
+
+fin_df = DataFrame(data_list, columns = column_name)
+
+fin_df
+
+### 선생님의 풀이
+tr = soup.select('table.type_5 >tr')
+
+for i in tr:
+    print(i)
+    
+tr[0] #column name
+type(tr[0])
+tr[1] #no data
+tr[2].select('td')
+tr[6]
+tr[7] #no data
+
+#no data인 부분을 피하려면 어떻게 해야 할까?
+
+tr[1].select('td.number')
+tr[2].select('td.no')
+tr[2].select('td > a')
+tr[2].select('td.number')
+tr[2].select('td.number')
+tr[2].select('td.number > span')
+
+for i in tr[2].select('td'):
+    print(i.string)
+
+tr[1].select_one('td.no')
+type(tr[1].select_one('td.no'))#NoneType
+
+#그러면 None인 부분을 건너뛰면 되겠다.
+for i in tr:
+    if i.select_one('td.no') is None:
+        pass
+    else:
+        print(i.select_one('td.no'))
+        
+#이제 span 테그에 데이터가 있는것은 어떻게 처리하나 
+cols = tr[2].select('td')
+cols[0].select_one('span')
+[i.select_one('span').string.strip() 
+if str(i).find('span') != -1 
+ else i.text.strip() for i in cols]
+
+#위 2개를 합치자 
+lst = []
+for i in tr:
+    if i.select_one('td.no') is None:
+        pass
+    else:
+        cols = i.select('td')
+        data = [x.select_one('span').string.strip() 
+                if str(x).find('span') != -1 
+                else x.text.strip() for x in cols]
+        lst.append(data)
+
+lst
+
+col = []
+for i in tr[0].select('th'):
+    col.append(i.string)
+    
+col
+
+df_data = DataFrame(lst, columns = col)
+df_data
+
+#한국농촌경제연구원 - 해외곡물정보 
+#F12누르고 network로 들어가서 날짜 파일 누르면 url이 나온다.(F5 눌러서 새로고침)
+#http://www.krei.re.kr:18181/chart/main_chart/index
+#/kind/S/sdate/2010-01-01/edate/2019-10-02
+#url을 검색하면 JSON형태의 데이터 파일이 나온다.
+#JSON - 텍스트 데이터를 기반, 자바스크립트에서 사용하는 객체 표기 방법을 기반으로 한다.
+#- 자바스크립트 전용데이터 형식은 아니고 다양한 소프트웨어와 
+#프로그램 언어끼리 데이터 교환할때 사용 
+import json
+url = "http://www.krei.re.kr:18181/chart/main_chart/index\
+/kind/S/sdate/2010-01-01/edate/2019-10-02"
+
+import urllib.request as req
+res = req.urlopen(url)
+res
+
+#json 형태로 로드하기 
+json_res = json.load(res)
+json_res
+type(json_res)#list, list안에 dictionary형태로 들어있다.
+
+json_res[0]
+
+for i in json_res:
+    print(i['date'],i['settlement'])
+    
+res.read()#한번 가져오면 없어지나..?
+res = req.urlopen(url)
+res_read = res.read()
+res_read
+
+#json 데이터를 pandas로 로드하자 
+import pandas as pd
+df = pd.read_json(res_read)
+df
+df.info()#DataFrame
+df['date']
+
+#이제 날짜와 가격만 뽑아서 그래프를 그려보자 
+import matplotlib.pylab as plt
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties \
+(fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
+rc('font',family = font_name)
+pd.to_datetime(df['date'].astype('str'))
+df['settlement']
+
+#날짜와 가격만 있는 DataFrame을 만들자 
+df2 = DataFrame({'date':pd.to_datetime(df['date'].astype('str')),
+                 'settlement':df['settlement']})
+df2
+#plt.bar(df2['date'],df2['settlement']) 이건 피하도록 하자, 컴퓨터가 힘들어 한다 
+plt.figure(figsize = (12,6))
+plt.plot(df2['date'],df2['settlement'])
+plt.title('세계 곡물 가격')
+plt.xlabel('날짜')
+plt.ylabel('가격')
+plt.grid(True)
+
+df2['settlement'].plot(grid = True, figsize = (12,6))
+#그런데 이렇게만 하면 x축이 index가 나온다. 
+
+#다음 - 증권 - 인기검색 10
+#http://finance.daum.net/api/search/ranks?limit=10 링크 들어가면 
+#403 Forbidden 이 뜬다. 봇인걸 막아놓는 경우가 있는데 이럴때는 
+#Header를 만들어서 링크와 같이 가야한다.
+#network에서 밑에 보면 Request Header 부분이 있는데 그 중에서 
+#Referer: http://finance.daum.net/
+#User-Agent: Mozilla/5.0 (Windows NT 6.1; Win64; x64) \
+#AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 Safari/537.36
+
+headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64) \
+           AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90 \
+           Safari/537.36",
+           "Referer": "http://finance.daum.net/"
+           }
+url = "http://finance.daum.net/api/search/ranks?limit=10"
+
+req_data = req.urlopen(req.Request(url, headers = headers)).read().decode('utf-8')
+req_data
+
+json_data = json.loads(req_data)['data']
+json_data
+
+for i in json_data:
+    print(i['rank'],i['name'],i['tradePrice'])
+
+#업종 상위 - 코스피 를 뽑아보자 ... ?
+#이것도 403 Forbidden 이 뜬다.
+kospi_headers = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)\
+                 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/77.0.3865.90\
+                 Safari/537.36",
+                 "Referer": "http://finance.daum.net/"
+                 }
+
+kospi_url = "http://finance.daum.net/api/sectors?market=KOSPI&\
+change=RISE&includedStockLimit=1&perPage=5"
+
+kospi_data = req.urlopen(req.Request(kospi_url,headers = kospi_headers)
+).read().decode('utf-8')
+
+json_kospi_data = json.loads(kospi_data)['data']
+json_kospi_data
+
+for i in json_kospi_data:
+    print(i['sectorName'],i['includedStocks'][0]['name'])
