@@ -1094,3 +1094,288 @@ json_kospi_data
 
 for i in json_kospi_data:
     print(i['sectorName'],i['includedStocks'][0]['name'])
+    
+#################################################################
+#10/4#
+#selenium 
+#웹브라우저를 컨트롤하여 웹 UI(User Interface)를 자동화하는 도구
+#command line에서 selenium library 설치함
+
+from selenium import webdriver
+url = "http://naver.com"
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.get(url)
+driver.save_screenshot("C:\WorkSpace\\Python_Space\\data\\naver.png")
+driver.quit()
+
+url = "http://daum.net"
+driver = webdriver.PhantomJS("C:\WorkSpace//phantomjs.exe")
+driver.get(url)#Selenium은 PhantomJS 지원을 deprecate 할꺼라..
+#팝업창이 뜨지 않는다.
+driver.save_screenshot("C:\WorkSpace\\Python_Space\\data\\daum.png")
+#스샷은 저장된다. 어디까지 작동이 되나 디버깅용으로 사용된다고 하심
+driver.quit()
+
+#네이버 이미지 검색 
+url = "https://search.naver.com/search.naver?where=image"
+import urllib.request as req
+from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+import time
+
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.get(url)
+ser = driver.find_element_by_id("nx_query")#검색어 입력 
+ser.send_keys("다크소울 2")#검색어 
+ser.submit()
+
+#사진들이 나온걸 보면 모든 사진들이 나온게 아니고, 스크롤바를 내리면
+#새로운 사진들이 로딩된다. 스크롤바를 내려보자 
+for i in range(1,3):
+    driver.find_element_by_tag_name('body').send_keys(Keys.END)
+    time.sleep(5)#5초 대기
+
+html = driver.page_source
+soup = BeautifulSoup(html, "html.parser")
+soup
+
+params = []
+img_list = soup.find_all("img", class_="_img")
+img_list[99]
+img_list[100]
+img_list[102]
+for i in img_list:
+    params.append(i['src'])
+
+params[100]
+
+x = 1
+for p in params:
+    #링크주소가 있는 사진들을 해당 경로에 저장하자 
+    req.urlretrieve(p,"C:\WorkSpace\\sample_img_data\\darksoul2_"+str(x)+".jpg")
+    x += 1
+
+params2 = []
+img_list2 = soup.select('img._img')
+
+img_list2
+for i in range(len(img_list2)):
+    img_list2[i] = img_list2[i].attrs['src']
+
+
+driver.quit()
+
+#다음 이미지 검색 
+url = "https://search.daum.net/search?w=img&nil_search=btn&DA=NTB&enc=utf8&q="
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.get(url)
+ser = driver.find_element_by_id("q")
+ser.send_keys("위쳐 3")
+ser.submit()
+
+html = driver.page_source
+soup = BeautifulSoup(html, "html.parser")
+soup
+
+params = []
+img_list = soup.find_all("img", class_="thumb_img")
+img_list[1]['src']
+for i in img_list:
+    params.append(i['src'])
+
+params
+
+x = 1
+for p in params:
+    req.urlretrieve(p,"C:\WorkSpace\\sample_img_data\\witcher3_"+str(x)+".jpg")
+    x += 1
+
+driver.close()   
+    
+##yes24 로그인 하기(yes24에 회원가입이 되어 있어야 한다.)
+url = "https://www.yes24.com/Templates/FTLogin.aspx"
+user = ""
+mypas = ""
+
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.get(url)
+#아이디 입력
+inputid = driver.find_element_by_id("SMemberID")
+inputid.clear()#기존값 삭제 
+inputid.send_keys(user)
+driver.implicitly_wait(3)
+#비밀번호 입력
+inputpas = driver.find_element_by_id("SMemberPassword")
+inputpas.clear()#기존값 삭제 
+inputpas.send_keys(mypas)
+driver.implicitly_wait(3)
+#가동 
+loginbn = driver.find_element_by_css_selector("button#btnLogin")
+loginbn.submit() 
+
+
+driver.close()  
+#yes24 잘 안되었음...                                            
+                 
+#그외 본인이 회원가입한 사이트로 
+#daum로그인 해 보자 
+url = "https://logins.daum.net/accounts/signinform.do?url=https%3A%2F%2Fwww.daum.net%2F"
+
+user = ""
+mypas = ""
+
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.get(url)
+#아이디 입력
+inputid = driver.find_element_by_id("id")
+inputid.clear()#기존값 삭제 
+inputid.send_keys(user)
+driver.implicitly_wait(3)
+#비밀번호 입력
+inputpas = driver.find_element_by_id("inputPwd")
+inputpas.clear()#기존값 삭제 
+inputpas.send_keys(mypas)
+driver.implicitly_wait(3)
+#가동 
+loginbn = driver.find_element_by_css_selector("button#loginBtn")
+loginbn.submit() 
+
+driver.close()
+
+####다시 네이버 로그인 
+url = 'https://nid.naver.com/nidlogin.login'
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.implicitly_wait(5)
+driver.get(url)
+userid = 'ljhm_1986'
+userpw = ''
+
+driver.execute_script("document.getElementsByName('id')[0].\
+                      value=\'"+userid+"\'")
+driver.execute_script("document.getElementsByName('pw')[0].\
+                      value=\'"+userpw+"\'")
+driver.implicitly_wait(3)
+
+driver.find_element_by_xpath('//*[@id="frmNIDLogin"]/fieldset/input').click()
+driver.implicitly_wait(3)
+#브라우저 등록 물어보면 (등록 안 하는거로...)
+driver.find_element_by_xpath('//*[@id="frmNIDLogin"]\
+                             /fieldset/span[2]/a').click()
+
+driver.close()
+
+####다나와
+#XPATH들을 보면 
+#열기
+'//*[@id="dlMaker_simple"]/dd/div[2]/button[1]'
+#닫기
+'//*[@id="dlMaker_simple"]/dd/div[2]/button[2]'
+#apple 클릭
+'//*[@id="selectMaker_simple_priceCompare_A"]/li[14]'
+'//*[@id="searchMaker1452"]'
+
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
+
+url = 'http://prod.danawa.com/list/?cate=112758'
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.implicitly_wait(5)
+driver.get(url)
+#페이지가 뜰떄까지 기라리자 
+#클릭 , 노트북 제조회사 목록을 더 보기 
+WebDriverWait(driver, 3).until(EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="dlMaker_simple"]/dd/div[2]/button[1]'))).click()
+
+driver.implicitly_wait(3)
+
+WebDriverWait(driver, 3).until(EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="dlMaker_simple"]/dd/div[2]/button[2]'))).click()
+
+driver.implicitly_wait(3)
+
+#그리고 노트북 목록 중에서 하나 눌러보기 
+WebDriverWait(driver, 3).until(EC.presence_of_element_located((
+                By.XPATH,
+                '//*[@id="adReaderProductItem9261852"]/div/div[2]/p/a'))).click()
+#새로운 팝업창이 뜬다. 
+driver.implicitly_wait(3)
+
+#노트북 목록에서 이미지와 가격을 추출해보자 
+html = driver.page_source
+soup = BeautifulSoup(html, "html.parser")
+soup
+list_all = soup.select('div.main_prodlist.main_prodlist_list > ul > \
+                       li.prod_item.prod_layer')
+x = 1
+for i in list_all:
+    #인기순위와 제품명
+    print(i.select_one("p.prod_name").text.strip())
+    #이미지 링크
+    print(i.select_one("a.thumb_link > img")['data-original'])
+    #이미지 추출 
+    req.urlretrieve(i.select_one("a.thumb_link > img")['data-original'],
+                    "C:\WorkSpace\\sample_img_data\\notebook_"+str(x)+".jpg")
+    x += 1
+    #가격 
+    print(i.select_one("p.price_sect > a > strong").text.strip())
+    
+#list_all2 = soup.find_all('div',class_='main_prodlist main_prodlist_list')
+#list_all2[1]
+
+#페이지를 넘기기 
+num = 2
+WebDriverWait(driver, 3).until(EC.presence_of_element_located((
+        #XPATH 일때는 숫자를 넣어주어야 한다. css로 해서 nth-child()를 이용하자
+        #안에 숫자만 바꾸어 넣으면 다른 목록 페이지로 넘어갈 수 있다.  
+                By.CSS_SELECTOR,'div.number_wrap > a:nth-child({})'.format(num)
+                ))).click()
+#해 보면 제 2페이지로 넘어간걸 볼 수 있다. 
+driver.close()
+
+
+######페이지들 수집하기 ######
+url = 'http://prod.danawa.com/list/?cate=112758'
+driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
+driver.implicitly_wait(5)
+driver.get(url)
+
+#apple사 제품만 나오도록 하자 
+WebDriverWait(driver, 3).until(EC.presence_of_element_located((
+                By.XPATH,'//*[@id="searchMakerRep1452"]'))).click()
+
+time.sleep(5)#5초 기다렸다가 하자 
+#바로 하면 페이지가 바뀌기 전에 클릭을 하게 되어서 error가 난다. 
+
+for i in range(2,4):
+    list_all3 = []
+    #해당 페이지로 이동
+    WebDriverWait(driver, 3).until(EC.presence_of_element_located(( 
+                By.CSS_SELECTOR,'div.number_wrap > a:nth-child({})'.format(i)
+                ))).click()
+    
+    #노트북 목록에서 이미지와 가격을 추출해보자 
+    html = driver.page_source
+    soup = BeautifulSoup(html, "html.parser")
+    list_all3 = soup.select('div.main_prodlist.main_prodlist_list > ul > \
+                            li.prod_item.prod_layer')
+    x = 1
+    for j in list_all3:
+        #인기순위와 제품명
+        print(j.select_one("p.prod_name").text.strip())
+        #이미지 링크
+        print(j.select_one("a.thumb_link > img")['data-original'])
+        #이미지 추출 
+        req.urlretrieve(j.select_one("a.thumb_link > img")['data-original'],
+                    "C:\WorkSpace\\sample_img_data\\notebook_"+
+                    str(i)+'_'+str(x)+".jpg")
+        x += 1
+        #가격 
+        print(j.select_one("p.price_sect > a > strong").text.strip())
+
+#HTTPError: Forbidden 이거 뜨면 ...
+driver.close()
+#######
