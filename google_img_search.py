@@ -37,4 +37,20 @@ for p in params:
 
 driver.close()
 ######################
-img_list = soup.find_all("img", class_="rg_ic rg_i")
+img_list2 = soup.find_all("a", class_="rg_l")
+
+params2 = []
+for i in img_list2:
+    try:
+        params2.append(i['href'])
+    except KeyError:
+        continue
+
+import re
+re.sub('/imgres?imgurl=','',params2[1])
+
+
+x = 1
+for p in params2:
+    req.urlretrieve(re.sub('/imgres?imgurl=','',p).strip(),"C:\\WorkSpace\\sample_img_data\\skyrim_"+str(x)+".jpg")
+    x += 1
