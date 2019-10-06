@@ -201,6 +201,7 @@ source.replace('Science','Scientist')#'Data Scientist'
 #위와 같은 기능을 가진 함수는 
 #re.sub(찾는문자패턴, 바꾸려는문자, 문자열, count = 0)
 re.sub('Science','Scientist',source)#'Data Scientist'
+re.sub('Data','',source)
 
 #re.compile(찾는문자패턴) 사용 
 #아래처럼 다른 함수와 같이 사용된다.
@@ -516,14 +517,14 @@ soup
 p1 = soup.find_all('p',{'class':'con'})
 
 for i in p1:
-    print(i.string)
+    print(i.string.strip())
     
 for i in p1:
-    print(i.get_text())
+    print(i.get_text().strip())
     
 data = []
 for i in p1:
-    data.append(i.get_text())
+    data.append(i.get_text().strip())
 data
 
 #[문제 159] 게시글 뿐만 아니라 게시날짜 정보도 같이 출력하세요
@@ -580,7 +581,8 @@ for i in txt:
 url_col
 
 #기사 제목    
-txt[0].string
+txt[0].string#h2 태그 안에 태그가 있을경우 안 나옴 
+txt[0].get_text()
 #기사 링크 
 txt[0].find('a').attrs['href']
 
@@ -647,6 +649,7 @@ for i in h2:
     print(i.find('a').attrs['href'])
     url_2.append(i.find('a').attrs['href'])
 
+#attr 대신 get을 사용해도 된다. 
 url_2 = []
 for i in h2:
     print(i.find('a').get('href'))
@@ -668,7 +671,7 @@ url = "https://search.joins.com/JoongangNews?page={}\
 &Keyword=%EC%9D%B8%EA%B3%B5%EC%A7%80%EB%8A%A5&SortType=New\
 &SearchCategoryType=JoongangNews"
 
-#기사 링크들을 모으자 
+#기사 링크들을 url_2에 모으자 
 for i in range(1,11):    
     html = req.urlopen(url.format(i))
     soup= BeautifulSoup(html, "html.parser")
@@ -725,6 +728,7 @@ url = "http://news.donga.com/search?p={}\
 &query=%EC%9D%B8%EA%B3%B5%EC%A7%80%EB%8A%A5&\
 check_news=1&more=1&sorting=1&search_date=1&v1=&v2=&range=1"
 
+#뉴스들의 링크를 params에 저장하자 
 for i in range(1,137,15): 
     res = req.urlopen(url.format(i))
     soup= BeautifulSoup(res, "html.parser")
@@ -734,7 +738,7 @@ for i in range(1,137,15):
 params
 txt= []
 error = []
-
+#링크별로 뉴스기사를 불러올때 error가 나는경우도 대처할 수 있다. 
 for i in params:
     try:
         #print(i)
@@ -750,6 +754,7 @@ for i in params:
 
 txt[0]
 txt[0][0:txt[0].find('Copyright')]
+error
 
 new_txt = []
 for i in range(0,len(txt)):
@@ -1014,7 +1019,7 @@ json_res[0]
 for i in json_res:
     print(i['date'],i['settlement'])
     
-res.read()#한번 가져오면 없어지나..?
+res.read()#한번 가져오면 없어지나..? 다시 불러와서 변수에 저장하자 
 res = req.urlopen(url)
 res_read = res.read()
 res_read
@@ -1046,6 +1051,7 @@ plt.title('세계 곡물 가격')
 plt.xlabel('날짜')
 plt.ylabel('가격')
 plt.grid(True)
+plt.show()
 
 df2['settlement'].plot(grid = True, figsize = (12,6))
 #그런데 이렇게만 하면 x축이 index가 나온다. 
