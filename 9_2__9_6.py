@@ -244,6 +244,7 @@ x
 x
 
 #원본문자를 찾아서 다른 문자로 치환하는 함수 
+#SQL : replace(x,'리','이')
 # R : stringr :: str_replace(x, '리','이')
 x = x.replace('리','이')
 
@@ -286,13 +287,15 @@ x.index('a')#error가 나온다.
 #R : stringr :: str_count(string, pattern)
 x.count('l')
 
-#원본문자열을 대문자로 변환하는 함수 #R : toupper()
+#원본문자열을 대문자로 변환하는 함수 
+#SQL : upper() #R : toupper()
 x.upper()
 
-#원본문자열을 소문자로 변환하는 함수 #R : tolower()
+#원본문자열을 소문자로 변환하는 함수 
+#SQL : lower() #R : tolower()
 x.lower()
 
-#첫글자만 대문자로 바꾸는 함수
+#첫글자만 대문자로 바꾸는 함수 #SQL : initcap()
 x.capitalize()
 
 #모든 단어의 첫글자를 대문자로 변환하는 함수 
@@ -306,9 +309,11 @@ s.swapcase()
 s.center(20)
 
 #원본 문자열을 지정한 공간에서 왼쪽에 배치하는 함수 
+#SQL : rpad(s,20)
 s.ljust(20)
 
 #원본 문자열을 지정한 공간에서 오른쪽에 배치하는 함수 
+#SQL : lpad(s,20)
 s.rjust(20)
 
 x = '             hello               '

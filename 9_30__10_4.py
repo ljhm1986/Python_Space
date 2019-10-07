@@ -1271,7 +1271,7 @@ driver.find_element_by_xpath('//*[@id="frmNIDLogin"]\
 
 driver.close()
 
-####다나와
+####다나와에 들어가서 노트북 리스트를 보자 
 #XPATH들을 보면 
 #열기
 '//*[@id="dlMaker_simple"]/dd/div[2]/button[1]'
@@ -1290,7 +1290,7 @@ driver = webdriver.Chrome("C:\WorkSpace//chromedriver.exe")
 driver.implicitly_wait(5)
 driver.get(url)
 #페이지가 뜰떄까지 기라리자 
-#클릭 , 노트북 제조회사 목록을 더 보기 
+#클릭, 노트북 제조회사 목록을 더 보기 
 WebDriverWait(driver, 3).until(EC.presence_of_element_located((
                 By.XPATH,
                 '//*[@id="dlMaker_simple"]/dd/div[2]/button[1]'))).click()
