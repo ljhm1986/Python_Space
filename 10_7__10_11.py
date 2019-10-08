@@ -503,3 +503,583 @@ emp2.addEmployee("류현진","미국", 5000)
 emp2.printCount()
 emp2.printEmployee()
 ####################################################################
+#10/8#
+
+class Person:
+    #클래스 변수 
+    hobbys = []
+    
+    def __init__(self,hobby):
+        #hobbys가 클래스 변수이다. 모든 인스턴스에서 사용이 가능하다.
+        self.hobbys.append(hobby)
+
+p1 = Person("독서")
+p1.hobbys
+
+p2 = Person("게임")
+p2.hobbys
+#['독서', '게임'], '독서','게임' 둘 다 추가되어 있다.
+
+Person.hobbys
+Person.hobbys.append('여행')
+Person.hobbys
+#['독서', '게임', '여행'], '여행'이 추가된다.
+
+class Person:
+    hobbys = []
+    
+    def add_hobby(self,hobby):
+        self.hobbys.append(hobby)
+        
+p1 = Person()
+p1.add_hobby("독서")
+p1.hobbys
+
+p2 = Person()
+p2.add_hobby("게임")
+p2.hobbys
+
+
+class Person:
+    def add_hobby(self, hobby):
+        #인스턴스 변수 
+        self.hobbys = hobby
+    
+    def show(self):
+        print("내 취미는 ",self.hobbys)
+        
+p1 = Person()
+p1.add_hobby("독서")
+p1.show()#인스턴스 변수 
+Person.hobbys#클래스 변수가 아니라서 오류
+
+p2 = Person()
+p2.add_hobby("게임")
+p2.show()
+
+#[문제 164] 주민번호를 입력하면 다음과 같이 출력되는 클래스를 생성하시오
+
+#id1 = Processldc("010101-3234567")
+#id1.id_process()
+#('2001','01','01','남성')
+#id2 = Processldc("990202-2123456")
+#id2.id_process()
+#('2001','01','01','여성')
+
+import re
+bool(re.match('\d{6}\-\d{7}','010101-3234567'))
+str1 = '010101-3234567'
+str1[7]
+
+class PersonNumber:
+    
+    
+    def __init__(self,x):
+        
+        self.data = []
+        #self.deter = 0
+        
+        #외국인은 -뒤의 번호가 1~4가 아니라고 한다. 여기서는 넘어간다. 
+        if not bool(re.match('\d{2}[0|1]\d[0-3]\d\-[1-4]\d{6}',x)):
+            print('초기화 실패')
+        else:
+            self.personNumber = x
+            
+    def NumberPrint(self):
+        print(self.personNumber)
+        
+    def id_process(self):
+        deter = int(self.personNumber[7])
+                     
+        #출생 세기에 따라서 
+        if deter <=2:
+            self.data.append('19'+self.personNumber[0:2])
+        else:
+            self.data.append('20'+self.personNumber[0:2])
+            
+        self.data.append(self.personNumber[2:4])
+        self.data.append(self.personNumber[4:6])
+           
+        #성별에 따라서 
+        if deter in [1,3]:
+            self.data.append("남성")
+        else:
+            self.data.append("여성")
+            
+        print(self.data)
+        self.data = []
+
+            
+        
+a1 = PersonNumber('123')       
+a1.NumberPrint()
+
+a2 = PersonNumber("010101-3234567")
+a2.id_process() 
+a2.NumberPrint()       
+
+a3 = PersonNumber("990202-2123456")
+a3.id_process() 
+
+a4 = PersonNumber("950403-1893873")
+a4.id_process()
+
+a5 = PersonNumber("020202-4432343")
+a5.id_process()
+
+a6 = PersonNumber("020202-5432343")
+
+##선생님 풀이 ##
+class Processldc:
+    def __init__(self,id):
+        self.id = id
+        
+    def id_process(self):
+        self.first, self.second = self.id.split('-')
+        self.gender = self.second[0]
+        
+        if self.gender == '1' or self.gender == '2':
+            self.year = '19'+self.first[:2]
+        else:
+            self.year = '20'+self.first[:2]
+        
+        if self.gender == "2" or self.gender == '4':
+            self.gender = "여성"
+        else:
+            self.gender = '남성'
+            
+        self.month = self.first[2:4]
+        self.day = self.first[4:6]
+        
+        return self.year, self.month, self.day, self.gender
+
+a1 = Processldc('123')       
+a1.NumberPrint()
+
+a2 = Processldc("010101-3234567")
+a2.id_process() 
+a2.NumberPrint()       
+
+a3 = Processldc("990202-2123456")
+a3.id_process() 
+
+a4 = Processldc("950403-1893873")
+a4.id_process()
+
+a5 = Processldc("020202-4432343")
+a5.id_process()
+
+a6 = Processldc("020202-5432343")   
+
+#[문제 165] 위에 show()함수를 추가해 주세요 
+#주민번호, 출생년월일, 성별, 나이를 출력하게 된다. 
+
+class Processldc2:
+    def __init__(self,id):
+        self.id = id
+        
+    def id_process(self):
+        self.first, self.second = self.id.split('-')
+        self.gender = self.second[0]
+        
+        if self.gender == '1' or self.gender == '2':
+            self.year = '19'+self.first[:2]
+        else:
+            self.year = '20'+self.first[:2]
+        
+        if self.gender == "2" or self.gender == '4':
+            self.gender = "여성"
+        else:
+            self.gender = '남성'
+            
+        self.month = self.first[2:4]
+        self.day = self.first[4:6]
+        
+        return self.year, self.month, self.day, self.gender
+    
+    def show(self):
+        print("주민번호 : "+self.id)
+        self.id_process()
+        print("출생년월일 : "+self.year+"년 "+self.month+"월 "+self.day+"일")
+        print("성별 : "+self.gender)
+        import datetime
+        d = datetime.datetime.now()
+        old = (int(d.year) - int(self.year))+1
+        print("나이 : "+str(old))
+
+a2 = Processldc2("010101-3234567")
+ 
+a2.show()      
+
+a3 = Processldc2("990202-2123456")
+a3.show()
+
+a4 = Processldc2("950403-1893873")
+a4.id_process()
+
+a5 = Processldc2("020202-4432343")
+a5.id_process()
+
+a6 = Processldc2("020202-5432343") 
+
+########   
+class PersonNumber2:
+    
+    def __init__(self,x):
+        
+        self.data = []
+        #외국인은 -뒤의 번호가 1~4가 아니라고 한다. 여기서는 넘어간다. 
+        if not bool(re.match('\d{2}[0|1]\d[0-3]\d\-[1-4]\d{6}',x)):
+            print('초기화 실패')
+        else:
+            self.personNumber = x
+            
+    def NumberPrint(self):
+        print(self.personNumber)
+        
+    def id_process(self):
+        self.deter = int(self.personNumber[7])
+                     
+        #출생 세기에 따라서 
+        if self.deter <=2:
+            self.year = '19'+self.personNumber[0:2]
+        else:
+            self.year = '20'+self.personNumber[0:2]
+         
+        self.data.append(self.year)
+        self.data.append(self.personNumber[2:4])
+        self.data.append(self.personNumber[4:6])
+           
+        #성별에 따라서 
+        if self.deter in [1,3]:
+            self.gender = "남성"
+        else:
+            self.gender = "여성"
+         
+        self.data.append(self.gender)
+        return self.data
+        self.data = []
+        
+    def show(self):
+        print("주민번호 : "+ self.personNumber)
+        self.id_process()
+        print("출생년월일 : "+self.year + '년 '+
+              self.personNumber[2:4] + '월'+self.personNumber[4:6]+'일')
+        print("성별 : " + self.gender)
+        import datetime
+        d = datetime.datetime.now()
+        old = (int(d.year) - int(self.year))+1
+        print("나이 : "+str(old))
+    
+              
+a1 = PersonNumber2('123')       
+a1.NumberPrint()
+
+a2 = PersonNumber2("010101-3234567")
+a2.id_process() 
+a2.NumberPrint()       
+
+a3 = PersonNumber2("990202-2123456")
+a3.show()
+
+a4 = PersonNumber2("950403-1893873")
+a4.show()
+
+a5 = PersonNumber2("020202-4432343")
+a5.show()
+
+a6 = PersonNumber2("020202-5432343")
+
+#나중에 나이계산을 만나이로 해보자, SQL로도 만들어보자 
+#from datetime import date
+import pandas as pd
+pd.datetime.now() - pd.Timestamp('2000-01-01')
+today = pd.datetime.now()
+birth = pd.Timestamp('2000-01-01')
+today.year - birth.year
+today.month - birth.month
+today.day - birth.day
+
+
+#[문제 166] 
+class Person:
+    
+    def __init__(self, name):
+        self.name = name
+        self.hobbys = ''
+    
+    def add_hobby(self, x):
+        self.hobbys = self.hobbys + x + ' '
+    
+    def show(self):
+        self.result = self.name + " 취미는 " + self.hobbys
+        return self.result
+
+p1 = Person("도바킨")
+p1.hobbys
+p1.add_hobby("게임하기")
+p1.add_hobby("산책하기")
+p1.hobbys
+p1.show()
+
+p2 = Person("게롤드")
+p2.hobbys += "검술"
+p2.show()
+
+#[문제167] 아래와 같이 수행되는 클래스를 생성하세요.
+#emp1 = Employee("홍길동",1000)
+#emp1.emp_info()
+#이름 :  홍길동 , 급여 :  1000
+
+#emp1.raise_ratio
+#1.1
+#
+#emp1.raise_salary()
+#emp1.emp_info()
+#이름 :  홍길동 , 급여 :  1100
+#
+#emp1.raise_ratio = 1.2
+#
+#emp1.raise_salary()
+#
+#emp1.emp_info()
+#이름 :  홍길동 , 급여 :  1320
+#
+#emp2 = Employee("박찬호",2000)
+#emp2.emp_info()
+#이름 :  박찬호 , 급여 :  2000
+#
+#emp2.raise_ratio
+#Out[26]: 1.1
+class Employee:
+    
+    def __init__(self, name, sal):
+        self.name = name
+        self.sal = sal
+        self.raise_ratio = 1.1
+    
+    def raise_salary(self):
+        self.sal = self.sal * self.raise_ratio
+    
+    def emp_info(self):
+        print("이름 : {}, 급여 : {}".format(self.name, self.sal))
+   
+emp1 = Employee('겐지',3000)
+emp1.emp_info()
+emp1.raise_ratio
+emp1.raise_salary()
+emp1.emp_info()
+
+emp2 = Employee("리퍼",4500)
+emp2.emp_info()
+emp2.raise_ratio
+
+#[문제 168] Stats 클래스를  정하세요
+
+class Stats:
+    
+    def __init__(self):
+        self.sum = 0
+    
+    def s_sum(self, *arg):
+        self.sum = 0
+        
+        for i in arg:
+            self.sum += i
+        
+        return self.sum
+    
+    def s_mean(self, *arg):
+        #같은 클래스의 함수를 호출할때는 클래스이름.함수 
+        self.mean = Stats.s_sum(self,*arg)/len(arg)
+        
+        return self.mean
+    
+    def s_variance(self, *arg):        
+        self.variance = 0
+        
+        Stats.s_mean(self,*arg)
+        
+        for i in arg:           
+            self.variance += (i - self.mean)**2
+        
+        self.variance /= (len(arg)-1)
+        
+        return self.variance
+    
+    def s_std(self, *arg):       
+        Stats.s_variance(self,*arg)
+        
+        self.std = self.variance**(1/2)
+        
+        return self.std
+            
+stats = Stats()           
+stats.s_sum(1,2,3,4,5)            
+stats.s_mean(1,2,3,4,5,6)
+stats.s_variance(1,2,3,4,5,6)
+
+
+#상속
+#클래스내에서 메소드 속성을 물려 받는다.
+#공통된 내용/중복된 내용을 하나로 묶어서 관리할 수 있다. 
+#
+
+class Parents:
+    
+    def __init__(self, name, pn):
+        self.name = name
+        self.pn = pn
+        
+    def Printinfo(self):
+        print("이름 : {}, 전화번호 : {}".format(self.name, self.pn))
+        
+p = Parents("고길동","000-0000-0000")
+p.Printinfo()
+
+#상속을 받는 class를 만들자 
+class Child(Parents):
+    
+    def __init__(self, name, pn, addr, sn):
+        self.name = name
+        self.pn = pn
+        self.addr = addr
+        self.sn = sn
+        
+c = Child("홍하드","010-1004-1004","서울","000000-1234567")
+#부모 class의 함수를 사용할 수 있다. 
+c.Printinfo()
+
+#부모 클래스에 있는 부분을 대체해 보자 
+class Child2(Parents):
+    
+    def __init__(self, name, pn, addr, sn):
+        Parents.__init__(self,name,pn)
+        self.addr = addr
+        self.sn = sn
+    #그리고 새로운 함수를 추가해보자    
+    def showInfo(self):
+        print("주소 : {}, 주민번호 : {}".format(self.addr, self.sn))
+        
+c2 = Child2("홍하드","010-1004-1004","서울","000000-1234567")
+c2.Printinfo()
+c2.showInfo()
+
+#[문제169] Person 클래스를 생성하세요. 생성자는 이름, 나이, 성별을 만드세요.
+#Person 클래스 에는 printMe 메소드를 생성하셔서 이름, 나이 성별을 출력합니다.
+#Employees클래스를 생성한후 Person상속받습니다.
+#생성자는 이름, 나이, 성별, 주소, 생일입니다.
+#단 이름, 나이, 성별은 person에서 상속받으세요.
+#Employees 클래스에 printMe를 재구성하셔서 주소, 생일을 출력하세요.
+
+class Person:
+    def __init__(self, name, age, gender):
+        self.name = name
+        self.age = age
+        self.gender = gender
+        
+    def printMe(self):
+        print("이름 :{}, 나이 :{}, 성별 :{}"
+              .format(self.name, self.age, self.gender))
+
+p1 = Person("한조",40,"남성")
+p1.printMe()
+
+class Employees(Person):
+    def __init__(self,name, age, gender, addr, birth):
+        Person.__init__(self, name, age, gender)
+        self.addr = addr
+        self.birth = birth
+        
+    def printMe(self):
+        Person.printMe(self)
+        print("주소 : {}, 생일 : {}".format(self.addr, self.birth))
+        
+e1 = Employees("겐지",35,"남성","하나무라","20401001")
+e1.printMe()
+
+#[문제170] Add 클래스에 두수를 더하는 값을 리턴하는 add 메소드 생성
+#Multiply 클래스에 두수를 곱한값을 리턴하는 multiply 메소드 생성
+#Divide 클래스에 두수를 나눈값을 리턴하는 divide메소드 생성
+#Calculator클래스에는 Add, Multiply, Divide 상속받고 두수를 뺀값을 리턴하는 sub 메소드 생성하세요.
+#
+#cal = Calculator()
+#print(cal.add(10,20))
+#print(cal.multiply(10,20))
+#print(cal.divide(10,2))
+#print(cal.sub(10,8))
+
+class Add:
+
+    def add(self,x,y):
+        self.sum_num = x + y
+        return self.sum_num
+
+class Multiply:
+
+    def multiply(self,x,y):
+        self.mul_num = x * y
+        return self.mul_num
+    
+class Divide:
+
+    def divide(self,x,y):
+        try:
+            self.div_num = x / y
+            return self.div_num
+        except ArithmeticError as error:
+            print(error)
+        
+
+class Calculator(Add, Multiply, Divide):
+
+    def sub(self,x,y):
+        self.sub_num = x - y
+        return self.sub_num
+
+
+cal = Calculator()
+print(cal.add(10,20))
+print(cal.multiply(10,20))
+print(cal.divide(10,0))
+print(cal.sub(10,8))        
+
+#다만 다음과 같이 하면 에러가 난다. 
+Calculator.add(1,2)
+#static method를 만들면 된다. 이때는 self 지시어를 사용하면 안된다.
+#@staticmethod : static method라는걸 나타냄 
+
+class Calculator:
+    @staticmethod
+    def add(x,y):
+        return x + y
+    @staticmethod
+    def multiply(x,y):
+        return x * y
+    @staticmethod
+    def divide(x,y):
+        try:
+            return x/y
+        except ArithmeticError as error:
+            print(error)
+    @staticmethod
+    def sub(x,y):
+        return x - y
+
+Calculator.add(1,2)
+Calculator.multiply(3,4)
+Calculator.divide(4,3)
+Calculator.sub(8,4)
+
+##선생님이 올리신 파일을 불러들여 사용해 보자 
+import sys
+sys.path
+#파일 경로 추가 
+sys.path.append('C:\\Workspace\\Python_Space\\myPython')
+from Stats_class import Stats as st
+dir(st)
+
+st.mean(1,2,3)
+st.sum(1,2,3)
+st.variance(1,2,3,4,5)
+st.stddev(1,2,3,4)

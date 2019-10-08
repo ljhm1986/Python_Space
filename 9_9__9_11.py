@@ -310,6 +310,7 @@ datetime.datetime(2019,12,23)-datetime.datetime(2019,6,18)
 #datetime.timedelta(days=188)
 (datetime.datetime(2019,12,23)-datetime.datetime(2019,6,18)).days
 #188
+(datetime.datetime(2019,12,23)-datetime.datetime(2019,6,18))
 
 #날짜 + 날
 datetime.datetime(2019,9,9) +datetime.timedelta(days=105)
