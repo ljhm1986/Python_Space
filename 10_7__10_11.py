@@ -1044,7 +1044,7 @@ print(cal.multiply(10,20))
 print(cal.divide(10,0))
 print(cal.sub(10,8))        
 
-#다만 다음과 같이 하면 에러가 난다. 
+#다만 다음과 같이 인스턴스를 만들지 않고 클래스의 함수를 바로 작동하면 에러가 난다. 
 Calculator.add(1,2)
 #static method를 만들면 된다. 이때는 self 지시어를 사용하면 안된다.
 #@staticmethod : static method라는걸 나타냄 
@@ -1083,3 +1083,682 @@ st.mean(1,2,3)
 st.sum(1,2,3)
 st.variance(1,2,3,4,5)
 st.stddev(1,2,3,4)
+
+########################################################################
+#10/10#
+#[문제 171] 초기 생성자에 이름, 핸드폰번호, 메일, 주소 변수를 생성합니다. 
+#print_info 메소드를 생성한 후  출력하는 Contact 클래스를 생성하세요.
+#인스턴스는 set_contact 함수를 이용해서 만드시고 이름, 핸드폰번호,메일,
+#주소는 입력값으로 받아서 출력하세요.
+#
+#set_contact()
+#
+#이름을 입력하세요 : 홍길동
+#
+#핸드폰번호를 입력하세요 : 010-1000-1004
+#
+#메일을 입력하세요 : hong@aaa.com
+#
+#주소를 입력하세요 : 서울시 강남구 삼성로
+#이름 : 홍길동 
+#핸드폰번호 : 010-1000-1004 
+#메일 : hong@aaa.com 
+#주소 : 서울시 강남구 삼성로 
+
+class Contact:
+    
+    def __init__(self, name, phone_number, mail, addr):
+        self.name = name
+        self.phone_number = phone_number
+        self.mail = mail
+        self.addr = addr
+        
+    def print_info(self):
+        print("이름 : {}".format(self.name))
+        print("핸드폰 번호 : {}".format(self.phone_number))
+        print("메일 : {}".format(self.mail))
+        print("주소 : {}".format(self.addr))
+
+def set_contract():
+    import re
+    
+    name = input("이름을 입력하세요 :")
+   
+    while(True):
+        phone_number = input("핸드폰 번호를 입력하세요 :")
+        if bool(re.match('\d{3}-\d{3,4}-\d{4}',phone_number)):
+            break
+        else:
+           print("잘못된 형식입니다.") 
+    
+    while(True):
+        mail = input("메일을 입력하세요 :")
+        if bool(re.search('@',mail)):
+            break
+        else:
+            print("잘못된 형식입니다.")
+        
+    addr = input("주소를 입력하세요 :")
+    
+    contact = Contact(name, phone_number, mail, addr)
+    contact.print_info()
+    
+set_contract()
+
+#이제 입력받은 값을 dbms에 저장해보자 
+#[문제 172] Contact 클래스 이용해서 입력 들어온 값들을
+#저장해보자 
+
+#import sqlite3
+#dir(sqlite3)
+##디스크에 sqlite 구성하기 
+#conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\info.db")
+##cursor 설정, 객체 지정 
+#c = conn.cursor()
+
+class Contact2:
+       
+    def __init__(self, name, phone_number, mail, addr):
+        self.name = name
+        self.phone_number = phone_number
+        self.mail = mail
+        self.addr = addr
+        
+    def print_info(self):
+        print("이름 : {}".format(self.name))
+        print("핸드폰 번호 : {}".format(self.phone_number))
+        print("메일 : {}".format(self.mail))
+        print("주소 : {}".format(self.addr))
+        
+    def create_table_db(self):
+        import sqlite3
+        conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\info.db")
+        c = conn.cursor()
+        try:
+            c.execute("create table person_inform\
+                      (name varchar2(20),\
+                       phone_number varchar2(20),\
+                       mail varchar2(20),\
+                       addr varchar2(20))")
+        except:
+            pass
+        conn.commit()
+        c.close()
+        conn.close()
+        
+    def save_inform(self):
+        import sqlite3
+        conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\info.db")
+        c = conn.cursor()
+        insert_sql = "insert into person_inform(name, phone_number, mail, addr)\
+                      values (?,?,?,?)"
+        c.execute(insert_sql,(self.name, self.phone_number, self.mail, self.addr))
+        conn.commit()
+        c.close()
+        conn.close()
+        
+    def select_inform(self):
+        import sqlite3
+        conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\info.db")
+        c = conn.cursor()
+        c.execute("select * from person_inform")
+        c.fetchall()
+        c.close()
+        conn.close()
+
+def set_contract2():
+    import re
+    
+    name = input("이름을 입력하세요 :")
+   
+    while(True):
+        phone_number = input("핸드폰 번호를 입력하세요 :")
+        if bool(re.match('\d{3}-\d{3,4}-\d{4}',phone_number)):
+            break
+        else:
+           print("잘못된 형식입니다.") 
+    
+    while(True):
+        mail = input("메일을 입력하세요 :")
+        if bool(re.search('@',mail)):
+            break
+        else:
+            print("잘못된 형식입니다.")
+        
+    addr = input("주소를 입력하세요 :")
+    
+    contact2 = Contact2(name, phone_number, mail, addr)
+    contact2.print_info()
+    contact2.create_table_db()
+    contact2.save_inform()
+    
+set_contract2()
+
+import sqlite3
+conn = sqlite3.connect("C:\\WorkSpace\\Python_Space\\data\\info.db")
+c = conn.cursor()
+c.execute("select * from person_inform")
+c.fetchall()
+c.close()
+conn.close()
+
+##선생님의 풀이 ##
+class Contact11:
+    def __init__(self,name, pn, email, addr):
+        self.name = name
+        self.pn = pn
+        self.email = email
+        self.addr = addr
+
+    def print_info(self):
+        print("이름 : {} ".format(self.name))
+        print("핸드폰번호 : {} ".format(self.pn))
+        print("메일 : {} ".format(self.email))
+        print("주소 : {} ".format(self.addr))
+    
+    def open(self):
+        import sqlite3
+        self.conn = sqlite3.connect('c:/data/contact.db')
+        self.c = self.conn.cursor()
+        print("contact db open")
+    
+    def table_check(self):
+        self.c.execute("SELECT name FROM sqlite_master WHERE name = 'contact'")
+        if self.c.fetchone()  is None:
+            self.c.execute('create table contact\
+                           (name text,pn text, mail text,addr text)')
+               
+        
+    def input(self):
+        self.c.execute("insert into contact(name, pn, mail, addr)\
+                       values(?,?,?,?)",(self.name,self.pn,self.email,self.addr))
+        self.c.execute('select * from contact')
+        print(self.c.fetchall())
+    
+    def commit(self):
+        self.conn.commit()
+        print("입력값 영구히 저장")
+       
+    def rollback(self):
+        self.conn.rollback()
+        print("입력값 영구히 취소")
+       
+    def close(self):
+        self.c.close()
+        self.conn.close()
+        print("contact db close")
+
+def set_contact11():
+    name = input("이름을 입력하세요 : ")
+    pn = input("핸드폰번호를 입력하세요 : ")
+    email = input("메일을 입력하세요 : ")
+    addr = input("주소를 입력하세요 : ")
+    conIns = Contact11(name, pn, email, addr)
+    conIns.print_info()
+    conIns.open()
+    conIns.table_check()
+    conIns.input()
+    conIns.commit()
+    conIns.close()
+
+set_contact11()
+
+class Contact12:
+    def __init__(self,name, pn, email, addr):
+        self.name = name
+        self.pn = pn
+        self.email = email
+        self.addr = addr
+
+    def print_info(self):
+        print("이름 : {} ".format(self.name))
+        print("핸드폰번호 : {} ".format(self.pn))
+        print("메일 : {} ".format(self.email))
+        print("주소 : {} ".format(self.addr))
+    
+    def open(self):
+        import sqlite3
+        self.conn = sqlite3.connect('c:/data/contact.db')
+        self.c = self.conn.cursor()
+        print("contact db open")
+    
+    def table_check(self):
+        #sqlite에서의 기능, table이 있으면 생성하지 않는다 
+        self.c.execute('create table if not exists contact\
+                       (name text,pn text, mail text,addr text)')               
+        self.c.execute("PRAGMA table_info('contact')") 
+        print(self.c.fetchall())
+        
+    def input(self):
+        self.c.execute("insert into contact(name, pn, mail, addr)\
+                       values(?,?,?,?)",(self.name,self.pn,self.email,self.addr))
+        self.c.execute('select * from contact')
+        print(self.c.fetchall())
+    
+    def commit(self):
+        self.conn.commit()
+        print("입력값 영구히 저장")
+       
+    def rollback(self):
+        self.conn.rollback()
+        print("입력값 영구히 취소")
+       
+    def close(self):
+        self.c.close()
+        self.conn.close()
+        print("contact db close")
+
+def set_contact12():
+    name = input("이름을 입력하세요 : ")
+    pn = input("핸드폰번호를 입력하세요 : ")
+    email = input("메일을 입력하세요 : ")
+    addr = input("주소를 입력하세요 : ")
+    conIns = Contact12(name, pn, email, addr)
+    conIns.print_info()
+    conIns.open()
+    conIns.table_check()
+    conIns.input()
+    conIns.commit()
+    conIns.close()
+
+set_contact12()
+
+#[문제173] 한주간동안 걸음수를 요일별로 그래프를 그리세요.
+#단 막대그래프 함수를 생성해서 인수값으로 걸음수, 요일을 입력하면 
+#그래프가 그려지도록하세요.
+#
+#step = [5000,6000,7500,10000,10000,20000,2000]
+#labels = ['월','화','수','목','금','토','일']
+#cbc = create_bar_chart(step,labels,1)
+#cbc.create_bar_chart()
+
+class create_bar_chart:
+    
+    def __init__(self, xlabel, ylabel):
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+        self.plot = 0
+        
+    def create_chart(self, plot):
+        import matplotlib.pylab as plt
+        from matplotlib import font_manager, rc
+        font_name = font_manager.FontProperties \
+        (fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
+        rc('font',family = font_name)
+        self.plot = plot
+        
+        if self.plot == 1:
+            plt.pie(self.ylabel, labels = self.xlabel)
+            plt.title("일별 걸음 수")
+            plt.show()
+        elif self.plot == 2:
+            plt.bar(xlabel, ylabel)
+            plt.title("일별 걸음 수")
+            plt.show()
+        elif self.plot == 3:
+            plt.barh(xlabel, ylabel)
+            plt.title("일별 걸음 수")
+            plt.show()
+        elif self.plot == 4:
+            plt.plot(xlabel, ylabel)
+            plt.title("일별 걸음 수")
+            plt.show()
+        else:
+            pass
+    
+
+xlabel = ['월','화','수','목','금','토','일']
+ylabel = [5000,6000,7500,10000,10000,20000,2000]    
+cbc = create_bar_chart(xlabel, ylabel)  
+cbc.create_chart(1)
+cbc.create_chart(2)
+cbc.create_chart(3)
+cbc.create_chart(4)
+
+##선생님의 풀이 ##
+import matplotlib.pylab as plt
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties(
+        fname="c:/Windows/Fonts/malgun.ttf").get_name()
+rc('font', family=font_name)
+
+class create_bar_chart:
+    def __init__(self,data, labels, bar):
+        self.data = data
+        self.labels = labels
+        self.bar = bar
+        
+    def create_bar_chart(self):
+    
+        if self.bar == 1:
+            plt.bar(self.labels, self.data, align='center')
+            plt.xlabel('요일')
+            plt.ylabel('걸음수')
+        elif self.bar == 2:
+            plt.barh(self.labels, self.data, align='center')
+            plt.xlabel('걸음수')
+            plt.ylabel('요일')
+        elif self.bar == 3:
+            plt.plot(self.labels,self.data,linestyle=':',color='r')
+            plt.xlabel('요일',fontsize=10)
+            plt.ylabel('걸음수',fontsize=10)
+        elif self.bar == 4:
+            self.step_max=max(self.data)
+            #가장 큰 데이터만 조금 중심에서 벗어나게 하자 
+            self.explode = [0.1 if i == self.step_max else 0.0 for i in self.data]
+            plt.figure(figsize=(6,6))
+            plt.pie(self.data,labels=self.labels,explode=self.explode,
+                    opct='%1.1f%%',textprops={'fontsize':10})
+            
+        plt.title('한주간 동안 걸음수') 
+        plt.grid()
+        plt.show()
+    
+if __name__=='__main__':
+    step = [5000,6000,7500,10000,10000,20000,2000]
+    labels = ['월','화','수','목','금','토','일']
+    cbc = create_bar_chart(step,labels,1)
+    cbc.create_bar_chart()
+
+if __name__=='__main__':
+    step = [5000,6000,7500,10000,10000,20000,2000]
+    labels = ['월','화','수','목','금','토','일']
+    cbc = create_bar_chart(step,labels,2)
+    cbc.create_bar_chart()
+
+if __name__=='__main__':
+    step = [5000,6000,7500,10000,10000,20000,2000]
+    labels = ['월','화','수','목','금','토','일']
+    cbc = create_bar_chart(step,labels,3)
+    cbc.create_bar_chart()
+    
+if __name__=='__main__':
+    step = [5000,6000,7500,10000,10000,20000,2000]
+    labels = ['월','화','수','목','금','토','일']
+    cbc = create_bar_chart(step,labels,4)
+    cbc.create_bar_chart()
+
+##################################################
+class Viva:
+    cnt = 0
+    def __init__(self, name):
+        self.name = name
+        print("{} 님이 게임방에 들어왔습니다.".format(self.name))
+        Viva.cnt += 1
+        
+    def count_viva(self):
+        print("현재 {}명이 남았습니다.".format(Viva.cnt))
+     
+    #인스턴스를 삭제할때 작동함 
+    def __del__(self):
+        print("{} 님이 게임방에서 나갔습니다.".format(self.name))
+        Viva.cnt -= 1
+        
+man1 = Viva("홍길동")
+man1.count_viva()    
+
+man2 = Viva("박찬호")
+man2.count_viva()
+
+man1.count_viva()
+
+del man1
+
+man2.count_viva()
+man1.count_viva()#error
+
+del man2
+
+class Viva2:
+    cnt = 0
+    def __init__(self, name):
+        self.name = name
+        print("{} 님이 게임방에 들어왔습니다.".format(self.name))
+        Viva2.cnt += 1
+       
+    @classmethod #클래스 메소드 지정 
+    def count_viva(cls):#이 경우에는 self 대신 cls 넣어야 함 
+        print("현재 {}명이 남았습니다.".format(cls.cnt))
+     
+    #인스턴스를 삭제할때 작동함 
+    def __del__(self):
+        print("{} 님이 게임방에서 나갔습니다.".format(self.name))
+        Viva2.cnt -= 1
+
+man1 = Viva2("홍길동")
+man1.count_viva()    
+
+man2 = Viva2("박찬호")
+man2.count_viva()
+
+man1.count_viva()
+
+del man1
+
+man2.count_viva()
+man1.count_viva()#error
+
+del man2
+
+######
+class Student:
+    
+    def __init__(self, name, id, grade, detail):
+        self._name = name
+        self._id = id
+        self._grade = grade
+        self._detail = detail
+    
+    def __str__(self):
+        return '{} {}'.format(self._name, self._id)
+    
+student1 = Student('홍길동',1,1,{'성별':'남','영어':100})
+student2 = Student('도바킨',1,1,{'성별':'남','영어':80})
+
+#인스턴스의 인수값 보기 
+student1.__dict__
+#{'_name': '홍길동', '_id': 1, '_grade': 1, '_detail': {'성별': '남', '영어': 100}}
+#인스턴스를 출력해 보자, __str__ 함수의 return 값이 출력된다. 
+print(student1)#홍길동 1
+
+lst = []
+lst.append(student1)
+lst.append(student2)
+#보면 객체값이 들어가 있다. 
+lst
+print(lst)
+#출력값을 보면 append 할때 __str__ 함수의 return 값이 들어가 있다. 
+for i in lst:
+    print(i)
+
+##
+class Student2:
+    
+    def __init__(self, name, id, grade, detail):
+        self._name = name
+        self._id = id
+        self._grade = grade
+        self._detail = detail
+    
+    def __repr__(self):
+        return '{} {}'.format(self._name, self._id)
+    
+    def show(self):
+        print("학생 정보 이름 : {}, 등급 : {}, 자세하게 : {}".format(
+                self._name, self._grade, self._detail))
+    
+student1 = Student2('홍길동',1,1,{'성별':'남','영어':100})
+student2 = Student2('도바킨',1,1,{'성별':'남','영어':80})
+student1.show()
+
+student1.__dict__
+print(student1)
+
+lst = []
+lst.append(student1)
+lst.append(student2)
+#객체값이 아니라 __repr__ 함수의 리턴값이 들어가 있다. 
+lst
+
+#[문제 174] Sets 클래스 안에 union, intersection, difference 메소드를 생성하시요
+x = {1,2,3,4,5,2,3,4,5}
+y = {2,4,6,8,10}
+
+for i in x:
+    print(i)
+
+class Sets:
+    
+    def __init__(self,set1, set2):
+        self.set1 = set1
+        self.set2 = set2
+        print(type(self.set1))
+        print(type(self.set2))
+    
+    def union(self):
+        if (type(self.set1) is set) & (type(self.set2) is set):
+            self.union_set = set()#{} 하면 dictionary 임 ...
+        
+            for i in self.set1:
+                self.union_set.add(i)
+        
+            for i in self.set2:
+                if i in self.union_set:
+                    pass
+                else:
+                    self.union_set.add(i)
+        
+            return self.union_set
+        
+        elif (type(self.set1) is list) & (type(self.set2) is list):
+            self.union_list = []
+        
+            self.union_list.extend(self.set1)
+        
+            for i in self.set2:
+                if i in self.union_list:
+                    pass
+                else:
+                    self.union_list.append(i)
+        
+            return self.union_list
+            
+        else:
+            print("두 데이터 타입이 다릅니다.")
+        
+    def intersection(self):
+        if (type(self.set1) is set) & (type(self.set2) is set):
+            
+            self.intersection_set = set()
+        
+            for i in self.set1:
+                if i in self.set2:
+                    self.intersection_set.add(i)
+                else:
+                    pass
+        
+            return self.intersection_set
+        
+        elif (type(self.set1) is list) & (type(self.set2) is list):
+        
+            self.intersection_list = []
+        
+            for i in self.set1:
+                if i in self.set2:
+                    self.intersection_list.append(i)
+                else:
+                    pass
+        
+            return self.intersection_list
+            
+        else:
+            print("두 데이터 타입이 다릅니다.")
+                
+    def difference(self):
+        if (type(self.set1) is set) & (type(self.set2) is set):
+            self.difference_set = set()
+        
+            for i in self.set1:
+                if i not in self.set2:
+                    self.difference_set.add(i)
+                else:
+                    pass
+        
+            return self.difference_set
+        
+        elif (type(self.set1) is list) & (type(self.set2) is list):
+            self.difference_list = []
+        
+            for i in self.set1:
+                if i not in self.set2:
+                    self.difference_list.append(i)
+                else:
+                    pass
+        
+            return self.difference_list
+            
+        else:
+            print("두 데이터 타입이 다릅니다.")
+##class Sets 끝 
+
+x = {1,2,3,4,5,2,3,4,5}
+y = {2,4,6,8,10}  
+type(x)  
+type(y)
+s = Sets(x,y)
+s.union()   
+s.intersection()     
+s.difference()
+
+x = [1,2,4,5,6,3]
+y = [3,5,6,3,2,7]
+type(x) == 'list'
+type(x) is list
+s = Sets(x,y)
+s.union()   
+s.intersection()     
+s.difference()
+
+## 선생님의 풀이 ##
+class Sets():                  
+    def __init__(self,a,b):     
+        self.a = a             
+        self.b = b            
+       
+    def union(self):
+        self.result = []                   
+        for i in self.a:  
+            if i not in self.result:    
+                self.result.append(i) 
+        
+        for i in self.b:  
+            if i not in self.result:    
+                self.result.append(i) 
+        
+        self.result.sort()
+        return self.result
+    
+    def intersection(self):    
+        self.result = []
+        for i in self.a:
+            if i in self.b:
+                self.result.append(i)
+        self.result.sort()
+        return self.result
+    
+    def difference(self):
+        self.result = []
+        for i in self.a:    
+            if i not in self.b:    
+                self.result.append(i)   
+        self.result.sort()
+        return self.result
+    
+x = [1,5,6,3,7]
+y = [2,4,5,3,7]
+
+s = Sets(x,y)                
+print(s.__dict__)
+s.union()
+s.intersection()
+s.difference()

@@ -52,6 +52,11 @@ class Cookie:
             self.cookieSaveCount -= 1
             self.cookieCount += 1
             print("We load one Cookie")
+            
+    def __del__(self):
+        print("Cookie factory closed")
+        Cookie.cookieFactoryCount -= 1
+        
     
             
 cookie1 = Cookie()
@@ -60,3 +65,5 @@ cookie1.makeCookie()
 cookie1.eatCookie()
 cookie1.saveCookie()
 cookie1.cookieInfo()
+cookie1.__dict__
+del cookie1
