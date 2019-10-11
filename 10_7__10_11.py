@@ -1762,3 +1762,439 @@ print(s.__dict__)
 s.union()
 s.intersection()
 s.difference()
+
+######################################################################
+#10/11#
+u = [1,2,3,4,5,6,7,8,9]#전체집합
+a = [2,4,6,8]
+#a의 여집합은?
+
+a_c = []
+
+for i in u:
+    if i not in a:
+        a_c.append(i)
+    else:
+        continue
+a_c
+
+##class의 인스턴스에 있는 변수들을 출력해보자 
+class Point:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        
+p1 = Point(1,3)
+p2 = Point(2,4)
+
+#객체값이 나온다. 
+print(p1)
+print(p2)
+
+#class 에 함수를 추가하자 
+class Point2:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+    
+    def show(self):
+        print('({}, {})'.format(self.x, self.y))
+
+p1 = Point2(1,3)
+p2 = Point2(2,4)
+#객체값이 나온다.
+print(p1)
+print(p2)
+#함수를 이용해서 값을 볼 수 있다. 
+p1.show()
+
+#class에 함수를 추가하자 
+class Point3:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+    
+    def show(self):
+        print('({}, {})'.format(self.x, self.y))
+    
+    def __str__(self):
+        return '({}, {})'.format(self.x, self.y)
+
+p1 = Point3(1,3)
+p2 = Point3(2,4)
+#__str__ 함수 return 값이 나온다.
+print(p1)
+print(p2)
+
+#두개 인스턴스에 들어있는 변수들을 더하려면 ?
+class Point4:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        
+    def add(self,z):
+        new_x = self.x + z.x
+        new_y = self.y + z.y
+        return (new_x, new_y)
+    
+    def show(self):
+        print('({}, {})'.format(self.x, self.y))
+    
+    def __str__(self):
+        return '({}, {})'.format(self.x, self.y)
+
+p1 = Point4(1,3)
+p2 = Point4(2,4)
+#__str__ 함수 return 값이 나온다.
+print(p1)
+print(p2)
+#add()를 추가했음 
+p1.add(p2)
+#다음은 안되는데 
+p1 + p2
+#class에 새로운 함수들을 추가해보자 
+class Point5:
+    def __init__(self,x,y):
+        self.x = x
+        self.y = y
+        
+    #+를 사용할 수 있다. 
+    def __add__(self,z):
+        new_x = self.x + z.x
+        new_y = self.y + z.y
+        return (new_x, new_y)
+    
+    def __sub__(self,z):
+        new_x = self.x - z.x
+        new_y = self.y - z.y
+        return (new_x, new_y)
+
+    def __mul__(self,z):
+        new_x = self.x * z.x
+        new_y = self.y * z.y
+        return (new_x, new_y)
+    
+    def show(self):
+        print('({}, {})'.format(self.x, self.y))
+    
+    def __str__(self):
+        return '({}, {})'.format(self.x, self.y)
+
+p1 = Point5(1,3)
+p2 = Point5(2,4)
+#__str__ 함수 return 값이 나온다.
+print(p1)
+print(p2)
+#__add__()를 추가했음
+p1 + p2
+#__sub__()를 추가했음
+p1 - p2
+#__mul__()를 추가했
+p1 * p2
+
+#tuple
+t1 = ('도바킨',10,'남')
+type(t1)
+print(t1)
+
+t2 = ('트레이서',12,'여')
+type(t2)
+print(t2)
+
+for i in [t1,t2]:
+    print("%s은(는) %d 세의 %s성 입니다."%i)
+    
+#namedtuple() #원소에 지시자가 붙은 tuple 생성 
+import collections
+Person = collections.namedtuple("Person",'name age gender')
+n1 = Person(name = "홍길동",age = 10, gender = "남")
+n2 = Person(name = "김태희",age = 40, gender = "여")
+print(n1)
+print(n2)
+
+for i in [n1,n2]:
+    print('%s은(는) %d세의 %s성 입니다.'%i)
+
+#직교좌표계의 두 점이라 하자  
+t1 = (1.0,6.0)
+t2 = (3.5,2.5)
+#두 점 사이의 거리 
+distance = ((t2[0] - t1[0])**2 + (t2[1] - t1[1])**2)**(1/2)
+
+#index로 표시하지 말고 다르게 표시를 해 보자 
+from collections import namedtuple
+Point = namedtuple('Point','x y')
+#값이 중복되거나, 예약어를 쓰면 안 된다. 예약어를 사용할 경우 rename = True 하기 
+Point = namedtuple('Point','x y class',rename = True)
+#Point = namedtuple('Point',['x', 'y'])
+#Point = namedtuple('Point','x,y')
+
+p1 = Point(1.0,6.0)
+p2 = Point(3.5,2.5)
+
+Point.__dict__
+#그럼 다시 두 점 사이의 거리를 구하면 
+distance = ((p2.x - p1.x)**2 + (p2.y - p1.y)**2)**(1/2)
+distance
+
+#dictionary를 보자 
+dict1 = {}
+dict1["numpy"] = "과학 계산용 라이브러리"
+dict1["pandas"] = "데이터 처리와 분석 라이브러리"
+dict1["matplotlib"] = "시각화 라이브러리 "
+print(dict1)
+
+for i, j in dict1.items():
+    print(i,j)
+    
+dict2 = {}
+dict2["matplotlib"] = "시각화 라이브러리 "
+dict2["numpy"] = "과학 계산용 라이브러리"
+dict2["pandas"] = "데이터 처리와 분석 라이브러리"
+
+#입력순서가 다르지만 두 dictionary 는 같다. 
+dict1 == dict2#True
+
+#입력순서가 다르면 두 dictionary가 달라지게 해 보자 
+import collections
+dict3 = collections.OrderedDict()
+dict3["numpy"] = "과학 계산용 라이브러리"
+dict3["pandas"] = "데이터 처리와 분석 라이브러리"
+dict3["matplotlib"] = "시각화 라이브러리 "
+
+dict4 = collections.OrderedDict()
+dict4["pandas"] = "데이터 처리와 분석 라이브러리"
+dict4["matplotlib"] = "시각화 라이브러리 "
+dict4["numpy"] = "과학 계산용 라이브러리"
+
+print(dict3)
+print(dict4)
+
+dict3 == dict4#False !!
+
+#변수에 값 지정하기 
+t = (1,2)
+x ,y = t
+
+lst = ["라인하르트",60,'독일',(1990,10,10)]
+name, age, addr, birthday = lst
+print(name)
+name, age, addr, (year, month, day) = lst
+
+str = "happly"
+a,b,c,d,e,f = str
+
+name, _, addr, _ = lst
+print(name)
+print(_)#마지막것만 나옴 
+
+#* : 언패킹하기, 원하는 정보만 골라서 추출할때 도움 됨 
+name, age, *info = lst
+print(name)
+print(*info)
+
+*info, pn = lst
+print(*info)
+
+#
+str1 = "바스티온/23/4590093849803/010101-3748382/010-1111-1111/서울"
+name, old, *_, addr = str1.split('/')
+print(name)
+print(old)
+print(addr)
+
+name, *_, (year, *_) = lst
+print(name)
+print(year)
+
+#[문제 176] cal_stock 함수를 생성하세요
+my_stock = [("삼성전자",100,49000),("현대차",50,126000),('LG전자',200,68800)]
+
+def cal_stock(lst):
+    
+    all_price = 0
+    
+    for i in lst:
+        all_price += i[1] * i[2]
+    
+    return all_price
+
+
+cal_stock(my_stock)
+
+#[문제 177] cal_stock 함수 만들기, namedtuple 사용
+from collections import namedtuple
+
+def cal_stock2(lst):
+    
+    all_price = 0
+    Stock = namedtuple("stock","company num price")
+    
+    for i in lst:
+        s = Stock(*i)
+        all_price += s.num * s.price
+    
+    return all_price
+
+cal_stock2(my_stock)
+
+#tuple의 값을 바꾸기 
+Stock = namedtuple('stock',['name','amount','price'])
+
+s = Stock("NAVER",100,1500000)
+s.amount
+s._replace(amount = 150)
+s
+
+def show1(*arg):
+    
+    for i in arg:
+        print(i)
+        
+show1('도바킨',100,1000)
+
+#dictionary를 가변으로 넣을때 
+def show2(**dic):
+    print(dic)
+    print(dic.keys())
+    print(dic.values())
+    
+    for key, value in dic.items():
+        print("{}, {}".format(key, value))
+        
+show2(name = "한조", 점수 = 10000, 급여 = 2300000)
+
+#arg1 : [], () arg2 : {}
+def show3(*arg1, **arg2):
+    print(arg1)
+    print(arg2)
+    
+show3(1,2)
+#(1, 2) 
+#*arg1로만 데이터가 들어감
+show3(name = "한조", 점수 = 10000, 급여 = 2300000)
+#()
+#{'name': '한조', '점수': 10000, '급여': 2300000}
+#**arg2로만 데이터가 들어감 
+show3(1,2,name = "한조", 점수 = 10000, 급여 = 2300000)
+#(1, 2)
+#{'name': '한조', '점수': 10000, '급여': 2300000}
+
+x = {'name':'겐지','power':100,'인기':20000}
+show3(x)
+#({'name': '겐지', 'power': 100, '인기': 20000},)
+#{}
+show3(**x)
+#()
+#{'name': '겐지', 'power': 100, '인기': 20000}
+
+#list의 원소의 갯수를 해야려 보자 
+x = ['a','b','c','a','c','d','b']
+dict1 = {}
+
+for i in x:
+    if i in dict1.keys():
+        dict1[i] += 1
+    else:
+        dict1[i] = 1
+        
+dict1
+
+dict1 = {}
+for i in x:
+    if i not in dict1.keys():
+        dict1[i] = 0
+    dict1[i] += 1
+
+dict1
+
+dict1 = {}
+for i in x:
+    #setdefault(i,0) :i 있으면 넘어감, 없으면 등록 
+    dict1.setdefault(i,0)#dict1에 i가 있는지 봄, 없으면 i 등록하고 value는 0
+    dict1[i] += 1
+
+dict1
+
+
+import collections
+cnt = collections.Counter(x)
+print(cnt)
+
+dict2 = collections.defaultdict(int)#value의 type
+dict2
+
+#원소의 갯수가 세어지는 과정을 볼 수 있다. 
+for i in x:
+    dict2[i] += 1
+    print(dict2)
+    
+#dictionary의 key에 대해 여러 value 들을 넣어보자  
+dict31 = {'info':'02'}
+dict32 = {'info':'서울'}
+
+dict1 = {}
+dict1.setdefault('info',[]).append('02')
+dict1.setdefault('info',[]).append('서울')
+dict1
+
+#value가 list이다
+dict4 = collections.defaultdict(list)
+dict4['info'].append('02')
+dict4['info'].append('서울')
+dict4
+
+#value가 set이다 
+dict4 = collections.defaultdict(set)
+dict4['info'].add('02')
+dict4['info'].add('서울')
+dict4
+
+#value가 tuple인건 안 된다
+dict4 = collections.defaultdict(tuple)
+dict4['info'].append('02')
+dict4['info'].append('서울')
+dict4
+
+##반복문을 사용해서 해 보자 
+dictionary = {}
+x1 = {'info':'02'}
+x2 = {'info':'서울'}
+x3 = {'info':'010-1000-0001'}
+x4 = {'info2':'051'}
+x5 = {'info2':'부산'}
+x6 = {'info2':'010-1001-0002'}
+
+#values가 list일때 
+for i in [x1,x2,x3,x4,x5,x6]:
+    for k, v in i.items():
+        if k not in dictionary:
+            dictionary[k] = [v]
+        else:
+            dictionary[k].append(v)
+  
+print(dictionary)
+
+#
+dictionary = collections.defaultdict(list)
+for i in [x1,x2,x3,x4,x5,x6]:
+    for k, v in i.items():
+        if k not in dictionary:
+            dictionary[k] = [v]
+        else:
+            dictionary[k].append(v)
+
+print(dictionary)
+
+#values 가 set일때
+dictionary = collections.defaultdict(set)
+for i in [x1,x2,x3,x4,x5,x6]:
+    for k, v in i.items():
+        if k not in dictionary:
+            dictionary[k] = set()
+            dictionary[k].add(v)
+        else:
+            dictionary[k].add(v)
+
+print(dictionary)
+
