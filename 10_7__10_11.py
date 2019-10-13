@@ -347,7 +347,7 @@ class Employee:
         self.info = ""
         #instance에 저장된 인원 수를 나타내게 된다. 
         self.cn = 0
-        #이 class에서 만들어진 instance의 갯수를 나타내게 된다.
+        #Employee class에서 만들어진 instance의 갯수를 나타내게 된다.
         Employee.instanceCount += 1
         
     def ClassCount(self):
@@ -472,13 +472,14 @@ emp2.addEmployee("손흥민","영국", 3000)
 emp2.addEmployee("류현진","미국", 5000)
 emp2.printCount()
 emp2.printEmployee()
+#다른 인스턴스에서 입력한 정보들까지 모두 출력이 된다. 
 
 #########################################
 class Employee:
     
     empCn = 0
     def __init__(self):
-        #이러면 나중에 새로운 인스턴스를 생성할때 다른 인스턴스에서 입력한 
+        #이러면 나중에 새로운 인스턴스를 생성할때 다른 인스턴스에서 입력해놓은
         #데이터들이 사라진다. 
         Employee.info = ""
     def printCount(self):
@@ -654,11 +655,9 @@ class Processldc:
         return self.year, self.month, self.day, self.gender
 
 a1 = Processldc('123')       
-a1.NumberPrint()
 
 a2 = Processldc("010101-3234567")
-a2.id_process() 
-a2.NumberPrint()       
+a2.id_process()       
 
 a3 = Processldc("990202-2123456")
 a3.id_process() 
@@ -673,6 +672,7 @@ a6 = Processldc("020202-5432343")
 
 #[문제 165] 위에 show()함수를 추가해 주세요 
 #주민번호, 출생년월일, 성별, 나이를 출력하게 된다. 
+#선생님 풀이에 추가한 것
 
 class Processldc2:
     def __init__(self,id):
@@ -722,7 +722,7 @@ a5.id_process()
 
 a6 = Processldc2("020202-5432343") 
 
-########   
+#내 풀이에 추가한 것  
 class PersonNumber2:
     
     def __init__(self,x):
@@ -950,7 +950,7 @@ c = Child("홍하드","010-1004-1004","서울","000000-1234567")
 #부모 class의 함수를 사용할 수 있다. 
 c.Printinfo()
 
-#부모 클래스에 있는 부분을 대체해 보자 
+#초기화를 할 때 자식 클레스에서 부모 클래스에 있는 부분을 대체해 보자 
 class Child2(Parents):
     
     def __init__(self, name, pn, addr, sn):
@@ -1796,7 +1796,7 @@ class Point2:
     def __init__(self,x,y):
         self.x = x
         self.y = y
-    
+    #함수 추가 
     def show(self):
         print('({}, {})'.format(self.x, self.y))
 
@@ -1805,7 +1805,7 @@ p2 = Point2(2,4)
 #객체값이 나온다.
 print(p1)
 print(p2)
-#함수를 이용해서 값을 볼 수 있다. 
+#show() 함수를 이용해서 instance안에 저장된 변수들을 볼 수 있다. 
 p1.show()
 
 #class에 함수를 추가하자 
@@ -1826,12 +1826,12 @@ p2 = Point3(2,4)
 print(p1)
 print(p2)
 
-#두개 인스턴스에 들어있는 변수들을 더하려면 ?
+#다른 인스턴스에 들어있는 변수들을 더하려면 ?
 class Point4:
     def __init__(self,x,y):
         self.x = x
         self.y = y
-        
+    #z : class     
     def add(self,z):
         new_x = self.x + z.x
         new_y = self.y + z.y
@@ -1915,11 +1915,12 @@ print(n2)
 for i in [n1,n2]:
     print('%s은(는) %d세의 %s성 입니다.'%i)
 
-#직교좌표계의 두 점이라 하자  
+#t1, t2를 직교좌표계의 두 점이라 하자  
 t1 = (1.0,6.0)
 t2 = (3.5,2.5)
 #두 점 사이의 거리 
 distance = ((t2[0] - t1[0])**2 + (t2[1] - t1[1])**2)**(1/2)
+print(distance)
 
 #index로 표시하지 말고 다르게 표시를 해 보자 
 from collections import namedtuple
@@ -1935,7 +1936,7 @@ p2 = Point(3.5,2.5)
 Point.__dict__
 #그럼 다시 두 점 사이의 거리를 구하면 
 distance = ((p2.x - p1.x)**2 + (p2.y - p1.y)**2)**(1/2)
-distance
+print(distance)
 
 #dictionary를 보자 
 dict1 = {}
@@ -2008,6 +2009,7 @@ print(name)
 print(year)
 
 #[문제 176] cal_stock 함수를 생성하세요
+#회사이름, 주식수, 주식가격 
 my_stock = [("삼성전자",100,49000),("현대차",50,126000),('LG전자',200,68800)]
 
 def cal_stock(lst):
@@ -2064,7 +2066,8 @@ def show2(**dic):
         
 show2(name = "한조", 점수 = 10000, 급여 = 2300000)
 
-#arg1 : [], () arg2 : {}
+#arg1 : [], () : list, tuple
+#arg2 : {} : dictionary
 def show3(*arg1, **arg2):
     print(arg1)
     print(arg2)
@@ -2081,17 +2084,21 @@ show3(1,2,name = "한조", 점수 = 10000, 급여 = 2300000)
 #{'name': '한조', '점수': 10000, '급여': 2300000}
 
 x = {'name':'겐지','power':100,'인기':20000}
+type(x)#dictionary
 show3(x)
 #({'name': '겐지', 'power': 100, '인기': 20000},)
 #{}
+#tuple에 dictionary형태의 원소가 있는 모습으로 들어간다. 
 show3(**x)
 #()
 #{'name': '겐지', 'power': 100, '인기': 20000}
+
 
 #list의 원소의 갯수를 해야려 보자 
 x = ['a','b','c','a','c','d','b']
 dict1 = {}
 
+#전에 해 보았던 것이고 다음과 같은 방법으로 할 수 있다. 
 for i in x:
     if i in dict1.keys():
         dict1[i] += 1
@@ -2108,9 +2115,11 @@ for i in x:
 
 dict1
 
+#새로운 함수를 이용해서 해 보자 
+#dictionary.setdefault(key,default) : key값이 있으면 value 반환
+#key값이 없으면 default를 value로 key입력, defalut 반환 
 dict1 = {}
 for i in x:
-    #setdefault(i,0) :i 있으면 넘어감, 없으면 등록 
     dict1.setdefault(i,0)#dict1에 i가 있는지 봄, 없으면 i 등록하고 value는 0
     dict1[i] += 1
 

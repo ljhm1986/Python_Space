@@ -46,11 +46,14 @@ for i in img_list2:
     except KeyError:
         continue
 
-import re
-re.sub('/imgres?imgurl=','',params2[1])
-
+params2[0]
+params2[1]
+params2[2]
 
 x = 1
 for p in params2:
-    req.urlretrieve(re.sub('/imgres?imgurl=','',p).strip(),"C:\\WorkSpace\\sample_img_data\\skyrim_"+str(x)+".jpg")
+    req.urlretrieve("https://www.google.co.kr"+p,
+    "C:\\WorkSpace\\sample_img_data\\skyrim_link"+str(x)+".jpg")
     x += 1
+
+driver.close()
