@@ -4,7 +4,8 @@ Created on Tue Oct 15 10:38:45 2019
 
 @author: stu11
 """
-
+###################################################################
+#10/15#
 #[문제 178] KNN 프로그램을 만들어 보자
 
 pointlist = [(1,1),(1,0),(2,0),(0,1),(2,2),(1,5),(2,3)]
@@ -281,3 +282,338 @@ x = data.loc[data['rank'] <= 3]['class'].value_counts()[
         ]
 x.keys()[0]
 
+####################################################################
+#10/16#
+#[문제 182] 나이, 월수입, 상품구매 여부 3개의 데이터를 이용해서
+#나이가 44이고 월급이 400만원인 사람이 상품을 구매할지 
+#비구매할지를 knn으로 분류해주세요 
+import pandas as pd
+buy_data = pd.read_csv("C:\\WorkSpace\\R_Space\\data\\buy.csv")
+buy_data
+
+x_train = buy_data[['나이','월수입']]
+label = buy_data['상품구매여부']
+
+from sklearn.neighbors import KNeighborsClassifier
+buy_predict = KNeighborsClassifier(3)
+buy_predict.fit(x_train,label)
+buy_predict.predict([[44,400]])
+buy_predict.predict([[44,400]])[0]
+#'구매'
+
+#####
+import pandas as pd
+import numpy as np
+
+x = (np.arange(9, dtype = np.float) - 3)
+x
+x.shape
+x = x.reshape(-9,1)
+x
+np.vstack([x, [100]])#100이 추가된다.
+x
+pd.DataFrame(x).describe()
+
+#표준정규분호로 표준화하는 방법 
+y = (x - np.mean(x))/np.std(x)
+
+pd.DataFrame(y).describe()
+
+from sklearn.preprocessing import StandardScaler
+#평균 0, 분산 1로 조정된다.
+y_1  = StandardScaler().fit_transform(x)
+
+np.mean(y_1)
+np.std(y_1)
+
+scaler = StandardScaler()
+scaler.fit(x)
+y_2 = scaler.transform(x)
+
+#최소값과 최대값을 사용해서 0 ~ 1 사이의 데이터로 표준화 방법
+(x - x.min())/(x.max() - x.min())
+
+from sklearn.preprocessing import MinMaxScaler
+
+min_max_scaler = MinMaxScaler()
+min_max_scaler.fit_transform(x)
+
+from sklearn.preprocessing import minmax_scale
+minmax_scale(x)
+
+#평균 0, 분산 1로 조정하는 방법 
+from sklearn.preprocessing import scale
+np.mean(scale(x))
+np.std(scale(x))
+
+#[문제 185] bmi데이터를 이용해서 키: 178, 몸무게 71 일때 분류해조세요
+
+bmi_data = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\bmi.csv")
+bmi_data
+bmi_data.info()
+
+#scale 하지 않고 knn을 수행하자 
+height_data = bmi_data['height']
+weight_data = bmi_data['weight']
+label_data = bmi_data['label']
+x_train = bmi_data[['height','weight']]
+
+test_data = np.array([[178,71]])
+test_data2 = np.array([[155,69]])
+
+bmi_test = KNeighborsClassifier(5)
+bmi_test.fit(x_train, label_data)
+bmi_test.predict(test_data)
+#normal
+bmi_test.predict_proba(test_data)
+bmi_test.predict(test_data2)
+#fat
+
+#정규화를 한 뒤에 해 보자 
+from pandas import DataFrame
+bmi_data_scale = DataFrame()
+
+#x_train 을 정규화 해 보자 
+height_mean = bmi_data['height'].mean()
+height_std = bmi_data['height'].std()
+bmi_data_scale['height'] = (bmi_data['height'] - height_mean)/height_std
+
+weight_mean = bmi_data['weight'].mean()
+weight_std = bmi_data['weight'].std()
+bmi_data_scale['weight'] = (bmi_data['weight'] - weight_mean)/weight_std
+
+x_train_scale = bmi_data_scale[['height','weight']]
+
+#test 를 정규화 해 보자 
+test_data_scale = np.array([[0.0,0.0]])
+test_data_scale[0][0] = (test_data[0][0] - height_mean)/height_std
+test_data_scale[0][1] = (test_data[0][1] - weight_mean)/weight_std
+
+test_data2_scale = np.array([[0.0,0.0]])
+test_data2_scale[0][0] = (test_data2[0][0] - height_mean)/height_std
+test_data2_scale[0][1] = (test_data2[0][1] - weight_mean)/weight_std
+
+#정규화 한 데이터를 넣어서 수행하자 
+bmi_test_scale = KNeighborsClassifier(5)
+bmi_test_scale.fit(x_train_scale, label_data)
+bmi_test_scale.predict(test_data_scale)
+#normal
+bmi_test_scale.predict(test_data2_scale)
+#fat
+bmi_test_scale.predict_proba(test_data_scale)
+
+#minmax_scaler 를 한 뒤에 해보자 
+bmi_data_maxmin = DataFrame()
+
+#x_train을 minmax 하자 
+height_max = bmi_data['height'].max()
+height_min = bmi_data['height'].min()
+bmi_data_maxmin['height'] = (bmi_data['height'] - height_min)/(
+                                height_max - height_min)
+
+weight_max = bmi_data['weight'].max()
+weight_min = bmi_data['weight'].min()
+bmi_data_maxmin['weight'] = (bmi_data['weight'] - weight_min)/(
+                                weight_max - weight_min)
+
+x_train_maxmin = bmi_data_maxmin[['height','weight']]
+
+#text 를 minmax 하자 
+test_data_maxmin = np.array([[0.0,0.0]])
+test_data_maxmin[0][0] = (test_data[0][0] - height_max)/(
+                            height_max - height_min)
+test_data_maxmin[0][1] = (test_data[0][1] - weight_max)/(
+                            weight_max - weight_min)
+
+test_data2_maxmin = np.array([[0.0,0.0]])
+test_data2_maxmin[0][0] = (test_data2[0][0] - height_min)/(
+                            height_max - height_min)
+test_data2_maxmin[0][1] = (test_data2[0][1] - weight_min)/(
+                            weight_max - weight_min)
+
+#minmax 한 것을 knn으로 수행하자 
+
+bmi_test_maxmin = KNeighborsClassifier(5)
+bmi_test_maxmin.fit(x_train_maxmin, label_data)
+bmi_test_maxmin.predict(test_data_maxmin)
+#normal
+bmi_test_maxmin.predict(test_data2_maxmin)
+#fat
+bmi_test_maxmin.predict_proba(test_data_maxmin)
+
+#이번 경우에는 3가지 방법 모두 같은 값이 나왔다.
+#3가지 방법으로 했는데 값이 다르게 나오는 경우가 있다. 그런 경우에는 직접
+#데이터 셋에서 샘플을 뽑아서 확인하거나, 데이터의 label이 잘 되어 있는지 
+#확인해야 한다. 
+
+#### 선생님의 풀이 ####
+#[문제185] bmi 데이터를 이용해서 키 : 178, 몸무게 : 71 일때 분류해주세요.
+bmi = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\bmi.csv")
+bmi.info()
+
+#scale 안 하고 함 
+x_train = np.array(bmi.iloc[:,:2])
+x_train
+label = bmi['label']
+label
+y = np.array([[155, 69]])
+
+clf = KNeighborsClassifier(n_neighbors=3)
+clf.fit(x_train,label)
+clf.predict(y)[0]#fat
+
+##standard scale
+bmi = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\bmi.csv")
+bmi.info()
+x_train = np.array(bmi.iloc[:,:2])
+x_train
+
+h_mean =  np.mean(bmi.iloc[:,0])
+h_std  = np.std(bmi.iloc[:,0])
+
+w_mean =  np.mean(bmi.iloc[:,1])
+w_std  = np.std(bmi.iloc[:,1])
+
+from sklearn.preprocessing import scale
+x_train = np.array(scale(bmi.iloc[:,:2]))
+x_train
+label = bmi['label']
+label
+y = np.array([[155,69]])
+h_s = (y[0][0]-h_mean) / h_std
+w_s = (y[0][1]-w_mean) / w_std
+test = np.array([[h_s,w_s]])
+clf = KNeighborsClassifier(n_neighbors=3)
+clf.fit(x_train,label)
+clf.predict(test)[0]#fat
+
+#minmax scale
+bmi = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\bmi.csv")
+
+bmi.info()
+x_train = np.array(bmi.iloc[:,:2])
+
+h_min =  np.min(bmi.iloc[:,0])
+h_max  = np.max(bmi.iloc[:,0])
+
+w_min =  np.min(bmi.iloc[:,1])
+w_max  = np.max(bmi.iloc[:,1])
+
+from sklearn.preprocessing import minmax_scale
+
+x_train = np.array(minmax_scale(bmi.iloc[:,:2]))
+x_train
+label = bmi['label']
+label
+y = np.array([[155,69]])
+h_minmax = (y[0][0]-h_min) / (h_max - h_min)
+w_minmax = (y[0][1]-w_min) / (w_max - w_min)
+test = np.array([[h_minmax,w_minmax]])
+clf = KNeighborsClassifier(n_neighbors=3)
+clf.fit(x_train,label)
+clf.predict(test)[0]#fat
+
+##height는 200으로 나눔, weight는 100으로 나눔 
+bmi = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\bmi.csv")
+bmi
+bmi.info()
+
+x_train = np.array([bmi['height']/200,bmi['weight']/100]).T
+x_train
+
+label = bmi['label']
+label
+y = np.array([[155/200,69/100]])
+
+clf = KNeighborsClassifier(n_neighbors=3)
+clf.fit(x_train,label)
+clf.predict(y)[0]#fat
+
+################################################################
+#[문제186] 유방암 데이터 입니다. kNN알고리즘을 이용해서 훈련데이터셋,
+#테스트데이터셋을 이용해서 분류가 잘되는지 확인하세요.
+#
+#
+#1 단계 : 데이터 수집
+#https://archive.ics.uci.edu/ml/machine-learning-databases/
+#breast-cancer-wisconsin/wdbc.names
+#
+#- 위스콘신대학의 연구원들의 자료
+#- 유방 종양의 미세침 흡인물 디지털 이미지에서 측정한 값 이며 이 값은 디지털 
+#이미지에 나타난 세포 핵의 특징이다.
+#- 암조직 검사에 대한 관측값은 569개, 변수(속성) 32
+#- 식별숫자, 암진단 여부(악성(Malignant),양성(Benign)), 30개 수치 측정치
+#- 세포핵의 모양과 크기관련된 10개 특성
+#* radius(반지름)
+#* texture(질감)
+#* perimeter(둘레)
+#* area(넓이)
+#* smoothness(매끄러움)
+#* compactness(조밀성)
+#* concavity(오목함)
+#* concave points(오목점)
+#* symmetry(대칭성)
+#* fractal dimension(프랙탈 차원)
+
+#이런 데이터를 분석하려면 유방암에 대한 공부를 해야 한다.
+
+breast_cancer = pd.read_csv(
+        "C:\\WorkSpace\\Python_Space\\data\\wisc_bc_data.csv")
+
+breast_cancer
+breast_cancer.info()
+#보면 column이 32개나 된다, 분석을 할때 id는 빼도 무방하다.  
+#diagnosis는 라벨이다. 
+
+#id column를 빼자 
+breast_cancer = breast_cancer.iloc[:,1:]
+
+breast_cancer['diagnosis'] 
+#빈도수를 계산하자 
+from collections import Counter
+Counter(breast_cancer['diagnosis'])
+#Counter({'B': 357, 'M': 212})
+cn = Counter(breast_cancer['diagnosis'])
+(cn['B'] / 569) * 100#62.741652021089635
+(cn['M'] / 569) * 100#37.258347978910365
+
+breast_cancer.describe()
+
+#각 column마다 수치단위가 다르니까 scale 작업을 하자 
+from sklearn.preprocessing import scale
+breast_cancer.iloc[:,1:] = np.array(scale(breast_cancer.iloc[:,1:]))
+breast_cancer.describe()
+breast_cancer.head(5)
+
+#70%를 학습하고, 30%는 시험해보자 
+#train_data에다가 label이 비율을 맞추어서 추출하자 
+from sklearn.model_selection import train_test_split
+X = breast_cancer.iloc[:,1:]
+Y = breast_cancer.iloc[:,0]#label
+
+#80%는 훈련 데이터, 20%는 시험 데이터
+#train_test_split() 시행할때 마다 추출하는 샘플이 다르다 
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.2)
+#대략 비율 좋게 나왔다.
+(Counter(Y_train)['B'] * 100) / (Counter(Y_train)['B'] + Counter(Y_train)['M'])
+(Counter(Y_test)['B'] * 100) / (Counter(Y_test)['B'] + Counter(Y_test)['M'])
+
+#knn에 이웃수는 몇으로 할까? 
+np.sqrt(569)
+clf = KNeighborsClassifier(n_neighbors = 23)
+clf.fit(X_train, Y_train)
+Counter(clf.predict(X_test) == Y_test)#Counter({True: 108, False: 6})
+108/ 114
+#score() 정답인 비율을 보여준다. 
+clf.score(X_test, Y_test)
+clf.score(X_test, Y_test) == 108/ 114#True
+#그럼 틀리게 나온 데이터를 찾아보자, 그리고 진단이 잘 되었는지 의뢰해 보자 
+
+X_test[clf.predict(X_test) != Y_test]
+
+idx = X_test[clf.predict(X_test) != Y_test].index.tolist()
+idx
+breast_cancer.iloc[idx]
+breast_cancer.iloc[idx]['diagnosis']
+#예측이 잘못 되었으면 k값을 조정해야 한다.
+#또는 다른 scale 조정 방법을 택한다.
