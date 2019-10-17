@@ -617,3 +617,243 @@ breast_cancer.iloc[idx]
 breast_cancer.iloc[idx]['diagnosis']
 #예측이 잘못 되었으면 k값을 조정해야 한다.
 #또는 다른 scale 조정 방법을 택한다.
+
+###############################################################
+#10/17#
+#어제 한 유방암 데이터를 다시 살펴 봄 
+import pandas as pd
+import numpy as np
+from sklearn.neighbors import KNeighborsClassifier
+#score () : 예측된 값과 실제 데이터의 값의 일치비율 
+clf.score(X_test, Y_test)
+
+#혼동행렬(confusion matrix) : 모델 성능을 평가할 때 사용되는 지표
+#예측값이 실제 관측값을 얼마나 정확히 예측했는지 보여주는 행렬
+from sklearn.metrics import classification_report, confusion_matrix
+y_predict = clf.predict(X_test)
+Y_test.shape
+y_predict.shape
+
+#예측한 결과와 실제 값을 비교해 보자 
+#test 값과 예측결과를 넣어야 한다.
+print(confusion_matrix(Y_test,y_predict))
+#    B  M
+#B [67 0 ]
+#M [ 8 39]
+from collections import Counter
+Counter(y_predict)#Counter({'M': 39, 'B': 75}) 예측된 갯수
+Counter(Y_test)#Counter({'M': 47, 'B': 67}) 실제 갯수 
+#예로 다음과 같이 2가지 결과가 나왔다고 하자 
+############################
+#[A]             예측
+#실제       암환자    일반환자
+#---------------------------
+#암환자         9          1
+#일반환자      30         60
+############################
+#[B]             예측
+#실제       암환자    일반환자
+#---------------------------
+#암환자         1          9
+#일반환자      20         70
+###########################
+#위 둘을 비교하면 A가 B보다 더 좋게 예측을 한다 
+
+#            예상(예)   예상(아니오)
+#----------------------------
+#실제(예)         TP       FN
+#실제(아니오)      FP       TN
+#
+#TP(True Positive) :참 긍정
+#병에 관한 아니오 라고 예측한 환자가 실제로 병이 없는 경우
+#TN(True Negative) : 참 부정
+#병에 관해 예 라고 예측한 환자가 실제로 병이 있는 경우
+#FP(False Positive) : 거짓 긍정
+#병에 관해 예 라고 예측한 환자가 실제로 병이 없는 경우 
+#FN(False Negative) : 거짓 부정 
+#병에 관해 아니오 라고 예측한 환자가 실제로 병이 있는 경우
+
+#예측 모델의 정확도(accuracy)
+#모델이 입력된 데이터에 대해 얼마나 정확하게 예측하는지를 나타낸다.
+#정확도 = 예측결과와 실제값이 동일한 건수 / 전체 데이터 수 
+#      = (TP + FN) / (TP + TN + FP + FN)
+(60 + 9) / 100#0.69
+(70 + 1) / 100#0.71
+#B의 정확도가 더 높다.
+
+#정밀도(precision) : positive 로 예측된 결과의 정확도
+#TP / (TP + FP)
+9 / (9 + 30)#0.230
+1 / (1 + 20)#0.0476
+#A의 정밀도가 더 높다. 
+print(classification_report(Y_test, y_predict)) 
+#              precision    recall  f1-score   support
+#
+#           B       0.89      1.00      0.94        67
+#           M       1.00      0.83      0.91        47
+#
+#    accuracy                           0.93       114
+#   macro avg       0.95      0.91      0.93       114
+#weighted avg       0.94      0.93      0.93       114
+
+#재현율(recall) : 실제 positive중 positive로 예측한 비율 
+#TP / (TP + FN)
+#실제값 중에서 모델이 검출한 실제값의 비율을 나타내는 지표
+#실제로 병이 있는 전체중 참 긍정 비율?
+#실제 암환자들이 병원에 갔을때 암환자라고 예측될 확률, 
+#조기에 정확하게 발견해서 신속하게 처방하는 것이 올바른 모델
+9 / (1 + 9)#0.9
+1 / (1 + 9)#0.1
+
+#f1-score 
+#정밀도도 중요하고 재현율도 중요한데 둘 중 무엇을 쓸지 고민될 수 있다.
+#이 두값의 조화평균을 내서 하나의 수치로 나타낸 지표 
+#f1-score : 2 * 평균 재현율 * 평균 정밀도 / (평균 재현율 + 평균 정밀도)
+
+#B 정밀도 : 67 / (67 + 8)
+#M 정밀도 : 40 / (40 + 0)
+#B 재현율 : 67 / (67 + 0)
+#M 재현율 : 40 / (40 + 6)
+
+### iris data를 불려들여봐서 knn를 해 보자 ###
+iris_data = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\iris.csv")
+iris_data
+iris_data.info()
+
+#빈도수를 계산하자
+from collections import Counter
+Counter(iris_data['Name'])
+
+#scale  하지 않고 해봄
+from sklearn.model_selection import train_test_split
+X = iris_data.iloc[:,0:4]
+Y = iris_data.iloc[:,4]
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.2)
+
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(21)
+clf.fit(X_train, Y_train)
+clf.predict(X_test)
+#예측이 맞는 비율 
+clf.score(X_test,Y_test)
+#예측과 실제값이 다른 row
+X_test[clf.predict(X_test) != Y_test]
+
+from sklearn.metrics import classification_report, confusion_matrix
+Y_predict = clf.predict(X_test)
+print(confusion_matrix(Y_test, Y_predict))
+print(classification_report(Y_test, Y_predict)) 
+
+#standard scale을 하고 해 보자 
+from sklearn.preprocessing import StandardScaler
+X = StandardScaler().fit_transform(iris_data.iloc[:,0:4])
+#from sklearn.preprocessing import scale
+#X = scale(iris_data.iloc[:,0:4])
+X = scale(iris_data.iloc[:,0:4])
+Y = iris_data.iloc[:,4]
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.2)
+
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(21)
+clf.fit(X_train, Y_train)
+clf.predict(X_test)
+#예측이 맞는 비율 
+clf.score(X_test,Y_test)
+#예측과 실제값이 다른 row
+X_test[clf.predict(X_test) != Y_test]
+
+#minmax scale을 하고 해 보자 
+from sklearn.preprocessing import MinMaxScaler
+X = MinMaxScaler().fit_transform(iris_data.iloc[:,0:4])
+from sklearn.preprocessing import minmax_scale
+X = minmax_scale(iris_data.iloc[:,0:4])
+
+iris_data.columns
+bool(iris_data.iloc[:,5])
+len(iris_data)
+
+df = DataFrame(index = range(len(iris_data)),
+               columns = iris_data.columns)
+
+def standard_scaler(dataFrame):
+    
+    from pandas import Series, DataFrame
+    
+    df = DataFrame(index = range(len(dataFrame)),
+               columns = dataFrame.columns)
+    
+    i = 0
+    while(True):
+        
+        try:
+            mean = dataFrame.iloc[:,i].mean()
+            std = dataFrame.iloc[:,i].std()
+            for j in range(len(dataFrame)):
+                df.iloc[j,i] = (dataFrame.iloc[j,i] - mean) / std
+        except:
+            break
+        i += 1
+    
+    return df
+
+X = standard_scaler(iris_data.iloc[:,0:4])
+
+def minmax_scaler(dataFrame):
+    
+    from pandas import Series, DataFrame
+    
+    df = DataFrame(index = range(len(dataFrame)),
+               columns = dataFrame.columns)
+    
+    i = 0
+    while(True):
+        
+        try:
+            max_value = dataFrame.iloc[:,i].max()
+            min_value = dataFrame.iloc[:,i].min()
+            for j in range(len(dataFrame)):
+                df.iloc[j,i] = (dataFrame.iloc[j,i] - min_value) / \
+                                (max_value - min_value)
+        except:
+            break
+        i += 1
+    
+    return df
+
+X = minmax_scaler(iris_data.iloc[:,0:4])
+Y = iris_data.iloc[:,4]
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.2)
+
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(21)
+clf.fit(X_train, Y_train)
+clf.predict(X_test)
+#예측이 맞는 비율 
+clf.score(X_test,Y_test)
+#예측과 실제값이 다른 row
+X_test[clf.predict(X_test) != Y_test]
+
+#그럼 k 가 1~100일때 예측이 얼마나 맞는지 보자 
+score_data = []
+for i in range(1,101):
+    clf = KNeighborsClassifier(i)
+    clf.fit(X_train, Y_train)
+    score = clf.score(X_test,Y_test)
+    print("이웃이 {}일때 정확도는 {} 이다.".format(i,score))
+    score_data.append(score)
+    
+score_data
+    
+import matplotlib.pylab as plt
+from matplotlib import font_manager, rc
+font_name = font_manager.FontProperties \
+(fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
+rc('font',family = font_name)
+
+plt.plot(score_data)
+plt.title("k값에 따른 예측이 맞는 비율")
+plt.xlabel("k")
+plt.ylabel("예측율")
