@@ -136,3 +136,55 @@ print(a)
 #   confidence      lift  leverage  conviction  
 #0    0.888889  2.222222      0.22         5.4  
 #1    1.000000  2.222222      0.22         inf  
+
+#################################################################
+#10/29#
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+
+#utf-8 로 인코딩 되어서 저장해놓아야 한다.
+groceries = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\groceries.csv",
+                        error_bad_lines = False)
+groceries#약 3000여 row가 없음 ...
+groceries.info()
+pd.set_option('display.max_columns',20)
+
+groceries2 = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\groceries.csv",
+                        sep = 'delimiter')
+
+groceries2.info()
+
+#
+import csv
+
+groceries = []
+with open("C:\\WorkSpace\\Python_Space\\data\\groceries.csv","r",
+          encoding = 'utf-8') as f:
+    data = csv.reader(f)
+    for i in data:
+        print(i)
+        groceries.append(i)
+    
+groceries
+type(groceries)
+groceries[0]
+#list모양으로 저장이 되어 있다.
+#이후로는 전날에 했던대로 하면 된다.
+
+t = TransactionEncoder()
+t_ary = t.fit(groceries).transform(groceries)
+t.columns_
+
+df = pd.DataFrame(t_ary, columns = t.columns_)
+df
+
+#min_support를 좀 작게 해야 한다. 그래야 나중에 
+#association_rules를 했을때 결과가 있다. 
+item = apriori(df, min_support = 0.002, use_colnames = True)
+item
+
+groceries_a = association_rules(item)
+groceries_a.info()
+print(groceries_a)
