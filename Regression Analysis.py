@@ -47,8 +47,19 @@ slope, intercept, r_value, p_value, stderr = stats.linregress(height, weight)
 
 ##
 import csv
-with open("C:\\WorkSpace\\Python_Space\\data\\score.txt",'r'):
+score_data =  []
+with open("C:\\WorkSpace\\Python_Space\\data\\score.txt",
+          'r', encoding = 'utf-8') as f:
+    score = csv.reader(f)
+    for i in score:
+        score_data.append(i)
     
+score_data
+len(score_data)
+
+
+
+
 #한글이 있으니 utf-8로 저장
 score = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\score.txt")
 score
@@ -111,3 +122,36 @@ reg.fit(insurance2[col],insurance2['charges'])
 
 print("절편 : ", reg.intercept_)
 print("기울기 : ",reg.coef_)
+
+#########################################################################
+#11/1#
+#알레르기 증세에 효과가 있다고 하는 새로 개발된 약품의 복용량(mg)과
+#지속되는 기간(일)을 조사한 자료입니다.
+#.....
+
+#
+import pandas as pd
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+iris = pd.read_csv("C:\\WorkSpace\\Python_Space\\data\\iris.csv")
+iris
+iris.info()
+X = iris.iloc[:,:-1]
+X
+Y = iris['Name']
+
+log = LogisticRegression()
+log.fit(X,Y)
+
+test1 = [[5.1, 3.5, 1.4, 0.2]]
+log.predict(test1)
+
+#실제 데이터를 넣어보자 
+iris.iloc[7,0:4]
+type(test1)
+type([iris.iloc[7,:0:4]])
+log.predict([iris.iloc[7,0:4]])
+#array(['Iris-setosa'], dtype=object)
+print(iris.iloc[7,4])
+#Iris-setosa
+
