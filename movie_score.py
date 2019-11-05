@@ -20,9 +20,8 @@ Created on Mon Nov  4 09:56:22 2019
 import re
 from bs4 import BeautifulSoup
 import urllib.request as req
-from selenium import webdriver
 
-#daum 영와 평점 게시판의 글을 수집하자 
+#daum 영화 평점 게시판의 글을 수집하자 
 url = 'https://movie.daum.net/moviedb/grade?\
 movieId=123582&type=netizen&page={}'
 
@@ -123,28 +122,6 @@ collections.Counter(inform_df['PN'])
 import nltk
 nltk.download('punkt')
 from nltk.tokenize import word_tokenize
-
-#for i in inform_df.iloc[:10,1]:
-#    print(i)
-#
-#words = set([j for i in inform_df.iloc[:100,1] for j in word_tokenize(i)])
-#words
-#
-#PWords = set([j for i in inform_df[inform_df['PN'] == 1]['review'] 
-#              for j in word_tokenize(i)])
-#    
-#NWords = set([j for i in inform_df[inform_df['PN'] == 0]['review'] 
-#              for j in word_tokenize(i)])
-#    
-##불용어를 제거하자
-#stopword = ['(',')','|','~']
-#PWords = [i for i in PWords if i not in stopword]
-
-#from konlpy.tag import Kkma
-#
-#k = Kkma()
-#
-
 from konlpy.tag import Twitter
 t = Twitter()
 #명사를 추출하자 
@@ -218,16 +195,11 @@ model.show_most_informative_features()
 train_data = []
 i = 0
 while(i < len(score_text)):
-    #print('while')
-    if (int(score_text[i]) >= 9):
-        #print('p')
+    if (score_text[i] >= 9):
         train_data.append((review_text[i],'Positive'))
-    elif (int(score_text[i]) <= 2):
-        #print('n')
+    elif (score_text[i] <= 2):
         train_data.append((review_text[i],'Negative'))
-    
     i = i + 1
-    #print(i)
 
 allword2 = set([j for i in train_data for j in word_tokenize(i[0])])
 
@@ -258,7 +230,7 @@ t_p_n = {word : (word in word_tokenize(test))
 t_p_n
 model2.classify(t_p_n)
 
-#길이가 1이하인 단어를 제거하고 해 보자 
+#이번에는 길이가 1 이하인 단어를 제거하고 해 보자 
 allword3 = [i for i in allword2 if (len(i) > 1)]
 
 collections.Counter(allword3)
@@ -284,7 +256,7 @@ model3.show_most_informative_features()
 #                      영화 = True           Negati : Positi =      2.9 : 1.0
 
 #'터미네이터' 가 있는게 N이 P보다 왜 9배나 될까???
-
+#갯수를 해아려 보자 
 P_N2[0][0]['터미네이터']
 P_N2[0][1]
 

@@ -139,7 +139,7 @@ iris.info()
 X = iris.iloc[:,:-1]
 X
 Y = iris['Name']
-
+Y
 log = LogisticRegression()
 log.fit(X,Y)
 
