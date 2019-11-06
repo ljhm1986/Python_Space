@@ -661,7 +661,7 @@ tuple5 = (1,2,('a','b','c'),3,(1,2,3))
 type(tuple5[0])#int
 type(tuple5[2][0])#str
 
-#tuple 2개를 합치
+#tuple 2개를 합치기 
 x = (1,2,3)
 y = (4,5,6)
 

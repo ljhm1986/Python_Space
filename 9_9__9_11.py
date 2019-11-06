@@ -92,7 +92,7 @@ factorial5(-2)
 #-반복문과 stack구조를 의미한다.
 
 #stack
-#- 바닥부터 데이터를 쌓는 개
+#- 바닥부터 데이터를 쌓는 개념 
 #- LIFO(Last In First Out) : 마지막으로 들어오는 데이터가 제일 먼저 나간다.
 #후힙선출
 #-push : 마지막 데이터 위치에 데이터를 입력한다.
@@ -1003,11 +1003,13 @@ for i in emp_50_sorted:
 바이너리 형태로 저장된다. '''
 import pickle
 lst = ['a', 'b', 'c']
-file = open('C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'wb') # wb: 바이너리 형식으로 쓰기
+file = open('C:\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'wb') 
+# wb: 바이너리 형식으로 쓰기
 pickle.dump(lst, file)
 file.close()
 
-file = open('\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'rb') #rb: 바이너리 파일 읽기
+file = open('\\WorkSpace\\PythonSpace\\Python_Space\\data\\lst.txt', 'rb')
+ #rb: 바이너리 파일 읽기
 lst_temp = pickle.load(file)
 file.close()
 lst_temp

@@ -7,7 +7,7 @@ Created on Thu Oct 31 09:24:52 2019
 
 import pandas as pd
 
-KTPData = pd.read_excel("C:\\WorkSpace\\FinanceBigData\\KT_유동인구.xlsx",
+KTPData = pd.read_excel("C:\\WorkSpace\\FinanceData\\KT_유동인구.xlsx",
                       sheet_name = '유동인구 데이터')
 type(KTPData)
 KTPData.info()
@@ -43,3 +43,9 @@ font_name = font_manager.FontProperties \
 rc('font',family = font_name)
 
 plt.plot(a)
+
+
+KT_h = pd.read_excel("C:\\WorkSpace\\FinanceData\\KT_행정동 코드 데이터.xlsx")
+KT_h
+
+KT_h.columns
