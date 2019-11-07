@@ -456,3 +456,53 @@ model.fit(x_train, y_train)
 result = model.predict(x_test)
 model.score(x_train, y_train)
 model.score(x_test, y_test)
+
+##
+#11/7#
+#어제했었던 와인의 등급이 9단계였는데, 등급감정이 잘 되어있었는가?
+#등급이 잘 매겨져 있다면 군집도 잘 되어 있어야 하지 않을까?
+#k-mean 을 이용해서 확인해보자
+import pandas as pd
+import numpy as np
+WL = pd.read_csv("C:\WorkSpace\Python_Space\data\whitewines.csv")
+WL
+WL.columns
+
+x = WL.drop('quality', axis = 1)
+x
+y = WL['quality']
+y
+y.value_counts()
+#6    2198
+#5    1457
+#7     880
+#8     175
+#4     163
+#3      20
+#9       5
+#Name: quality, dtype: int64
+
+#x를 표준화하자
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+x = scaler.fit_transform(x)
+
+from sklearn.cluster import KMeans
+model = KMeans(n_clusters = 7)
+model.fit(x)
+model.labels_
+
+import collections
+collections.Counter(model.labels_)
+#Counter({6: 422, 1: 726, 4: 972, 2: 894, 0: 970, 5: 100, 3: 814})
+
+type(model.labels_)
+np.array(model.labels_)
+#
+#비교를 어떻게 할까?
+model_labels = model.labels_ + 3
+type(model_labels)
+
+
+import matplotlib.pyplot as plt
+plt.scatter(x = model_labels.index, y = model_labels)

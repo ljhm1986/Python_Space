@@ -396,7 +396,8 @@ class Employee:
    def printCount(self):
        print("클래스 수 : %d" %Employee.empCn)
    def addEmployee(self, name, addr, salary):
-       self.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " + str(salary)+"\n"
+       self.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " +\
+       str(salary)+"\n"
        self.cn += 1
    def printEmployee(self):
        print(self.info)
@@ -426,7 +427,8 @@ class Employee:
     def printCount(self):
         print("전체 인원수 : %d" %Employee.empCn)
     def addEmployee(self, name, addr, salary):
-        self.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " + str(salary)+"\n"                            
+        self.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " +\
+        str(salary)+"\n"                            
         Employee.empCn += 1
     def printEmployee(self):
         print(self.info)
@@ -447,14 +449,15 @@ emp2.printEmployee()
 
 #########################################
 class Employee:
-    
+    #초기화 함수 밖에서 변수를 선언함 
     empCn = 0
     info = ""
     def printCount(self):
         print("전체 인원수 : %d" %Employee.empCn)
     def addEmployee(self, name, addr, salary):
         #다른 인스턴스에서 정보를 입력해도 모두 합쳐진다. 
-        Employee.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " + str(salary)+"\n"                            
+        Employee.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " +\
+        str(salary)+"\n"                            
         Employee.empCn += 1
     def printEmployee(self):
         print(Employee.info)
@@ -476,7 +479,7 @@ emp2.printEmployee()
 
 #########################################
 class Employee:
-    
+    #초기화 함수 안에서 변수를 선언함 
     empCn = 0
     def __init__(self):
         #이러면 나중에 새로운 인스턴스를 생성할때 다른 인스턴스에서 입력해놓은
@@ -486,7 +489,8 @@ class Employee:
         print("전체 인원수 : %d" %Employee.empCn)
     def addEmployee(self, name, addr, salary):
         #다른 인스턴스에서 정보를 입력해도 모두 합쳐진다. 
-        Employee.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " + str(salary)+"\n"                            
+        Employee.info += "이름 : "+name+" 주소 : "+addr+ " 급여 : " +\
+        str(salary)+"\n"                            
         Employee.empCn += 1
     def printEmployee(self):
         print(Employee.info)
@@ -936,6 +940,7 @@ class Parents:
         
 p = Parents("고길동","000-0000-0000")
 p.Printinfo()
+#이름 : 고길동, 전화번호 : 000-0000-0000
 
 #상속을 받는 class를 만들자 
 class Child(Parents):
@@ -949,6 +954,7 @@ class Child(Parents):
 c = Child("홍하드","010-1004-1004","서울","000000-1234567")
 #부모 class의 함수를 사용할 수 있다. 
 c.Printinfo()
+#이름 : 홍하드, 전화번호 : 010-1004-1004
 
 #초기화를 할 때 자식 클레스에서 부모 클래스에 있는 부분을 대체해 보자 
 class Child2(Parents):
@@ -963,7 +969,9 @@ class Child2(Parents):
         
 c2 = Child2("홍하드","010-1004-1004","서울","000000-1234567")
 c2.Printinfo()
+#이름 : 홍하드, 전화번호 : 010-1004-1004
 c2.showInfo()
+#주소 : 서울, 주민번호 : 000000-1234567
 
 #[문제169] Person 클래스를 생성하세요. 생성자는 이름, 나이, 성별을 만드세요.
 #Person 클래스 에는 printMe 메소드를 생성하셔서 이름, 나이 성별을 출력합니다.
@@ -1001,7 +1009,8 @@ e1.printMe()
 #[문제170] Add 클래스에 두수를 더하는 값을 리턴하는 add 메소드 생성
 #Multiply 클래스에 두수를 곱한값을 리턴하는 multiply 메소드 생성
 #Divide 클래스에 두수를 나눈값을 리턴하는 divide메소드 생성
-#Calculator클래스에는 Add, Multiply, Divide 상속받고 두수를 뺀값을 리턴하는 sub 메소드 생성하세요.
+#Calculator클래스에는 Add, Multiply, Divide 상속받고 두수를 뺀값을 
+#리턴하는 sub 메소드 생성하세요.
 #
 #cal = Calculator()
 #print(cal.add(10,20))
@@ -1889,7 +1898,7 @@ print(p2)
 p1 + p2
 #__sub__()를 추가했음
 p1 - p2
-#__mul__()를 추가했
+#__mul__()를 추가했음
 p1 * p2
 
 #tuple
@@ -1910,10 +1919,14 @@ Person = collections.namedtuple("Person",'name age gender')
 n1 = Person(name = "홍길동",age = 10, gender = "남")
 n2 = Person(name = "김태희",age = 40, gender = "여")
 print(n1)
+#Person(name='홍길동', age=10, gender='남')
 print(n2)
+#Person(name='김태희', age=40, gender='여')
 
 for i in [n1,n2]:
     print('%s은(는) %d세의 %s성 입니다.'%i)
+#홍길동은(는) 10세의 남성 입니다.
+#김태희은(는) 40세의 여성 입니다.
 
 #t1, t2를 직교좌표계의 두 점이라 하자  
 t1 = (1.0,6.0)
