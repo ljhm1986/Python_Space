@@ -22,16 +22,9 @@ header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)\
 url = "https://www.metacritic.com/browse/games/score/metascore/year/all/\
 filtered?sort=desc&year_selected={}&page={}"#출시년도,페이지 번호
 
-search_years = [2016,2017,2018]
+search_years = range(2013,2019)
 
 import copy
-temp_header = copy.deepcopy(header)
-temp_header
-temp_header['Referer'] = temp_header['Referer'].format(2018,5)
-res = req.urlopen(req.Request(url.format(2018,5),headers = temp_header))
-soup = BeautifulSoup(res,'html.parser')
-soup
-type(soup)
 
 import pandas as pd
 import numpy as np
@@ -43,64 +36,8 @@ metascoreDF
 pd.set_option('display.max_rows',100)
 pd.set_option('display.max_columns',10)
 
-#body부분으로 범위를 줄인 다음에 
-soup_body = soup.find('div',class_='body_wrap')
-soup_body
-
-#게임 이름과 작동 기기 
-j = 0
-for i in soup_body.find_all('div',class_='basic_stat product_title'):
-    temp = i.get_text().strip()
-    name = temp.split('(')[0].strip()
-    platform = temp.split('(')[1].strip(')')
-    metascoreDF.at[j,'name'] = name
-    metascoreDF.at[j,'platform'] = platform
-    j += 1
-    
-metascoreDF['name']
-metascoreDF['platform']
-
-
-soup_body.find_all('div',class_= 'metascore_w small game positive')
-soup_body.select('div.basic_stat.product_score.brief_metascore')
-#metascore
-j = 0
-for i in soup_body.select('div.basic_stat.product_score.brief_metascore'):
-    metascore = i.get_text().strip()
-    metascoreDF.at[j,'metascore'] = metascore
-    j +=1
-
-sum(metascoreDF['metascore'].isnull())
-
-#userscore
-j = 0
-for i in soup_body.find_all('li',class_= 'stat product_avguserscore'):
-    temp = i.get_text().strip()
-    userscore = temp.split(':')[1].strip()
-    metascoreDF.at[j,'userscore'] = userscore
-    j += 1
-    
-sum(metascoreDF['userscore'].isnull())    
-    
-metascoreDF[['name','userscore']]
-
 import re
-#출시날짜(년도) 
-j = 0
-for i in soup_body.select('li.stat.release_date.full_release_date > span.data'):
-    #print(i.get_text().strip())
-    #년도만 뽑자
-    temp_text = i.get_text().strip()
-    year = re.search('\d{4}',temp_text)
-    metascoreDF['year'] = year[0]
-    j += 1
 
-metascoreDF.iloc[55,:]
-metascoreDF.info()
-metascoreDF['metascore'] = metascoreDF['metascore'].astype(int)
-metascoreDF['userscore'] = metascoreDF['userscore'].astype(float)
-len(metascoreDF)
-(metascoreDF)
 #year는 숫자형으로 변환하는게 좋을까? 
 pd.to_datetime(metascoreDF['year'],format = '%Y')
 
@@ -111,7 +48,6 @@ for search_year in search_years:
     while(True):
         print('page : {}'.format(page))
         temp_header = copy.deepcopy(header)
-        temp_header
         temp_header['Referer'] = temp_header['Referer'].format(search_year,page)
         
         res = req.urlopen(req.Request(url.format(search_year,page),headers = temp_header))
@@ -137,7 +73,7 @@ for search_year in search_years:
             metascore = i.get_text().strip()
             metascoreDF.at[j,'metascore'] = metascore
             j +=1
-        #userscore
+        #userscore와 출시날짜(년도) 
         j = start
         for i in soup_body.find_all('li',class_= 'stat product_avguserscore'):
             temp = i.get_text().strip()
@@ -146,21 +82,16 @@ for search_year in search_years:
                 metascoreDF.at[j,'userscore'] = userscore
             else:
                 pass
+            metascoreDF.at[j,'year'] = search_year
             j += 1
-        #출시날짜(년도) 
-        j = start
-        for i in soup_body.select('li.stat.release_date.full_release_date > span.data'):
-            temp_text = i.get_text().strip()
-            year = re.search('\d{4}',temp_text)
-            metascoreDF['year'] = year[0]
-            j += 1
-        
+              
         page += 1
 
 #userscore가 tbd인 row는 삭제할까?
 
 metascoreDF.info()
 metascoreDF.isnull().sum()
+metascoreDF['year'].unique()
 
 metascoreDF['metascore'] = metascoreDF['metascore'].astype(int)
 metascoreDF['userscore'] = metascoreDF['userscore'].astype(float)
@@ -176,8 +107,7 @@ metascoreDF['userscore'] = np.where(metascoreDF['userscore'].isnull(),
                metascoreDF['mean_userscore'],metascoreDF['userscore'])
 
 #뽑아놓은거 저장하자 
-metascoreDF.to_csv("C:\WorkSpace\Python_Space\Project\metascore.csv")
-
+metascoreDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
 
 
 import matplotlib.pylab as plt
@@ -214,37 +144,6 @@ header = {"User-Agent":"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/\
           537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36",
           "Referer":"https://opencritic.com/browse/all/{}?page={}"}
 url = "https://opencritic.com/browse/all/{}?page={}"
-
-temp_header = copy.deepcopy(header)
-temp_header
-temp_header['Referer'] = temp_header['Referer'].format(2018,46)
-res = req.urlopen(req.Request(url.format(2018,46),headers = temp_header))
-soup = BeautifulSoup(res,'html.parser')
-
-soup_body = soup.find('div',class_='desktop-game-display')
-
-soup_body.get_text() == ''
-
-#점수
-for i in soup_body.find_all('div',class_='score col-auto'):
-    print(i.get_text().strip())
-    score = i.get_text().strip()
-    if score == '':
-        break
-    
-#점수 없는거 어떡?
-    
-#게임이름
-for i in soup_body.select('div.game-name.col > a'):
-    print(i.get_text().strip())
-
-    
-#플랫폼
-for i in soup_body.find_all('div',class_='platforms col-auto'):
-    print(i.get_text().strip())
-    
-#출시년도
-#years 로
     
 opencriticDF = DataFrame(columns = ['openscore','name','platform','year'])
 opencriticDF
@@ -255,7 +154,6 @@ for search_year in search_years:
     while(True):
         print('page : {}'.format(page))
         temp_header = copy.deepcopy(header)
-        temp_header
         temp_header['Referer'] = temp_header['Referer'].format(search_year,page)
         res = req.urlopen(req.Request(url.format(search_year,page),headers = temp_header))
         soup = BeautifulSoup(res,'html.parser')
@@ -272,6 +170,7 @@ for search_year in search_years:
         j = start
         for i in soup_body.find_all('div',class_='score col-auto'):
             score = i.get_text().strip()
+            #점수가 없으면 멈춘다.
             if score == '':
                 end = j
                 break
@@ -306,9 +205,19 @@ opencriticDF.info()
 opencriticDF['openscore'] = opencriticDF['openscore'].astype('int')
 
 #저장하자 
-opencriticDF.to_csv("C:\WorkSpace\Python_Space\Project\opencritic.csv")
+opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
 
-######
+### 불러오기 ###
+metascoreDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
+metascoreDF = metascoreDF.iloc[:,1:]
+
+opencriticDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
+opencriticDF = opencriticDF.iloc[:,1:]
+### 
+
+metascoreDF['year']
+opencriticDF['year']
+#############################################################
 meta1 = metascoreDF[['name','metascore','userscore','year']]
 meta1.info()
 open1 = opencriticDF[['openscore','name','year']]
@@ -325,6 +234,6 @@ meta2.index = range(len(meta2))
 meta2.info()
 
 
-mergeDF = pd.merge(open1, meta2, on = 'name', how = 'outer')
+mergeDF = pd.merge(open1, meta2, on = 'name')
 mergeDF.info()
 
