@@ -208,32 +208,58 @@ opencriticDF['openscore'] = opencriticDF['openscore'].astype('int')
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
 
 ### 불러오기 ###
-metascoreDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
+metascoreDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascore.csv")
 metascoreDF = metascoreDF.iloc[:,1:]
 
-opencriticDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
+opencriticDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencritic.csv")
 opencriticDF = opencriticDF.iloc[:,1:]
 ### 
 
 metascoreDF['year']
 opencriticDF['year']
+metascoreDF.columns
+
+metascoreDF.groupby(metascoreDF['year']).count()
+metascoreDF.count()
+#플랫폼마다 각기 따로 등록이 되어 있으니 이름을 합치자 
+metascoreDF.groupby('name')[['metascore','userscore']].mean()
+metascoreDF_NAME = metascoreDF.groupby('name')\
+[['metascore','userscore','year','mean_userscore']].mean()
+metascoreDF_NAME['name'] = metascoreDF_NAME.index
+metascoreDF_NAME.index = range(len(metascoreDF_NAME))
+metascoreDF_NAME
+
+metascoreDF_NAME.groupby('year').count()#출시년도가 정수로 안 떨어지는 건?
+#어떻게 처리를 할까? 처음 출시년도를 기준으로 하자 
+import math
+metascoreDF_NAME['year'] = [math.floor(i) for i in metascoreDF_NAME['year']]
+
+#년도별 출시된 게임의 수 
+import collections
+year_count = collections.Counter(metascoreDF_NAME['year'])
+type(year_count)
+year_count.keys()
+year_count.values()
+plt.bar(year_count.keys(), year_count.values())
+
+#년도별 점수 비교 
+metascoreDF_NAME.groupby('year')[['metascore','userscore']].mean()
+metascoreDF_NAME.groupby('year')[['metascore','userscore']].describe()
+
+
 #############################################################
-meta1 = metascoreDF[['name','metascore','userscore','year']]
+meta1 = metascoreDF_NAME[['name','metascore','userscore','year']]
 meta1.info()
 open1 = opencriticDF[['openscore','name','year']]
 open1
 open1.columns
 open1.info()
 
-meta2 = meta1.groupby(meta1['name']).mean().sort_values(by = 'metascore')
-type(meta2)
-meta2.columns
-meta2.index
-meta2['name'] = meta2.index
-meta2.index = range(len(meta2))
-meta2.info()
 
-
-mergeDF = pd.merge(open1, meta2, on = 'name')
+mergeDF = pd.merge(open1, meta1, on = 'name')
 mergeDF.info()
+
+(mergeDF['year_x'] == mergeDF['year_y']).sum()#년도가 다른게 있는데..... 
+
+mergeDF.to_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 

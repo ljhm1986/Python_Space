@@ -65,6 +65,7 @@ def knn(point, pointlist, k):
 ###
 dist = np.sqrt(np.sum(pow(np.array(point) - np.array(pointlist),2),axis = 1))
 dist
+type(dist)
 #오름차순된 index번호를 반환한다. 
 indices = dist.argsort()
 #2개만 보려면 
@@ -108,7 +109,9 @@ list1[1][1]
 
 point = (6,4)
 
+#column name을 제거
 list1 = list1[1:]
+#point와 각 점들의 거리를 계산하여 각 중첩 리스트에 추가하자 
 for i in range(len(list1)):
     print(list1[i][1:3])
     distance_temp = ((point[0] - int(list1[i][1]))**2 
@@ -117,13 +120,14 @@ for i in range(len(list1)):
 
 list1
 #정렬은...
-
+#dictionary를 만들어 과일이름 : 거리 로 저장하자 
 dict1 = {}
 for i in list1:
     dict1[i[0]] = i[4]
     
 dict1
 
+#거리에 대하여 올림차순으로 정렬하자 
 sort_dict1 = sorted(dict1.items(), key=operator.itemgetter(1))
 sort_dict1
 
