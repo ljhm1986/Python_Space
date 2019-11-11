@@ -22,7 +22,7 @@ header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)\
 url = "https://www.metacritic.com/browse/games/score/metascore/year/all/\
 filtered?sort=desc&year_selected={}&page={}"#출시년도,페이지 번호
 
-search_years = range(2013,2019)
+search_years = range(2013,2020)
 
 import copy
 
@@ -108,7 +108,7 @@ metascoreDF['userscore'] = np.where(metascoreDF['userscore'].isnull(),
 
 #뽑아놓은거 저장하자 
 metascoreDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
-
+metascoreDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/metascore2019.csv")
 
 import matplotlib.pylab as plt
 #한글이 깨져서 나온다. 폰트에 한글폰트를 설정하자 
@@ -206,16 +206,27 @@ opencriticDF['openscore'] = opencriticDF['openscore'].astype('int')
 
 #저장하자 
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
+opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
 
 ### 불러오기 ###
-metascoreDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascore.csv")
+metascoreDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
 metascoreDF = metascoreDF.iloc[:,1:]
 
-opencriticDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencritic.csv")
+opencriticDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
 opencriticDF = opencriticDF.iloc[:,1:]
+
+metascore2019 = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore2019.csv")
+metascore2019 = metascore2019.iloc[:,1:]
+
+opencritic2019 = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
+opencritic2019 = opencritic2019.iloc[:,1:]
 ### 
 
-metascoreDF['year']
+metascoreDF
+metascore2019
+#모두 합쳐서 merge까지 한 다음에 2018년도까지와 2019년을 나누자 
+
+metascoreDF['year'].astype(int)
 opencriticDF['year']
 metascoreDF.columns
 
@@ -263,3 +274,24 @@ mergeDF.info()
 
 mergeDF.to_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 
+##############################################################
+#플랫폼마다 각기 따로 등록이 되어 있으니 이름을 합치자 
+metascore2019.groupby('name')[['metascore','userscore']].mean()
+metascore2019_NAME = metascore2019.groupby('name')\
+[['metascore','userscore','year','mean_userscore']].mean()
+metascore2019_NAME['name'] = metascore2019_NAME.index
+metascore2019_NAME.index = range(len(metascore2019_NAME))
+metascore2019_NAME
+
+meta1 = metascore2019_NAME[['name','metascore','userscore','year']]
+meta1.info()
+open1 = opencritic2019[['openscore','name','year']]
+open1
+open1.columns
+open1.info()
+
+
+merge2019 = pd.merge(open1, meta1, on = 'name')
+merge2019.info()
+
+merge2019.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge2019.csv")

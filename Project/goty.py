@@ -76,6 +76,8 @@ print(count)#53
 
 metascoreDF[metascoreDF['name'].isin(gotyA)]
 
+
+mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
 mergeDF['name']
 
 mergeDF['goty'] = [2 if i in gotyA else 1 if i in gotyB else 0 for i in mergeDF['name']]
@@ -92,6 +94,9 @@ model.fit(mergeDF.iloc[:,1:4])
 model.labels_
 model.cluster_centers_
 
+#응집도 
+model.inertia_
+
 colormatp = np.array(['red','blue','green','black'])
 plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
             c = colormatp[model.labels_], s = 2)
@@ -101,7 +106,7 @@ plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
             marker = 'D', c='g')
 plt.show()
 
-#knn
+### knn
 from sklearn.neighbors import KNeighborsClassifier
 #훈련 데이터 셋
 x_train = np.array(mergeDF.iloc[:,1:4])
@@ -114,3 +119,9 @@ clf = KNeighborsClassifier(n_neighbors = 3)
 clf.fit(x_train,label)
 #이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 clf.predict(np.array([[95,95,95]]))[0]
+
+merge2019 = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge2019.csv")
+merge2019 = merge2019[['name','metascore','userscore','openscore','year_y']]
+merge2019['userscore'] = merge2019['userscore']*10
+
+clf.predict(merge2019.iloc[:,1:4])
