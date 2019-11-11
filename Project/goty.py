@@ -87,12 +87,12 @@ mergeDF['userscore'] = mergeDF['userscore']*10
 
 #k-mean 을 이용해서 여러 그룹으로 나누어 보자 
 from sklearn.cluster import KMeans
-model = KMeans(n_clusters = 5)
+model = KMeans(n_clusters = 4)
 model.fit(mergeDF.iloc[:,1:4])
 model.labels_
 model.cluster_centers_
 
-colormatp = np.array(['red','blue','green','yellow','black'])
+colormatp = np.array(['red','blue','green','black'])
 plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
             c = colormatp[model.labels_], s = 2)
 
