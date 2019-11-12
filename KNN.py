@@ -318,13 +318,15 @@ np.vstack([x, [100]])#100이 추가된다.
 x
 pd.DataFrame(x).describe()
 
-#표준정규분호로 표준화하는 방법 
+#표준정규분포로 표준화하는 방법 
 y = (x - np.mean(x))/np.std(x)
 
 pd.DataFrame(y).describe()
 
-from sklearn.preprocessing import StandardScaler
+#train set의 평균을 빼고 표준편차로 나눈다.
 #평균 0, 분산 1로 조정된다.
+from sklearn.preprocessing import StandardScaler
+
 y_1  = StandardScaler().fit_transform(x)
 
 np.mean(y_1)

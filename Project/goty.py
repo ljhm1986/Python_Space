@@ -50,52 +50,56 @@ gotyB = goty2013B + goty2014B + goty2015B + goty2016B + goty2017B + goty2018B
 
 len(gotyA)#19
 len(gotyB)#73
-count = 0
-for i in metascoreDF['name']:
-    if i in gotyA:
-        count += 1
-print(count)#39
+#count = 0
+#for i in metascoreDF['name']:
+#    if i in gotyA:
+#        count += 1
+#print(count)#39
+#
+#count = 0
+#for i in opencriticDF['name']:
+#    if i in gotyA:
+#        count += 1
+#print(count)#15
+#
+#count = 0
+#for i in metascoreDF['name']:
+#    if i in gotyB:
+#        count += 1
+#print(count)#153
+#
+#count = 0
+#for i in opencriticDF['name']:
+#    if i in gotyB:
+#        count += 1
+#print(count)#53
+#
+#metascoreDF[metascoreDF['name'].isin(gotyA)]
 
-count = 0
-for i in opencriticDF['name']:
-    if i in gotyA:
-        count += 1
-print(count)#15
 
-count = 0
-for i in metascoreDF['name']:
-    if i in gotyB:
-        count += 1
-print(count)#153
+mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
+mergeDF = mergeDF.iloc[:,1:]
+mergeDF.info()
 
-count = 0
-for i in opencriticDF['name']:
-    if i in gotyB:
-        count += 1
-print(count)#53
-
-metascoreDF[metascoreDF['name'].isin(gotyA)]
-
-
-mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
-mergeDF['name']
-
-mergeDF['goty'] = [2 if i in gotyA else 1 if i in gotyB else 0 for i in mergeDF['name']]
-mergeDF.sort_values(by = 'metascore')
-mergeDF[mergeDF['goty'] >= 1]
-
-mergeDF = mergeDF[['name','metascore','userscore','openscore','year_x','goty']]
-mergeDF['userscore'] = mergeDF['userscore']*10
+mergeDF = mergeDF[['name','metascore','userscore','openscore','year_x']]
 
 #k-mean 을 이용해서 여러 그룹으로 나누어 보자 
 from sklearn.cluster import KMeans
 model = KMeans(n_clusters = 4)
-model.fit(mergeDF.iloc[:,1:4])
+
+#2가지 스케일링으로 실시해 본다.
+## 표준화(standardization) ##
+import copy
+X = copy.deepcopy(mergeDF)
+X.columns
+
+from sklearn.preprocessing import StandardScaler
+X_train = X.iloc[:,1:4]
+X_train_standardScale = StandardScaler().fit_transform(X_train)
+
+model.fit(X_train_standardScale)
 model.labels_
 model.cluster_centers_
-
-#응집도 
-model.inertia_
 
 colormatp = np.array(['red','blue','green','black'])
 plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
@@ -106,12 +110,97 @@ plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
             marker = 'D', c='g')
 plt.show()
 
+#응집도 
+model.inertia_
+
+l = range(1,11)
+inertia = []
+for k in l:
+    model = KMeans(n_clusters = k)
+    model.fit(X_train_standardScale)
+    inertia.append(model.inertia_)
+    
+inertia
+
+plt.plot(l, inertia, '-o')
+plt.xlabel("number of cluster K")
+plt.ylabel("inertia")
+plt.xticks(l)
+
+## 정규화(normalization) ##
+model2 = KMeans(n_clusters = 4)
+
+import copy
+X = copy.deepcopy(mergeDF)
+X.columns
+
+
+from sklearn.preprocessing import scale
+X_train = X.iloc[:,1:4]
+type(scale(X_train))
+X_train_normalScale = scale(X_train)
+
+model2.fit(X_train_normalScale)
+model2.labels_
+model2.cluster_centers_
+
+colormatp = np.array(['red','blue','green','black'])
+plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
+            c = colormatp[model2.labels_], s = 2)
+
+centers = pd.DataFrame(model.cluster_centers_)
+plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
+            marker = 'D', c='g')
+plt.show()
+
+#응집도 
+model2.inertia_
+
+l = range(1,11)
+inertia = []
+for k in l:
+    model2 = KMeans(n_clusters = k)
+    model2.fit(X_train_standardScale)
+    inertia.append(model2.inertia_)
+    
+inertia
+
+plt.plot(l, inertia, '-o')
+plt.xlabel("number of cluster K")
+plt.ylabel("inertia")
+plt.xticks(l)
+
+#두 스케일로 그룹이 달라지는가? 근데 각 위치별로 숫자가 일치하는건 아닌데
+#... 
+
+(model.labels_ == model2.labels_).sum()
+
+########################################################################
+#goty 표시하기 전에 2018년도 이전과 2019년도 작품을 분리하자 
+mergeA = mergeDF[mergeDF['year_x'] <= 2018]
+mergeB = mergeDF[mergeDF['year_x'] == 2019]
+len(mergeA)
+len(mergeB)
+
+mergeB[mergeB['metascore'] >= 90]
+
+mergeA['goty'] = [2 if i in gotyA else 1 if i in gotyB else 0 for i in mergeA['name']]
+mergeA.sort_values(by = 'metascore')
+mergeA[mergeA['goty'] >= 1]
+
 ### knn
 from sklearn.neighbors import KNeighborsClassifier
+
+#KNN도 2가지 방법으로 스케일링을 하자 
+## 표준화(standardization) ##
+from sklearn.preprocessing import StandardScaler
+X = StandardScaler().fit_transform(mergeA.iloc[:,1:4])
+X
+
 #훈련 데이터 셋
-x_train = np.array(mergeDF.iloc[:,1:4])
+x_train = np.array(X)
 #분류기준 
-label = mergeDF['goty']
+label = mergeA['goty']
 
 #근접 점의 갯수
 clf = KNeighborsClassifier(n_neighbors = 3)
@@ -120,8 +209,44 @@ clf.fit(x_train,label)
 #이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 clf.predict(np.array([[95,95,95]]))[0]
 
-merge2019 = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge2019.csv")
-merge2019 = merge2019[['name','metascore','userscore','openscore','year_y']]
-merge2019['userscore'] = merge2019['userscore']*10
+Y = StandardScaler().fit_transform(mergeB.iloc[:,1:4])
+pred = clf.predict(Y)
 
-clf.predict(merge2019.iloc[:,1:4])
+import collections
+type(pred)
+len(pred)
+collections.Counter(pred)
+
+j = 0
+for i in pred:
+    print(i)
+    if i > 0:
+        print(mergeB.iloc[j,:])
+    j +=1
+    
+colormatp = np.array(['yellow','blue','red'])
+plt.scatter(mergeA.iloc[:,1], mergeA.iloc[:,3],
+            c = colormatp[label], s = 2)
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure()
+axes3d = plt.axes(projection = '3d')
+axes3d.scatter(mergeA.iloc[:,1], mergeA.iloc[:,2], mergeA.iloc[:,3],
+               c = colormatp[label], s = 2)
+
+ 
+#보니 goty를 받지 못한 작품이 절대적으로 대다수이므로
+#근접한 작품중에서 goty 0 인 작품이 더 많을 것이다. 
+#그러므로 goty 2 없고, goty 1이 하나만 나온다. 
+
+#####################################################################
+from sklearn.linear_model import LogisticRegression
+log = LogisticRegression()
+log.fit(mergeA.iloc[:,1:4],label)
+
+pred2 = log.predict(mergeB.iloc[:,1:4])
+collections.Counter(pred2)
+
+#####################################################################

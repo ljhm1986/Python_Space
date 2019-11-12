@@ -209,16 +209,16 @@ opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.cs
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
 
 ### 불러오기 ###
-metascoreDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore.csv")
+metascoreDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascore.csv")
 metascoreDF = metascoreDF.iloc[:,1:]
 
-opencriticDF = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
+opencriticDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencritic.csv")
 opencriticDF = opencriticDF.iloc[:,1:]
 
-metascore2019 = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascore2019.csv")
+metascore2019 = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascore2019.csv")
 metascore2019 = metascore2019.iloc[:,1:]
 
-opencritic2019 = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
+opencritic2019 = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencritic2019.csv")
 opencritic2019 = opencritic2019.iloc[:,1:]
 ### 
 
@@ -226,15 +226,25 @@ metascoreDF
 metascore2019
 #모두 합쳐서 merge까지 한 다음에 2018년도까지와 2019년을 나누자 
 
-metascoreDF['year'].astype(int)
-opencriticDF['year']
-metascoreDF.columns
+metascoreAll = metascoreDF.iloc[:,:-1].append(metascore2019.iloc[:,:-1])
+metascoreAll.info()
+metascoreAll.groupby('metascore')['userscore'].mean()
 
-metascoreDF.groupby(metascoreDF['year']).count()
-metascoreDF.count()
+mean_userscore = metascoreAll.groupby('metascore')['userscore'].mean()
+metascoreAll['mean_userscore'] = [mean_userscore[i] for i in metascoreAll['metascore']] 
+metascoreAll['userscore'] = np.where(metascoreAll['userscore'].isnull(),
+               metascoreAll['mean_userscore'],metascoreAll['userscore'])
+
+opencriticAll = opencriticDF.append(opencritic2019)
+
+metascoreAll.groupby(metascoreAll['year']).count()
+metascoreAll.count()
+
+opencriticAll.groupby(opencriticAll['year']).count()
+
 #플랫폼마다 각기 따로 등록이 되어 있으니 이름을 합치자 
-metascoreDF.groupby('name')[['metascore','userscore']].mean()
-metascoreDF_NAME = metascoreDF.groupby('name')\
+metascoreAll.groupby('name')[['metascore','userscore']].mean()
+metascoreDF_NAME = metascoreAll.groupby('name')\
 [['metascore','userscore','year','mean_userscore']].mean()
 metascoreDF_NAME['name'] = metascoreDF_NAME.index
 metascoreDF_NAME.index = range(len(metascoreDF_NAME))
@@ -242,6 +252,7 @@ metascoreDF_NAME
 
 metascoreDF_NAME.groupby('year').count()#출시년도가 정수로 안 떨어지는 건?
 #어떻게 처리를 할까? 처음 출시년도를 기준으로 하자 
+#goty는 최초 출시된 년도를 기준으로 수여하니까 
 import math
 metascoreDF_NAME['year'] = [math.floor(i) for i in metascoreDF_NAME['year']]
 
@@ -257,11 +268,13 @@ plt.bar(year_count.keys(), year_count.values())
 metascoreDF_NAME.groupby('year')[['metascore','userscore']].mean()
 metascoreDF_NAME.groupby('year')[['metascore','userscore']].describe()
 
-
+#저장
+metascoreDF_NAME.to_csv("C:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
+opencriticAll.to_csv("C:/WorkSpace/Python_Space/Project/opencriticAll.csv")
 #############################################################
 meta1 = metascoreDF_NAME[['name','metascore','userscore','year']]
 meta1.info()
-open1 = opencriticDF[['openscore','name','year']]
+open1 = opencriticAll[['openscore','name','year']]
 open1
 open1.columns
 open1.info()
@@ -269,29 +282,9 @@ open1.info()
 
 mergeDF = pd.merge(open1, meta1, on = 'name')
 mergeDF.info()
+mergeDF
 
 (mergeDF['year_x'] == mergeDF['year_y']).sum()#년도가 다른게 있는데..... 
 
 mergeDF.to_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 
-##############################################################
-#플랫폼마다 각기 따로 등록이 되어 있으니 이름을 합치자 
-metascore2019.groupby('name')[['metascore','userscore']].mean()
-metascore2019_NAME = metascore2019.groupby('name')\
-[['metascore','userscore','year','mean_userscore']].mean()
-metascore2019_NAME['name'] = metascore2019_NAME.index
-metascore2019_NAME.index = range(len(metascore2019_NAME))
-metascore2019_NAME
-
-meta1 = metascore2019_NAME[['name','metascore','userscore','year']]
-meta1.info()
-open1 = opencritic2019[['openscore','name','year']]
-open1
-open1.columns
-open1.info()
-
-
-merge2019 = pd.merge(open1, meta1, on = 'name')
-merge2019.info()
-
-merge2019.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge2019.csv")
