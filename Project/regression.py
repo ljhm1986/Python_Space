@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np 
 ### 불러오기 ###
-metascore = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
+metascore = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascoreDF_NAME.csv")
 metascore = metascore.iloc[:,1:]
 
-opencritic = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencriticAll.csv")
+opencritic = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencriticAll.csv")
 opencritic = opencritic.iloc[:,1:]
 ### 
 
@@ -38,7 +38,7 @@ type(X_1)
 X_2 = np.transpose(X_1)
 X_2.shape
 
-Y = metascore['userscore']*10
+Y = metascore['userscore']
 LR.fit(X_2,Y)
 LR1 = LR.fit(X_2,Y)
 print(LR1)
@@ -56,29 +56,41 @@ metascore['metascore'].cov(metascore['userscore'])
 #상관계수 
 metascore['metascore'].corr(metascore['userscore'])
 
+def cal_mean(x):
+    mean = 0
+    for i in range(len(x)):
+        mean += x[i]
+    mean = mean / len(x)
+    return mean
 
+def mean_sq(x,y):
+
+    if len(x) != len(y):
+        print("not equal length")
+        return None
+
+    x_mean = cal_mean(x)
+    y_mean = cal_mean(y)
+    
+    sum = 0
+    for i in range(len(x)):
+        sum += (x[i] - x_mean) * (y[i] - y_mean)
+
+    return sum
 
 def estimateLine(x,y):
-    x_mean = 0
-    for i in range(len(x)):
-        x_mean += x[i]
-    x_mean = x_mean / len(x)
     
-    y_mean = 0
-    for i in range(len(y)):
-        y_mean += x[i]
-    y_mean = y_mean / len(y)
+    x_mean = cal_mean(x)
+    print('X의 평균 : {}'.format(x_mean))
 
-    Sxx = 0
-    for i in range(len(x)):
-        Sxx += (x[i] - x_mean)**2
-    Syy = 0
-    for i in range(len(y)):
-        Syy += (y[i] - y_mean)**2
+    y_mean = cal_mean(y)
+    print('Y의 평균 : {}'.format(y_mean))
+
+    Sxx = mean_sq(x,x)
     
-    Sxy = 0
-    for i in range(len(x)):
-        Sxy += (x[i] - x_mean) * (y[i] - y_mean)
+    Syy = mean_sq(y,y)
+    
+    Sxy = mean_sq(x,y)
     
     #slope    
     b1 = Sxy / Sxx
@@ -87,16 +99,56 @@ def estimateLine(x,y):
     
     print("slope : {}, intercept : {}".format(b1,b0))
 
+    SSE = 0
+    SSR = 0
+    for i in range(len(x)):
+        y_esti = b0 + b1 * x[i]
+        SSE += (y[i] - y_esti)**2
+        SSR += (y_esti - y_mean)**2
+    
+    #sample coefficient of determination
+    R2 = SSR/(SSR + SSE)
+    print('표본결정계수 : {}'.format(R2))
+
+    #standard error of estimate
+    s_y_x = 0
+    s_y_x = (SSE/ (len(x) - 2))**(1/2)
+    print("추정값의 표준오차 : {}".format(s_y_x))
+
+    #sample coefficient of correlation
+    Rxy = Sxy / (Sxx * Syy)**(1/2)
+    print("표본상관계수 : {}".format(Rxy))
+
+    MSR = SSR
+    MSE = SSE / (len(x) - 2)
+    F0 = MSR / MSE
+    print('F0 : {}'.format(F0))
+
+    #H0 : b1 = 0 으로 할때의 t0 
+    t0 = b1 / ((MSE/Sxx)**(1/2))
+    print('t0 (H0 : b1 = 0) : {}'.format(t0))
+    
+
 estimateLine(X,Y)
+""" 
+X의 평균 : 70.8902405330733
+Y의 평균 : 67.0438904111854
+slope : 0.6814402121296774, intercept : 18.73642986440408
+표본결정계수 : 0.33781328100776714
+추정값의 표준오차 : 10.647427435516365
+표본상관계수 : 0.5812170687512243
+F0 : 2091.6071138359557 """
 
 from scipy import stats
 slope, intercept, r_value, p_value, stderr = stats.linregress(X, Y)
-print(slope, intercept)
+print(slope, intercept,r_value,p_value,stderr)
+
+
 ## metascore와 openscore의 관계 ##
 LR = LinearRegression()
-mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
+mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
-mergeDF.info()
+mergeDF.info(})
 X = mergeDF['metascore']
 X.shape
 
@@ -119,6 +171,16 @@ plt.show()
 X.cov(Y)
 #상관계수
 X.corr(Y)
+
+estimateLine(X,Y)
+"""
+X의 평균 : 71.212017380509
+Y의 평균 : 71.5243947858473
+slope : 0.971079353183772, intercept : 2.371875009071104
+표본결정계수 : 0.9212120607895761
+추정값의 표준오차 : 3.1201877194989835
+표본상관계수 : 0.9597979270604672
+F0 : 31370.435422829636 """
 
 #그냥 해본 year와 metascore의 관계 
 from sklearn.linear_model import LinearRegression
@@ -153,3 +215,9 @@ plt.show()
 metascore['metascore'].cov(metascore['year'])
 #상관계수 
 metascore['metascore'].corr(metascore['year'])
+
+estimateLine(X,Y)
+
+from scipy import stats
+slope, intercept, r_value, p_value, stderr = stats.linregress(X, Y)
+print(slope, intercept,r_value,p_value,stderr)
