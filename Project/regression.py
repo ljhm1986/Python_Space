@@ -1,10 +1,10 @@
 import pandas as pd
 import numpy as np 
 ### 불러오기 ###
-metascore = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascoreDF_NAME.csv")
+metascore = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
 metascore = metascore.iloc[:,1:]
 
-opencritic = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/opencriticAll.csv")
+opencritic = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencriticAll.csv")
 opencritic = opencritic.iloc[:,1:]
 ### 
 
@@ -146,9 +146,9 @@ print(slope, intercept,r_value,p_value,stderr)
 
 ## metascore와 openscore의 관계 ##
 LR = LinearRegression()
-mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
+mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
-mergeDF.info(})
+mergeDF.info()
 X = mergeDF['metascore']
 X.shape
 
@@ -221,3 +221,42 @@ estimateLine(X,Y)
 from scipy import stats
 slope, intercept, r_value, p_value, stderr = stats.linregress(X, Y)
 print(slope, intercept,r_value,p_value,stderr)
+
+#goty = 0,1,2 밖에 없으므로 일반적인 다변량 회귀가 별로이다.....
+###장르도 넣어서 다변량 회귀를 하자 
+mergeA
+mergeB
+
+MLR = LinearRegression()
+X1 = mergeA.iloc[:,2:-1]
+X1
+Y = mergeA['goty']
+MLR1 = MLR.fit(X1,Y)
+MLR1.coef_
+MLR1.intercept_
+
+df1 = DataFrame({'factor':X1.columns,'slope':MLR1.coef_})
+df1
+df1['slope'].abs().sort_values()
+df1['slope_abs'] = df['slope'].abs()
+df1
+df1.sort_values(by = 'slope_abs', ascending = False)
+
+###장르만 넣어서 다변량 회귀를 하자 
+mergeA
+mergeB
+
+MLR = LinearRegression()
+X2 = mergeA.iloc[:,5:-1]
+X2
+Y = mergeA['goty']
+MLR2 = MLR.fit(X2,Y)
+MLR2.coef_
+MLR2.intercept_
+
+df2 = DataFrame({'factor':X2.columns,'slope':MLR2.coef_})
+df2
+df2['slope'].abs().sort_values()
+df2['slope_abs'] = df2['slope'].abs()
+df2
+df2.sort_values(by = 'slope_abs', ascending = False)

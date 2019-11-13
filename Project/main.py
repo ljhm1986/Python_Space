@@ -208,6 +208,96 @@ opencriticDF['openscore'] = opencriticDF['openscore'].astype('int')
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
 
+##metacritic에서 Genre 별로 
+header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)\
+          AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97\
+          Safari/537.36",
+          "Referer": "https://www.metacritic.com/browse/games/genre/metascore/\
+          {}/all?view=condensed&page={}"
+          }
+
+
+url = "https://www.metacritic.com/browse/games/genre/metascore/\
+{}/all?view=condensed&page={}"#genre, page 수
+
+Genre = ['action','fighting','first-person','flight','party','puzzle','racing',
+         'real-time','role-playing','simulation','sports','strategy',
+         'third-person','turn-based','wargame','wrestling']
+
+metaGenre = DataFrame(columns = ['name','platform','genre'])
+
+page = 1
+
+import copy
+  
+tempGenre = ['simulation','sports','strategy',
+             'third-person','turn-based','wargame','wrestling']
+   
+for genre in tempGenre:
+    print("장르 : {}".format(genre))
+    page = 0
+    while(True):
+        print("page : {}".format(page))
+        temp_header = copy.deepcopy(header)
+        temp_header['Referer'] = temp_header['Referer'].format(genre,page)
+        res = req.urlopen(req.Request(url.format(genre,page),headers = temp_header))
+        soup = BeautifulSoup(res,'html.parser')
+
+        soup_body = soup.find('div',class_='body')
+        
+        #page내용이 없는 경우 
+        if (soup_body.find('p',class_='no_data') is not None):
+            break
+        
+        start = len(metaGenre)
+        j = start
+        #name, platform, genre
+        for i in soup_body.find_all('div',class_='basic_stat product_title'):
+            temp = i.get_text().strip()
+            name = temp.split('(')[0].strip()
+            platform = temp.split('(')[1].strip(')')
+            metaGenre.at[j,'name'] = name
+            metaGenre.at[j,'platform'] = platform
+            metaGenre.at[j,'genre'] = genre
+            j += 1
+        page += 1
+
+metaGenre   
+metaGenre['name']
+metaGenre.info()
+metaGenre.nunique()#이름이 겹치는 게 있다. 아마 여러 장르에 걸쳐 있는듯 하다. 
+metaGenre['genre'].unique()
+
+#장르는 더미 컬럼을 만들자
+for j in range(len(metaGenre['genre'].unique())):
+    temp = metaGenre['genre'].unique()[j]
+    metaGenre[temp] = [1 if i == temp else 0 for i in metaGenre['genre']]
+ 
+metaGenre.iloc[:,3:]
+
+metaGenre[['name','platform']].nunique()
+
+metaGenre.to_csv("c:/WorkSpace/Python_Space/Project/genre.csv")
+
+#name중심으로 병합하자 
+metaGenre2 = metaGenre.groupby(['name','platform'])[Genre].mean()
+metaGenre2.index[1][0]
+
+metaGenre2['platform'] = [metaGenre2.index[i][1] for i in range(len(metaGenre2))]
+metaGenre2['name'] = [metaGenre2.index[i][0] for i in range(len(metaGenre2))]
+metaGenre2.index = range(len(metaGenre2))
+
+#장르중 값이 1 또는 0 이 아닌게 있는데...??? 아무래도 여러 장르에 중복으로 
+#속해있던 게임인듯 하다. 0이 아닌것은 모두 1로 바꾸어 주자... 나중에 
+#합치고 나서 .... 
+metaGenre2.info()
+metaGenre2['name'].sort_values()
+
+
+
+metaGenre2.to_csv("c:/WorkSpace/Python_Space/Project/genre2.csv")
+
+    
 ### 불러오기 ###
 metascoreDF = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascore.csv")
 metascoreDF = metascoreDF.iloc[:,1:]
@@ -235,20 +325,38 @@ metascoreAll['mean_userscore'] = [mean_userscore[i] for i in metascoreAll['metas
 metascoreAll['userscore'] = np.where(metascoreAll['userscore'].isnull(),
                metascoreAll['mean_userscore'],metascoreAll['userscore'])
 
+#그리고 genre 도 합치자, genre에 없는 게임들이 있으니 left outer join 을 하자 
+metascoreAll2 = pd.merge(metascoreAll, metaGenre2,
+                         on = ['name','platform'] , how = 'left')
+
+metascoreAll2.info()#null 값이 있네 다 0 을 넣자
+metascoreAll2.fillna(0, inplace = True)
+
+metascoreAll2.groupby(metascoreAll2['year']).count()
+metascoreAll2.count()
+metascoreAll2.nunique()
+metascoreAll2[metascoreAll2['metascore'] >= 90]
+
 opencriticAll = opencriticDF.append(opencritic2019)
-
-metascoreAll.groupby(metascoreAll['year']).count()
-metascoreAll.count()
-
 opencriticAll.groupby(opencriticAll['year']).count()
 
 #플랫폼마다 각기 따로 등록이 되어 있으니 이름을 합치자 
-metascoreAll.groupby('name')[['metascore','userscore']].mean()
-metascoreDF_NAME = metascoreAll.groupby('name')\
-[['metascore','userscore','year','mean_userscore']].mean()
+metascoreAll2.groupby('name')[['metascore','userscore']].mean()
+metascoreDF_NAME = metascoreAll2.groupby('name')\
+[['metascore','userscore','year','mean_userscore','action','fighting',
+  'first-person','flight','party','puzzle','racing','real-time',
+  'role-playing','simulation','sports','strategy','third-person',
+  'turn-based','wargame','wrestling']].mean()
 metascoreDF_NAME['name'] = metascoreDF_NAME.index
 metascoreDF_NAME.index = range(len(metascoreDF_NAME))
-metascoreDF_NAME
+metascoreDF_NAME.nunique()
+
+#이제 장르가 1,0 이 아닌것들을 수정하자 
+import collections
+collections.Counter(metascoreDF_NAME['action'])
+for i in range(len(Genre)):
+    metascoreDF_NAME[Genre[i]] = [1 if j > 0 else 0 for j in metascoreDF_NAME[Genre[i]]]
+
 
 metascoreDF_NAME.groupby('year').count()#출시년도가 정수로 안 떨어지는 건?
 #어떻게 처리를 할까? 처음 출시년도를 기준으로 하자 
@@ -256,8 +364,7 @@ metascoreDF_NAME.groupby('year').count()#출시년도가 정수로 안 떨어지
 import math
 metascoreDF_NAME['year'] = [math.floor(i) for i in metascoreDF_NAME['year']]
 
-#년도별 출시된 게임의 수 
-import collections
+#metacritic을 기준으로 본 년도별 출시된 게임의 수 
 year_count = collections.Counter(metascoreDF_NAME['year'])
 type(year_count)
 year_count.keys()
@@ -272,7 +379,11 @@ metascoreDF_NAME.groupby('year')[['metascore','userscore']].describe()
 metascoreDF_NAME.to_csv("C:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
 opencriticAll.to_csv("C:/WorkSpace/Python_Space/Project/opencriticAll.csv")
 #############################################################
-meta1 = metascoreDF_NAME[['name','metascore','userscore','year']]
+meta1 = metascoreDF_NAME[['name','metascore','userscore','year','action',
+                          'fighting','first-person','flight','party','puzzle',
+                          'racing','real-time','role-playing','simulation',
+                          'sports','strategy','third-person','turn-based',
+                          'wargame','wrestling']]
 meta1.info()
 open1 = opencriticAll[['openscore','name','year']]
 open1

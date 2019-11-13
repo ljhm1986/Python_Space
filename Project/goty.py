@@ -81,7 +81,11 @@ mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
 mergeDF.info()
 
-mergeDF = mergeDF[['name','metascore','userscore','openscore','year_x']]
+mergeDF = mergeDF[['name','year_x','metascore','userscore','openscore',
+                   'action','fighting','first-person','flight','party',
+                   'puzzle','racing','real-time','role-playing','simulation',
+                   'sports','strategy','third-person','turn-based','wargame',
+                   'wrestling']]
 
 #k-mean 을 이용해서 여러 그룹으로 나누어 보자 
 from sklearn.cluster import KMeans
@@ -94,7 +98,7 @@ X = copy.deepcopy(mergeDF)
 X.columns
 
 from sklearn.preprocessing import StandardScaler
-X_train = X.iloc[:,1:4]
+X_train = X.iloc[:,2:5]
 X_train_standardScale = StandardScaler().fit_transform(X_train)
 
 model.fit(X_train_standardScale)
@@ -136,7 +140,7 @@ X.columns
 
 
 from sklearn.preprocessing import scale
-X_train = X.iloc[:,1:4]
+X_train = X.iloc[:,2:5]
 type(scale(X_train))
 X_train_normalScale = scale(X_train)
 
@@ -188,13 +192,18 @@ mergeA['goty'] = [2 if i in gotyA else 1 if i in gotyB else 0 for i in mergeA['n
 mergeA.sort_values(by = 'metascore')
 mergeA[mergeA['goty'] >= 1]
 
+mergeA.info()
+mergeB.info()
+
+mergeA.to_csv("C:/WorkSpace/Python_Space/Project/mergeA.csv")
+mergeB.to_csv("C:/WorkSpace/Python_Space/Project/mergeB.csv")
 ### knn
 from sklearn.neighbors import KNeighborsClassifier
 
 #KNN도 2가지 방법으로 스케일링을 하자 
 ## 표준화(standardization) ##
 from sklearn.preprocessing import StandardScaler
-X = StandardScaler().fit_transform(mergeA.iloc[:,1:4])
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
 X
 
 #훈련 데이터 셋
@@ -209,7 +218,7 @@ clf.fit(x_train,label)
 #이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 clf.predict(np.array([[95,95,95]]))[0]
 
-Y = StandardScaler().fit_transform(mergeB.iloc[:,1:4])
+Y = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
 pred = clf.predict(Y)
 
 import collections
@@ -233,7 +242,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 fig = plt.figure()
 axes3d = plt.axes(projection = '3d')
-axes3d.scatter(mergeA.iloc[:,1], mergeA.iloc[:,2], mergeA.iloc[:,3],
+axes3d.scatter(mergeA.iloc[:,2], mergeA.iloc[:,3], mergeA.iloc[:,4],
                c = colormatp[label], s = 2)
 
  
@@ -241,12 +250,82 @@ axes3d.scatter(mergeA.iloc[:,1], mergeA.iloc[:,2], mergeA.iloc[:,3],
 #근접한 작품중에서 goty 0 인 작품이 더 많을 것이다. 
 #그러므로 goty 2 없고, goty 1이 하나만 나온다. 
 
+#이번에는 다르게 장르들도 포함해서 실행해보자 
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
+X
+
+#훈련 데이터 셋
+x_train = np.array(X)
+#분류기준 
+label = mergeA['goty']
+
+#근접 점의 갯수
+clf = KNeighborsClassifier(n_neighbors = 3)
+#훈련시키기 
+clf.fit(x_train,label)
+
+Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+pred = clf.predict(Y)
+collections.Counter(pred)
+
 #####################################################################
 from sklearn.linear_model import LogisticRegression
 log = LogisticRegression()
-log.fit(mergeA.iloc[:,1:4],label)
+log.fit(mergeA.iloc[:,2:5],label)
 
-pred2 = log.predict(mergeB.iloc[:,1:4])
+pred2 = log.predict(mergeB.iloc[:,2:5])
 collections.Counter(pred2)
 
+log2 = LogisticRegression()
+log2.fit(mergeA.iloc[:,2:-1],label)
+
+pred22 = log2.predict(mergeB.iloc[:,2:])
+collections.Counter(pred22)
+
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:-])
+Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+
+log3 = LogisticRegression()
+log3.fit(X,label)
+
+pred23 = log3.predict(Y)
+collections.Counter(pred23)
+
 #####################################################################
+from sklearn.tree import DecisionTreeClassifier
+
+modelTree = DecisionTreeClassifier(criterion = 'entropy', max_depth = 5)
+
+modelTree.fit(mergeA.iloc[:,2:-1],label)
+predTree = modelTree.predict(mergeB.iloc[:,2:])
+
+collections.Counter(predTree)
+
+#Scale한거 넣어보자 
+modelTree2 = DecisionTreeClassifier(criterion = 'entropy', max_depth = 4)
+
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
+Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+
+modelTree2.fit(X,label)
+predTree2 = modelTree.predict(Y)
+
+collections.Counter(predTree2)
+
+
+#그림을 그려보자 
+import pydotplus
+import graphviz
+
+from sklearn.tree import export_graphviz
+from IPython.display import Image
+
+mergeA.iloc[:,2:-1].columns
+
+dot_data = export_graphviz(modelTree2, out_file=None,
+                           feature_names= mergeA.iloc[:,2:-1].columns,
+                           filled=True,rounded=True,
+                           special_characters=True)
+
+graph = pydotplus.graph_from_dot_data(dot_data)
+Image(graph.create_png())
