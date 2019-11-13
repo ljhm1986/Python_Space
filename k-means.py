@@ -248,7 +248,7 @@ Counter(model.labels_)
 #Counter({3: 21323, 4: 5960, 0: 1038, 2: 872, 1: 807})
 model.cluster_centers_
 
-##표준 정규화를 하자 
+##표준화를 하자 
 from sklearn.preprocessing import StandardScaler
 data = snsData.iloc[:,4:40]
 data_scale = StandardScaler().fit_transform(data)

@@ -77,7 +77,7 @@ len(gotyB)#73
 #metascoreDF[metascoreDF['name'].isin(gotyA)]
 
 
-mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
+mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
 mergeDF.info()
 
@@ -104,14 +104,25 @@ X_train_standardScale = StandardScaler().fit_transform(X_train)
 model.fit(X_train_standardScale)
 model.labels_
 model.cluster_centers_
+collections.Counter(model.labels_)
 
 colormatp = np.array(['red','blue','green','black'])
 plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
             c = colormatp[model.labels_], s = 2)
+plt.show()
 
 centers = pd.DataFrame(model.cluster_centers_)
 plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
             marker = 'D', c='g')
+plt.show()
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure()
+axes3d = plt.axes(projection = '3d')
+axes3d.scatter(X.iloc[:,2], X.iloc[:,3], X.iloc[:,4],
+               c = colormatp[model.labels_], s = 2)
 plt.show()
 
 #응집도 
@@ -130,6 +141,7 @@ plt.plot(l, inertia, '-o')
 plt.xlabel("number of cluster K")
 plt.ylabel("inertia")
 plt.xticks(l)
+plt.show()
 
 ## 정규화(normalization) ##
 model2 = KMeans(n_clusters = 4)
@@ -139,22 +151,29 @@ X = copy.deepcopy(mergeDF)
 X.columns
 
 
-from sklearn.preprocessing import scale
+from sklearn.preprocessing import MinMaxScaler
 X_train = X.iloc[:,2:5]
 type(scale(X_train))
-X_train_normalScale = scale(X_train)
+X_train_normalScale = MinMaxScaler().fit_transform(X_train)
 
 model2.fit(X_train_normalScale)
 model2.labels_
 model2.cluster_centers_
+collections.Counter(model2.labels_)
 
 colormatp = np.array(['red','blue','green','black'])
 plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
             c = colormatp[model2.labels_], s = 2)
 
-centers = pd.DataFrame(model.cluster_centers_)
+centers = pd.DataFrame(model2.cluster_centers_)
 plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
             marker = 'D', c='g')
+plt.show()
+
+fig = plt.figure()
+axes3d = plt.axes(projection = '3d')
+axes3d.scatter(X.iloc[:,2], X.iloc[:,3], X.iloc[:,4],
+               c = colormatp[model2.labels_], s = 2)
 plt.show()
 
 #응집도 
@@ -164,7 +183,7 @@ l = range(1,11)
 inertia = []
 for k in l:
     model2 = KMeans(n_clusters = k)
-    model2.fit(X_train_standardScale)
+    model2.fit(X_train_normalScale)
     inertia.append(model2.inertia_)
     
 inertia
@@ -173,11 +192,136 @@ plt.plot(l, inertia, '-o')
 plt.xlabel("number of cluster K")
 plt.ylabel("inertia")
 plt.xticks(l)
+plt.show()
 
 #두 스케일로 그룹이 달라지는가? 근데 각 위치별로 숫자가 일치하는건 아닌데
 #... 
 
 (model.labels_ == model2.labels_).sum()
+
+## 이번에는 genre를 포함해서 k-mean을 해 보자 ###
+model3 = KMeans(n_clusters = 4)
+
+#2가지 스케일링으로 실시해 본다.
+## 표준화(standardization) ##
+import copy
+X = copy.deepcopy(mergeDF)
+X.columns
+
+from sklearn.preprocessing import StandardScaler
+X_train = X.iloc[:,2:]
+X_train_standardScale = StandardScaler().fit_transform(X_train)
+
+model3.fit(X_train_standardScale)
+model3.labels_
+model3.cluster_centers_
+collections.Counter(model3.labels_)
+
+X['cluster'] = model3.labels_
+X['metascore'].groupby(X['cluster']).mean()
+X['action'].groupby(X['cluster']).mean()
+
+colormatp = np.array(['red','blue','green','black'])
+plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
+            c = colormatp[model3.labels_], s = 2)
+plt.show()
+
+centers = pd.DataFrame(model3.cluster_centers_)
+plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
+            marker = 'D', c='g')
+plt.show()
+
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
+fig = plt.figure()
+axes3d = plt.axes(projection = '3d')
+axes3d.scatter(X.iloc[:,2], X.iloc[:,3], X.iloc[:,4],
+               c = colormatp[model3.labels_], s = 2)
+plt.show()
+
+#응집도 
+model3.inertia_
+
+l = range(1,11)
+inertia = []
+for k in l:
+    model3 = KMeans(n_clusters = k)
+    model3.fit(X_train_standardScale)
+    inertia.append(model3.inertia_)
+    
+inertia
+
+plt.plot(l, inertia, '-o')
+plt.xlabel("number of cluster K")
+plt.ylabel("inertia")
+plt.xticks(l)
+plt.show()
+
+l = range(1,31)
+inertia = []
+for k in l:
+    model3 = KMeans(n_clusters = k)
+    model3.fit(X_train_standardScale)
+    inertia.append(model3.inertia_)
+    
+inertia
+
+plt.plot(l, inertia, '-o')
+plt.xlabel("number of cluster K")
+plt.ylabel("inertia")
+plt.xticks(l)
+plt.show()
+
+## 정규화(normalization) ##
+model4 = KMeans(n_clusters = 4)
+
+import copy
+X = copy.deepcopy(mergeDF)
+X.columns
+
+
+from sklearn.preprocessing import MinMaxScaler
+X_train = X.iloc[:,2:]
+type(scale(X_train))
+X_train_normalScale = MinMaxScaler().fit_transform(X_train)
+
+model4.fit(X_train_normalScale)
+model4.labels_
+model4.cluster_centers_
+
+colormatp = np.array(['red','blue','green','black'])
+plt.scatter(mergeDF.iloc[:,2], mergeDF.iloc[:,3],
+            c = colormatp[model4.labels_], s = 2)
+
+centers = pd.DataFrame(model4.cluster_centers_)
+plt.scatter(centers.iloc[:,0], centers.iloc[:,1], s = 50,
+            marker = 'D', c='g')
+plt.show()
+
+fig = plt.figure()
+axes3d = plt.axes(projection = '3d')
+axes3d.scatter(X.iloc[:,2], X.iloc[:,3], X.iloc[:,4],
+               c = colormatp[model4.labels_], s = 2)
+plt.show()
+
+#응집도 
+model4.inertia_
+
+l = range(1,11)
+inertia = []
+for k in l:
+    model4 = KMeans(n_clusters = k)
+    model4.fit(X_train_normalScale)
+    inertia.append(model4.inertia_)
+    
+inertia
+
+plt.plot(l, inertia, '-o')
+plt.xlabel("number of cluster K")
+plt.ylabel("inertia")
+plt.xticks(l)
+plt.show() 
 
 ########################################################################
 #goty 표시하기 전에 2018년도 이전과 2019년도 작품을 분리하자 
@@ -197,6 +341,15 @@ mergeB.info()
 
 mergeA.to_csv("C:/WorkSpace/Python_Space/Project/mergeA.csv")
 mergeB.to_csv("C:/WorkSpace/Python_Space/Project/mergeB.csv")
+
+#불러오기 
+mergeA = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/mergeA.csv")
+mergeA = mergeA.iloc[:,1:]
+mergeB = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/mergeB.csv")
+mergeB = mergeB.iloc[:,1:]
+
+mergeA.info()#2359개 row
+mergeB.info()#326개 row 
 ### knn
 from sklearn.neighbors import KNeighborsClassifier
 
@@ -207,36 +360,62 @@ X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
 X
 
 #훈련 데이터 셋
-x_train = np.array(X)
+X = np.array(X)
 #분류기준 
 label = mergeA['goty']
 
+#train set과 test set을 나누자 
+from sklearn.model_selection import train_test_split
+X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+
 #근접 점의 갯수
+np.sqrt(2359)#48.569537778323564
 clf = KNeighborsClassifier(n_neighbors = 3)
 #훈련시키기 
-clf.fit(x_train,label)
-#이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
-clf.predict(np.array([[95,95,95]]))[0]
+clf.fit(X_train, Y_train)
 
-Y = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
-pred = clf.predict(Y)
+clf.score(X_test, Y_test)
+#0.9682203389830508
+
+#이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
+Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
+pred_z = clf.predict(Z)
 
 import collections
-type(pred)
-len(pred)
-collections.Counter(pred)
+type(pred_z)
+len(pred_z)
+collections.Counter(pred_z)
+#Counter({0: 325, 1: 1})
+#1이 1개뿐이고 2는 없다.... 결과가 납득되지 않는다.
 
-j = 0
-for i in pred:
-    print(i)
-    if i > 0:
-        print(mergeB.iloc[j,:])
-    j +=1
-    
+pred_X = clf.predict(X_test)
+collections.Counter(pred_X)#Counter({0: 702, 1: 6}) 예측 갯수
+collections.Counter(Y_test)#Counter({0: 690, 1: 12, 2: 6}) 실제 갯수 
+
+from sklearn.metrics import classification_report, confusion_matrix
+print(confusion_matrix(Y_test,pred_X))
+confusion_matrix(Y_test,pred_X)[1][1]
+collections.Counter(Y_test)[2]
+"""
+[[685   5   0]
+ [ 11   1   0]
+ [  6   0   0]]"""
+#정답률이 높게 나왔던게 우리가 원하는 것과 거리가 멀다.
+#goty = 1,2 예측이 잘 안된다.
+
+print(classification_report(Y_test, pred_X))
+""" 
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.98       690
+           1       0.17      0.08      0.11        12
+           2       0.00      0.00      0.00         6
+
+   micro avg       0.97      0.97      0.97       708
+   macro avg       0.38      0.36      0.37       708
+weighted avg       0.95      0.97      0.96       708 """
+
 colormatp = np.array(['yellow','blue','red'])
-plt.scatter(mergeA.iloc[:,1], mergeA.iloc[:,3],
-            c = colormatp[label], s = 2)
-
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
@@ -244,29 +423,163 @@ fig = plt.figure()
 axes3d = plt.axes(projection = '3d')
 axes3d.scatter(mergeA.iloc[:,2], mergeA.iloc[:,3], mergeA.iloc[:,4],
                c = colormatp[label], s = 2)
+plt.show()
 
  
 #보니 goty를 받지 못한 작품이 절대적으로 대다수이므로
 #근접한 작품중에서 goty 0 인 작품이 더 많을 것이다. 
 #그러므로 goty 2 없고, goty 1이 하나만 나온다. 
 
+tempDF = DataFrame(columns = ['k','score','goty score'])
+#K의 갯수를 다르게 해 보자
+j = 0
+for k in range(3,50,2):
+    goty_sum = 0
+    goty_suc = 0
+    tempDF.at[j,'k'] = k
+    #근접 점의 갯수
+    clf = KNeighborsClassifier(n_neighbors = k)
+    #훈련시키기 
+    clf.fit(X_train, Y_train)
+
+    tempDF.at[j,'score'] = clf.score(X_test, Y_test)
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+
+    tempDF.at[j,'goty score'] = goty_suc / goty_sum
+    j += 1
+
+tempDF
+"""
+     k     score goty score
+0    3  0.968927  0.0555556
+1    5  0.970339  0.0555556
+2    7  0.971751  0.0555556
+3    9  0.974576  0.0555556
+4   11  0.974576  0.0555556
+5   13  0.974576  0.0555556
+6   15  0.974576  0.0555556
+7   17  0.974576  0.0555556
+8   19  0.974576  0.0555556
+9   21  0.974576  0.0555556
+10  23  0.974576  0.0555556
+11  25  0.974576  0.0555556
+12  27  0.974576  0.0555556
+13  29  0.974576  0.0555556
+14  31  0.974576  0.0555556
+15  33  0.974576  0.0555556
+16  35  0.974576  0.0555556
+17  37  0.974576  0.0555556
+18  39  0.974576  0.0555556
+19  41  0.974576  0.0555556
+20  43  0.974576  0.0555556
+21  45  0.974576  0.0555556
+22  47  0.974576  0.0555556
+23  49  0.974576  0.0555556"""
+
+plt.plot(tempDF['k'],tempDF['goty score'])
+plt.xlabel("k 값")
+plt.ylabel("goty 1,2 일때 맞춘 확률")
+plt.show()
+
 #이번에는 다르게 장르들도 포함해서 실행해보자 
 X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
 X
 
 #훈련 데이터 셋
-x_train = np.array(X)
+X = np.array(X)
 #분류기준 
 label = mergeA['goty']
 
 #근접 점의 갯수
-clf = KNeighborsClassifier(n_neighbors = 3)
-#훈련시키기 
-clf.fit(x_train,label)
+clf2 = KNeighborsClassifier(n_neighbors = 3)
 
-Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
-pred = clf.predict(Y)
-collections.Counter(pred)
+X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+#훈련시키기 
+clf2.fit(X_train,Y_train)
+
+clf2.score(X_test, Y_test)
+#0.9646892655367232
+
+Z = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+pred_z = clf2.predict(Z)
+collections.Counter(pred_z)
+#Counter({0: 322, 2: 2, 1: 2})
+
+pred_X = clf2.predict(X_test)
+collections.Counter(pred_X)#Counter({0: 694, 1: 12, 2: 2}) 예측 갯수
+collections.Counter(Y_test)#Counter({0: 689, 1: 14, 2: 5}) 실제 갯수 
+
+print(confusion_matrix(Y_test,pred_X))
+"""
+[[680   9   0]
+ [ 11   2   1]
+ [  3   1   1]]"""
+print(classification_report(Y_test, pred_X))
+"""
+              precision    recall  f1-score   support
+
+           0       0.98      0.99      0.98       689
+           1       0.17      0.14      0.15        14
+           2       0.50      0.20      0.29         5
+
+   micro avg       0.96      0.96      0.96       708
+   macro avg       0.55      0.44      0.47       708
+weighted avg       0.96      0.96      0.96       708"""
+
+tempDF2 = DataFrame(columns = ['k','score','goty score'])
+#K의 갯수를 다르게 해 보자
+j = 0
+for k in range(3,50,2):
+    goty_sum = 0
+    goty_suc = 0
+    tempDF2.at[j,'k'] = k
+    #근접 점의 갯수
+    clf2 = KNeighborsClassifier(n_neighbors = k)
+    #훈련시키기 
+    clf2.fit(X_train, Y_train)
+
+    tempDF2.at[j,'score'] = clf2.score(X_test, Y_test)
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+
+    tempDF2.at[j,'goty score'] = goty_suc / goty_sum
+    j += 1
+
+tempDF2
+"""
+     k     score goty score
+0    3  0.964689   0.157895
+1    5  0.968927   0.157895
+2    7  0.968927   0.157895
+3    9  0.968927   0.157895
+4   11  0.968927   0.157895
+5   13  0.973164   0.157895
+6   15  0.973164   0.157895
+7   17  0.973164   0.157895
+8   19  0.973164   0.157895
+9   21  0.973164   0.157895
+10  23  0.973164   0.157895
+11  25  0.973164   0.157895
+12  27  0.973164   0.157895
+13  29  0.973164   0.157895
+14  31  0.973164   0.157895
+15  33  0.973164   0.157895
+16  35  0.973164   0.157895
+17  37  0.973164   0.157895
+18  39  0.973164   0.157895
+19  41  0.973164   0.157895
+20  43  0.973164   0.157895
+21  45  0.973164   0.157895
+22  47  0.973164   0.157895
+23  49  0.973164   0.157895"""
+
+plt.plot(tempDF2['k'],tempDF2['goty score'])
+plt.xlabel("k 값")
+plt.ylabel("goty 1,2 일때 맞춘 확률")
+plt.show()
 
 #####################################################################
 from sklearn.linear_model import LogisticRegression
@@ -296,23 +609,36 @@ from sklearn.tree import DecisionTreeClassifier
 
 modelTree = DecisionTreeClassifier(criterion = 'entropy', max_depth = 5)
 
-modelTree.fit(mergeA.iloc[:,2:-1],label)
-predTree = modelTree.predict(mergeB.iloc[:,2:])
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
+label = mergeA['goty']
+
+X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+
+modelTree.fit(X_train, Y_train)
+predTree = modelTree.predict(X_test)
+
+modelTree.score(X_test, Y_test)
+#0.9759887005649718
 
 collections.Counter(predTree)
+#Counter({0: 700, 1: 6, 2: 2})
 
-#Scale한거 넣어보자 
-modelTree2 = DecisionTreeClassifier(criterion = 'entropy', max_depth = 4)
+Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
+pred_z = modelTree.predict(Z)
+collections.Counter(pred_z)
+#Counter({0: 323, 1: 3})
 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
-Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+pred_X = modelTree.predict(X_test)
+collections.Counter(pred_X)#Counter({0: 700, 1: 6, 2: 2}) 예측 갯수
+collections.Counter(Y_test)#Counter({0: 690, 1: 16, 2: 2}) 실제 갯수 
 
-modelTree2.fit(X,label)
-predTree2 = modelTree.predict(Y)
+print(confusion_matrix(Y_test,pred_X))
+"""
+[[687   3   0]
+ [ 12   3   1]
+ [  1   0   1]]"""
 
-collections.Counter(predTree2)
-
-
+"""
 #그림을 그려보자 
 import pydotplus
 import graphviz
@@ -322,10 +648,34 @@ from IPython.display import Image
 
 mergeA.iloc[:,2:-1].columns
 
-dot_data = export_graphviz(modelTree2, out_file=None,
+dot_data = export_graphviz(modelTree, out_file=None,
                            feature_names= mergeA.iloc[:,2:-1].columns,
                            filled=True,rounded=True,
                            special_characters=True)
 
 graph = pydotplus.graph_from_dot_data(dot_data)
 Image(graph.create_png())
+plt.show()"""
+
+#max depth 값에 따라서 달라질까?
+tempDF3 = DataFrame(columns = ['max depth','score','goty score'])
+j = 0
+for i in range(3,30):
+    tempDF3.at[j,'max depth'] = i
+    modelTree = DecisionTreeClassifier(criterion = 'entropy', max_depth = i)
+    modelTree.fit(X_train, Y_train)
+    predTree = modelTree.predict(X_test)
+
+    tempDF3.at[j,'score'] = modelTree.score(X_test, Y_test)
+
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,predTree)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+
+    tempDF3.at[j,'goty score'] = goty_suc / goty_sum
+    j += 1
+
+tempDF3
+plt.plot(tempDF3['max depth'], tempDF3['goty score'])
+plt.show()
+

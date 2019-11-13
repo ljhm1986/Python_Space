@@ -44,7 +44,7 @@ model.predict([[5.1, 3.5, 5.1, 4.0]])[0]
 
 #C:\Program Files (x86)\Graphviz2.38\bin
 #시스템속성-환경변수-path 추가 
-#anaconda command line 에서 pip install pudotplus, pip install graphviz
+#anaconda command line 에서 pip install pydotplus, pip install graphviz
 #TypeError : 'module' object is not callable 이 뜨며 안되면
 #python -m pip install pydotplus --user, python -m pip install graphviz --user
 #입력 하기 

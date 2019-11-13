@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np 
 ### 불러오기 ###
-metascore = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
+metascore = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascoreDF_NAME.csv")
 metascore = metascore.iloc[:,1:]
 
 opencritic = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencriticAll.csv")
@@ -19,7 +19,25 @@ font_name = font_manager.FontProperties \
 (fname ="c:\\windows\\fonts\\malgun.ttf").get_name()
 rc('font',family = font_name)
 
-plt.scatter(metascore['metascore'],metascore['userscore'],s = 5)
+#metacritic을 기준으로 본 년도별 출시된 게임의 수 
+year_count = collections.Counter(metascore['year'])
+type(year_count)
+year_count.keys()
+year_count.values()
+plt.bar(year_count.keys(), year_count.values())
+plt.xlabel('년도')
+plt.ylabel('발매된 게임의 갯수')
+plt.title('metacritic에 의한 년도별 발매 게임 수')
+plt.show()
+
+#년도별 점수 비교 
+metascore.groupby('year')[['metascore','userscore']].mean()
+metascore.groupby('year')[['metascore','userscore']].describe()
+
+plt.scatter(metascore['metascore'],metascore['userscore'],s = 3)
+plt.xlabel('metascore')
+plt.ylabel('userscore')
+plt.title('metascore와 userscore의 산점도')
 plt.show()
 
 ## metascore와 userscore의 관계 ## 
@@ -47,8 +65,11 @@ print('절편 : ',LR1.intercept_)
 coef1 = LR1.coef_[0]
 intercept1 = LR1.intercept_
 
-plt.scatter(X,Y,s = 5)
+plt.scatter(X,Y,s = 3)
 plt.plot(X,X*coef1 + intercept1, c = 'red')
+plt.xlabel('metascore')
+plt.ylabel('userscore')
+plt.title('metacritic에서 metascore와 userscore의 관계')
 plt.show()
 
 #공분산
@@ -132,12 +153,13 @@ def estimateLine(x,y):
 estimateLine(X,Y)
 """ 
 X의 평균 : 70.8902405330733
-Y의 평균 : 67.0438904111854
-slope : 0.6814402121296774, intercept : 18.73642986440408
-표본결정계수 : 0.33781328100776714
-추정값의 표준오차 : 10.647427435516365
-표본상관계수 : 0.5812170687512243
-F0 : 2091.6071138359557 """
+Y의 평균 : 6.704389041118512
+slope : 0.06814402121296771, intercept : 1.873642986440382
+표본결정계수 : 0.33781328100776914
+추정값의 표준오차 : 1.0647427435516357
+표본상관계수 : 0.5812170687512254
+F0 : 2091.6071138359744
+t0 (H0 : b1 = 0) : 45.73409137433373 """
 
 from scipy import stats
 slope, intercept, r_value, p_value, stderr = stats.linregress(X, Y)
@@ -146,7 +168,7 @@ print(slope, intercept,r_value,p_value,stderr)
 
 ## metascore와 openscore의 관계 ##
 LR = LinearRegression()
-mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
+mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
 mergeDF.info()
 X = mergeDF['metascore']
@@ -163,8 +185,11 @@ print('절편 : ',LR2.intercept_)
 coef2 = LR2.coef_[0]
 intercept2 = LR2.intercept_
 
-plt.scatter(X,Y,s=5)
-plt.plot(X,X*coef2+intercept2, c = 'red')
+plt.scatter(X,Y,s = 3)
+plt.plot(X,X*coef2 + intercept2, c = 'red')
+plt.xlabel('metascore')
+plt.ylabel('openscore')
+plt.title(' metascore와 openscore의 관계')
 plt.show()
 
 #공분산
@@ -180,7 +205,8 @@ slope : 0.971079353183772, intercept : 2.371875009071104
 표본결정계수 : 0.9212120607895761
 추정값의 표준오차 : 3.1201877194989835
 표본상관계수 : 0.9597979270604672
-F0 : 31370.435422829636 """
+F0 : 31370.435422829636 
+t0 (H0 : b1 = 0) : 177.11701054057363 """
 
 #그냥 해본 year와 metascore의 관계 
 from sklearn.linear_model import LinearRegression
@@ -260,3 +286,5 @@ df2['slope'].abs().sort_values()
 df2['slope_abs'] = df2['slope'].abs()
 df2
 df2.sort_values(by = 'slope_abs', ascending = False)
+
+## score 들과 genre들의 관계
