@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np 
+from pandas import Series, DataFrame
 
 #3등 이내 2점, 2개 이상 1점, 그외 0점 
 
@@ -343,77 +344,79 @@ mergeA.to_csv("C:/WorkSpace/Python_Space/Project/mergeA.csv")
 mergeB.to_csv("C:/WorkSpace/Python_Space/Project/mergeB.csv")
 
 #불러오기 
-mergeA = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/mergeA.csv")
+mergeA = pd.read_csv("C:/WorkSpace/Python_Space/Project/mergeA.csv")
 mergeA = mergeA.iloc[:,1:]
-mergeB = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/mergeB.csv")
+mergeB = pd.read_csv("C:/WorkSpace/Python_Space/Project/mergeB.csv")
 mergeB = mergeB.iloc[:,1:]
 
 mergeA.info()#2359개 row
 mergeB.info()#326개 row 
 ### knn
 from sklearn.neighbors import KNeighborsClassifier
+#train set과 test set을 나누자 
+from sklearn.model_selection import train_test_split
+import collections
+from sklearn.metrics import classification_report, confusion_matrix
+
+def knnClass(X,Y,Z):
+    X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+    clf = KNeighborsClassifier(n_neighbors = 3)
+    #훈련시키기 
+    clf.fit(X_train, Y_train)
+    print("정답률 점수 :",clf.score(X_test, Y_test))
+    #이제 새로운 점을 넣어보자
+    pred_z = clf.predict(Z)
+    print("2019 goty 예상 :",collections.Counter(pred_z))
+    pred_X = clf.predict(X_test)
+    print("예측 갯수 : ",collections.Counter(pred_X))
+    print("실재 갯수 : ",collections.Counter(Y_test))
+    print(confusion_matrix(Y_test,pred_X))
+    goty_suc = 0
+    goty_sum = 0
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+    pro = goty_suc / goty_sum
+    print("원하는 부분의 정답률 (%):",pro * 100)
+    print(classification_report(Y_test, pred_X))
+      
 
 #KNN도 2가지 방법으로 스케일링을 하자 
 ## 표준화(standardization) ##
 from sklearn.preprocessing import StandardScaler
 X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
-X
-
-#훈련 데이터 셋
-X = np.array(X)
 #분류기준 
-label = mergeA['goty']
-
-#train set과 test set을 나누자 
-from sklearn.model_selection import train_test_split
-X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
-
-#근접 점의 갯수
-np.sqrt(2359)#48.569537778323564
-clf = KNeighborsClassifier(n_neighbors = 3)
-#훈련시키기 
-clf.fit(X_train, Y_train)
-
-clf.score(X_test, Y_test)
-#0.9682203389830508
-
+Y = mergeA['goty']
 #이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
-pred_z = clf.predict(Z)
 
-import collections
-type(pred_z)
-len(pred_z)
-collections.Counter(pred_z)
+knnClass(X,Y,Z)
+#정답률 점수 : 0.9661016949152542
+#2019 goty 예상 : Counter({0: 325, 1: 1})
+#예측 갯수 :  Counter({0: 705, 1: 2, 2: 1})
+#실재 갯수 :  Counter({0: 686, 1: 16, 2: 6})
+#[[684   2   0]
+# [ 15   0   1]
+# [  6   0   0]]
+#원하는 부분의 정답률 (%): 0.0
+#              precision    recall  f1-score   support
+#
+#           0       0.97      1.00      0.98       686
+#           1       0.00      0.00      0.00        16
+#           2       0.00      0.00      0.00         6
+#
+#    accuracy                           0.97       708
+#   macro avg       0.32      0.33      0.33       708
+#weighted avg       0.94      0.97      0.95       708
+
 #Counter({0: 325, 1: 1})
 #1이 1개뿐이고 2는 없다.... 결과가 납득되지 않는다.
 
-pred_X = clf.predict(X_test)
-collections.Counter(pred_X)#Counter({0: 702, 1: 6}) 예측 갯수
-collections.Counter(Y_test)#Counter({0: 690, 1: 12, 2: 6}) 실제 갯수 
-
-from sklearn.metrics import classification_report, confusion_matrix
-print(confusion_matrix(Y_test,pred_X))
-confusion_matrix(Y_test,pred_X)[1][1]
-collections.Counter(Y_test)[2]
-"""
-[[685   5   0]
- [ 11   1   0]
- [  6   0   0]]"""
+#[[684   2   0]
+# [ 15   0   1]
+# [  6   0   0]]
 #정답률이 높게 나왔던게 우리가 원하는 것과 거리가 멀다.
 #goty = 1,2 예측이 잘 안된다.
-
-print(classification_report(Y_test, pred_X))
-""" 
-              precision    recall  f1-score   support
-
-           0       0.98      0.99      0.98       690
-           1       0.17      0.08      0.11        12
-           2       0.00      0.00      0.00         6
-
-   micro avg       0.97      0.97      0.97       708
-   macro avg       0.38      0.36      0.37       708
-weighted avg       0.95      0.97      0.96       708 """
 
 colormatp = np.array(['yellow','blue','red'])
 import matplotlib.pyplot as plt
@@ -422,35 +425,44 @@ from mpl_toolkits.mplot3d import Axes3D
 fig = plt.figure()
 axes3d = plt.axes(projection = '3d')
 axes3d.scatter(mergeA.iloc[:,2], mergeA.iloc[:,3], mergeA.iloc[:,4],
-               c = colormatp[label], s = 2)
+               c = colormatp[Y], s = 2)
 plt.show()
 
- 
 #보니 goty를 받지 못한 작품이 절대적으로 대다수이므로
 #근접한 작품중에서 goty 0 인 작품이 더 많을 것이다. 
 #그러므로 goty 2 없고, goty 1이 하나만 나온다. 
 
-tempDF = DataFrame(columns = ['k','score','goty score'])
+
 #K의 갯수를 다르게 해 보자
-j = 0
-for k in range(3,50,2):
-    goty_sum = 0
-    goty_suc = 0
-    tempDF.at[j,'k'] = k
-    #근접 점의 갯수
-    clf = KNeighborsClassifier(n_neighbors = k)
-    #훈련시키기 
-    clf.fit(X_train, Y_train)
+def knnK(X,Y,Z):
+    tempDF = DataFrame(columns = ['k','score','goty score'])
+    X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+    j = 0
+    for k in range(3,50,2):
+        goty_sum = 0
+        goty_suc = 0
+        tempDF.at[j,'k'] = k
+        #근접 점의 갯수
+        clf = KNeighborsClassifier(n_neighbors = k)
+        #훈련시키기 
+        clf.fit(X_train, Y_train)
+        pred_X = clf.predict(X_test)
+        tempDF.at[j,'score'] = clf.score(X_test, Y_test)
+        for i in [1,2]:
+            goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
+            goty_sum += collections.Counter(Y_test)[i]
 
-    tempDF.at[j,'score'] = clf.score(X_test, Y_test)
-    for i in [1,2]:
-        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
-        goty_sum += collections.Counter(Y_test)[i]
+        tempDF.at[j,'goty score'] = goty_suc / goty_sum
+        j += 1
 
-    tempDF.at[j,'goty score'] = goty_suc / goty_sum
-    j += 1
+    print(tempDF)
+    plt.plot(tempDF['k'],tempDF['goty score'])
+    plt.xlabel("k 값")
+    plt.ylabel("goty 1,2 일때 맞춘 확률")
+    plt.show()
 
-tempDF
+knnK(X,Y,Z)
+#집 다시 
 """
      k     score goty score
 0    3  0.968927  0.0555556
@@ -478,167 +490,288 @@ tempDF
 22  47  0.974576  0.0555556
 23  49  0.974576  0.0555556"""
 
-plt.plot(tempDF['k'],tempDF['goty score'])
-plt.xlabel("k 값")
-plt.ylabel("goty 1,2 일때 맞춘 확률")
-plt.show()
+#정규화 해서 해 보자 
+from sklearn.preprocessing import MinMaxScaler
+X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:5])
+Y = mergeA['goty']
+Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:5])
+
+knnClass(X,Y,Z)
+#정답률 점수 : 0.9774011299435028
+#2019 goty 예상 : Counter({0: 317, 1: 6, 2: 3})
+#예측 갯수 :  Counter({0: 702, 1: 5, 2: 1})
+#실재 갯수 :  Counter({0: 691, 1: 14, 2: 3})
+#[[689   1   1]
+# [ 11   3   0]
+# [  2   1   0]]
+#원하는 부분의 정답률 (%): 17.647058823529413
+#              precision    recall  f1-score   support
+#
+#           0       0.98      1.00      0.99       691
+#           1       0.60      0.21      0.32        14
+#           2       0.00      0.00      0.00         3
+#
+#    accuracy                           0.98       708
+#   macro avg       0.53      0.40      0.44       708
+#weighted avg       0.97      0.98      0.97       708
+
+knnK(X,Y,Z)
 
 #이번에는 다르게 장르들도 포함해서 실행해보자 
+#먼저 정규화를 해서 실행하자 
 X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
-X
-
-#훈련 데이터 셋
-X = np.array(X)
-#분류기준 
-label = mergeA['goty']
-
-#근접 점의 갯수
-clf2 = KNeighborsClassifier(n_neighbors = 3)
-
-X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
-#훈련시키기 
-clf2.fit(X_train,Y_train)
-
-clf2.score(X_test, Y_test)
-#0.9646892655367232
-
+Y = mergeA['goty']
 Z = StandardScaler().fit_transform(mergeB.iloc[:,2:])
-pred_z = clf2.predict(Z)
-collections.Counter(pred_z)
-#Counter({0: 322, 2: 2, 1: 2})
+knnClass(X,Y,Z)
+#정답률 점수 : 0.9646892655367232
+#2019 goty 예상 : Counter({0: 322, 1: 3, 2: 1})
+#예측 갯수 :  Counter({0: 700, 1: 7, 2: 1})
+#실재 갯수 :  Counter({0: 689, 1: 16, 2: 3})
+#[[683   6   0]
+# [ 15   0   1]
+# [  2   1   0]]
+#원하는 부분의 정답률 (%): 0.0
+#              precision    recall  f1-score   support
+#
+#           0       0.98      0.99      0.98       689
+#           1       0.00      0.00      0.00        16
+#           2       0.00      0.00      0.00         3
+#
+#    accuracy                           0.96       708
+#   macro avg       0.33      0.33      0.33       708
+#weighted avg       0.95      0.96      0.96       708
 
-pred_X = clf2.predict(X_test)
-collections.Counter(pred_X)#Counter({0: 694, 1: 12, 2: 2}) 예측 갯수
-collections.Counter(Y_test)#Counter({0: 689, 1: 14, 2: 5}) 실제 갯수 
+knnK(X,Y,Z)
 
-print(confusion_matrix(Y_test,pred_X))
-"""
-[[680   9   0]
- [ 11   2   1]
- [  3   1   1]]"""
-print(classification_report(Y_test, pred_X))
-"""
-              precision    recall  f1-score   support
+#이번에는 표준화를 해서 실행하자
+X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:-1])
+Y = mergeA['goty']
+Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:])
+knnClass(X,Y,Z)
+#정답률 점수 : 0.9646892655367232
+#2019 goty 예상 : Counter({0: 320, 1: 5, 2: 1})
+#예측 갯수 :  Counter({0: 700, 1: 8})
+#실재 갯수 :  Counter({0: 688, 1: 12, 2: 8})
+#[[682   6   0]
+# [ 11   1   0]
+# [  7   1   0]]
+#원하는 부분의 정답률 (%): 5.0
+#              precision    recall  f1-score   support
+#
+#           0       0.97      0.99      0.98       688
+#           1       0.12      0.08      0.10        12
+#           2       0.00      0.00      0.00         8
+#
+#    accuracy                           0.96       708
+#   macro avg       0.37      0.36      0.36       708
+#weighted avg       0.95      0.96      0.96       708
 
-           0       0.98      0.99      0.98       689
-           1       0.17      0.14      0.15        14
-           2       0.50      0.20      0.29         5
-
-   micro avg       0.96      0.96      0.96       708
-   macro avg       0.55      0.44      0.47       708
-weighted avg       0.96      0.96      0.96       708"""
-
-tempDF2 = DataFrame(columns = ['k','score','goty score'])
-#K의 갯수를 다르게 해 보자
-j = 0
-for k in range(3,50,2):
-    goty_sum = 0
-    goty_suc = 0
-    tempDF2.at[j,'k'] = k
-    #근접 점의 갯수
-    clf2 = KNeighborsClassifier(n_neighbors = k)
-    #훈련시키기 
-    clf2.fit(X_train, Y_train)
-
-    tempDF2.at[j,'score'] = clf2.score(X_test, Y_test)
-    for i in [1,2]:
-        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
-        goty_sum += collections.Counter(Y_test)[i]
-
-    tempDF2.at[j,'goty score'] = goty_suc / goty_sum
-    j += 1
-
-tempDF2
-"""
-     k     score goty score
-0    3  0.964689   0.157895
-1    5  0.968927   0.157895
-2    7  0.968927   0.157895
-3    9  0.968927   0.157895
-4   11  0.968927   0.157895
-5   13  0.973164   0.157895
-6   15  0.973164   0.157895
-7   17  0.973164   0.157895
-8   19  0.973164   0.157895
-9   21  0.973164   0.157895
-10  23  0.973164   0.157895
-11  25  0.973164   0.157895
-12  27  0.973164   0.157895
-13  29  0.973164   0.157895
-14  31  0.973164   0.157895
-15  33  0.973164   0.157895
-16  35  0.973164   0.157895
-17  37  0.973164   0.157895
-18  39  0.973164   0.157895
-19  41  0.973164   0.157895
-20  43  0.973164   0.157895
-21  45  0.973164   0.157895
-22  47  0.973164   0.157895
-23  49  0.973164   0.157895"""
-
-plt.plot(tempDF2['k'],tempDF2['goty score'])
-plt.xlabel("k 값")
-plt.ylabel("goty 1,2 일때 맞춘 확률")
-plt.show()
+knnK(X,Y,Z)
 
 #####################################################################
 from sklearn.linear_model import LogisticRegression
 log = LogisticRegression()
+label = mergeA['goty']
 log.fit(mergeA.iloc[:,2:5],label)
 
 pred2 = log.predict(mergeB.iloc[:,2:5])
 collections.Counter(pred2)
+#Counter({0: 326}) ...
 
-log2 = LogisticRegression()
-log2.fit(mergeA.iloc[:,2:-1],label)
+def logisticRegression(X,Y,Z):
+    log = LogisticRegression()
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
+    log.fit(X_train, Y_train)
+    pred_X = log.predict(X_test)
+    print("정답률 점수 :",clf.score(X_test, Y_test))
+    print("예측 갯수 :",collections.Counter(pred_X))
+    print("실제 갯수 :",collections.Counter(Y_test))
+    print(confusion_matrix(Y_test,pred_X))
+    print(classification_report(Y_test, pred_X))
+    goty_suc = 0
+    goty_sum = 0
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,pred_X)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+    pro = goty_suc / goty_sum
+    print("원하는 부분의 정답률 (%):",pro * 100)
+    pred_X2 = log.predict(Z)
+    print("2019 goty 예상 :",collections.Counter(pred_X2))
+    
 
-pred22 = log2.predict(mergeB.iloc[:,2:])
-collections.Counter(pred22)
+#train과 test를 나누어서 해 보자 
+X = mergeA.iloc[:,2:5]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:5]
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 708})
+#실제 갯수 : Counter({0: 685, 1: 16, 2: 7})
+#[[685   0   0]
+# [ 16   0   0]
+# [  7   0   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.97      1.00      0.98       685
+#           1       0.00      0.00      0.00        16
+#           2       0.00      0.00      0.00         7
+#
+#    accuracy                           0.97       708
+#   macro avg       0.32      0.33      0.33       708
+#weighted avg       0.94      0.97      0.95       708
+#
+#원하는 부분의 정답률 (%): 0.0
+#2019 goty 예상 : Counter({0: 326})
 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:-])
-Y = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+#이번에는 장르를 포함해서 해 보자 
+X = mergeA.iloc[:,2:-1]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:]
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 708})
+#실제 갯수 : Counter({0: 690, 1: 14, 2: 4})
+#[[690   0   0]
+# [ 14   0   0]
+# [  4   0   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.97      1.00      0.99       690
+#           1       0.00      0.00      0.00        14
+#           2       0.00      0.00      0.00         4
+#
+#    accuracy                           0.97       708
+#   macro avg       0.32      0.33      0.33       708
+#weighted avg       0.95      0.97      0.96       708
+#
+#원하는 부분의 정답률 (%): 0.0
+#2019 goty 예상 : Counter({0: 326})
 
-log3 = LogisticRegression()
-log3.fit(X,label)
+#표준화 스케일링을 해 보자 
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
+Y = mergeA['goty']
+Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 708})
+#실제 갯수 : Counter({0: 680, 1: 23, 2: 5})
+#[[680   0   0]
+# [ 23   0   0]
+# [  5   0   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.96      1.00      0.98       680
+#           1       0.00      0.00      0.00        23
+#           2       0.00      0.00      0.00         5
+#
+#    accuracy                           0.96       708
+#   macro avg       0.32      0.33      0.33       708
+#weighted avg       0.92      0.96      0.94       708
+#
+#원하는 부분의 정답률 (%): 0.0
+#2019 goty 예상 : Counter({0: 326})
 
-pred23 = log3.predict(Y)
-collections.Counter(pred23)
+#정규화 스케일링을 해 보자 
+X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:5])
+Y = mergeA['goty']
+Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:5])
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 708})
+#실제 갯수 : Counter({0: 689, 1: 12, 2: 7})
+#[[689   0   0]
+# [ 12   0   0]
+# [  7   0   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.97      1.00      0.99       689
+#           1       0.00      0.00      0.00        12
+#           2       0.00      0.00      0.00         7
+#
+#    accuracy                           0.97       708
+#   macro avg       0.32      0.33      0.33       708
+#weighted avg       0.95      0.97      0.96       708
+#
+#원하는 부분의 정답률 (%): 0.0
+#2019 goty 예상 : Counter({0: 326})
+
+#장르를 포함해서 표준화 스케일링을 해보자 
+X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
+Y = mergeA['goty']
+Z = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 703, 1: 5})
+#실제 갯수 : Counter({0: 688, 1: 13, 2: 7})
+#[[686   2   0]
+# [ 12   1   0]
+# [  5   2   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.98      1.00      0.99       688
+#           1       0.20      0.08      0.11        13
+#           2       0.00      0.00      0.00         7
+#
+#    accuracy                           0.97       708
+#   macro avg       0.39      0.36      0.37       708
+#weighted avg       0.95      0.97      0.96       708
+#
+#원하는 부분의 정답률 (%): 5.0
+#2019 goty 예상 : Counter({0: 326})
+
+#장르를 포함해서 정규화 스케일링을 해보자 
+X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:-1])
+Y = mergeA['goty']
+Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:])
+logisticRegression(X,Y,Z) 
+#예측 갯수 : Counter({0: 708})
+#실제 갯수 : Counter({0: 691, 1: 14, 2: 3})
+#[[691   0   0]
+# [ 14   0   0]
+# [  3   0   0]]
+#              precision    recall  f1-score   support
+#
+#           0       0.98      1.00      0.99       691
+#           1       0.00      0.00      0.00        14
+#           2       0.00      0.00      0.00         3
+#
+#    accuracy                           0.98       708
+#   macro avg       0.33      0.33      0.33       708
+#weighted avg       0.95      0.98      0.96       708
+#
+#원하는 부분의 정답률 (%): 0.0
+#2019 goty 예상 : Counter({0: 326})
 
 #####################################################################
 from sklearn.tree import DecisionTreeClassifier
 
-modelTree = DecisionTreeClassifier(criterion = 'entropy', max_depth = 5)
 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
-label = mergeA['goty']
+def DTC(X,Y,Z,cri,n):
+    modelTree = DecisionTreeClassifier(criterion = cri, max_depth = n)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
 
-X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+    modelTree.fit(X_train, Y_train)
+    predTree = modelTree.predict(X_test)
+    
+    print("정답률 점수 : ",modelTree.score(X_test, Y_test))
+    print("예측 갯수 :",collections.Counter(predTree))
+    print("실제 갯수 :",collections.Counter(Y_test))
+    print(confusion_matrix(Y_test,predTree))
+    print(classification_report(Y_test, predTree))
+    tempDF = DataFrame({'feature':X.columns,
+                        'importances':modelTree.feature_importances_})
+    print(tempDF)
+    goty_suc = 0
+    goty_sum = 0
+    for i in [1,2]:
+        goty_suc += confusion_matrix(Y_test,predTree)[i][i]
+        goty_sum += collections.Counter(Y_test)[i]
+    pro = goty_suc / goty_sum
+    print("원하는 부분의 정답률 (%):",pro * 100)
+    pred_z = modelTree.predict(Z)
+    print("2019 goty 예측 : ",collections.Counter(pred_z))
+    
+X = mergeA.iloc[:,2:5]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:5]
+DTC(X,Y,Z,'entropy',5)
+DTC(X,Y,Z,'gini',5)
 
-modelTree.fit(X_train, Y_train)
-predTree = modelTree.predict(X_test)
-
-modelTree.score(X_test, Y_test)
-#0.9759887005649718
-
-collections.Counter(predTree)
-#Counter({0: 700, 1: 6, 2: 2})
-
-Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
-pred_z = modelTree.predict(Z)
-collections.Counter(pred_z)
-#Counter({0: 323, 1: 3})
-
-pred_X = modelTree.predict(X_test)
-collections.Counter(pred_X)#Counter({0: 700, 1: 6, 2: 2}) 예측 갯수
-collections.Counter(Y_test)#Counter({0: 690, 1: 16, 2: 2}) 실제 갯수 
-
-print(confusion_matrix(Y_test,pred_X))
-"""
-[[687   3   0]
- [ 12   3   1]
- [  1   0   1]]"""
-
-"""
 #그림을 그려보자 
 import pydotplus
 import graphviz
@@ -646,36 +779,97 @@ import graphviz
 from sklearn.tree import export_graphviz
 from IPython.display import Image
 
-mergeA.iloc[:,2:-1].columns
+col = ['metascore', 'userscore', 'openscore']
 
 dot_data = export_graphviz(modelTree, out_file=None,
-                           feature_names= mergeA.iloc[:,2:-1].columns,
+                           feature_names= mergeA.iloc[:,2:5].columns,
                            filled=True,rounded=True,
                            special_characters=True)
 
 graph = pydotplus.graph_from_dot_data(dot_data)
 Image(graph.create_png())
-plt.show()"""
+plt.show()
 
 #max depth 값에 따라서 달라질까?
-tempDF3 = DataFrame(columns = ['max depth','score','goty score'])
-j = 0
-for i in range(3,30):
-    tempDF3.at[j,'max depth'] = i
-    modelTree = DecisionTreeClassifier(criterion = 'entropy', max_depth = i)
-    modelTree.fit(X_train, Y_train)
-    predTree = modelTree.predict(X_test)
+def DTCMD(X,Y,Z,cri):
+    tempDF = DataFrame(columns = ['max depth','score','goty score'])
+    j = 0
+    for i in range(3,50):
+        tempDF.at[j,'max depth'] = i
+        modelTree = DecisionTreeClassifier(criterion = cri, max_depth = i)
+        modelTree.fit(X_train, Y_train)
+        predTree = modelTree.predict(X_test)
 
-    tempDF3.at[j,'score'] = modelTree.score(X_test, Y_test)
+        tempDF.at[j,'score'] = modelTree.score(X_test, Y_test)
 
+        goty_suc = 0
+        goty_sum = 0
+        for i in [1,2]:
+            goty_suc += confusion_matrix(Y_test,predTree)[i][i]
+            goty_sum += collections.Counter(Y_test)[i]
+
+        tempDF.at[j,'goty score'] = goty_suc / goty_sum
+        j += 1
+    
+    print(tempDF)
+    plt.plot(tempDF['max depth'], tempDF['goty score'])
+    plt.show()
+    
+DTCMD(X,Y,Z,'entropy')
+DTCMD(X,Y,Z,'gini')
+
+
+#장르를 넣고 해 보자 
+X = mergeA.iloc[:,2:-1]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:]
+DTC(X,Y,Z,'entropy',5)
+DTC(X,Y,Z,'gini',5)
+
+DTCMD(X,Y,Z,'entropy')
+DTCMD(X,Y,Z,'gini')
+
+##########################################################################
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
+
+def RFC(X,Y,Z,cri,esti):
+    model = RandomForestClassifier(n_estimators = esti,
+                                   oob_score = True,#default = False
+                                   criterion = cri,
+                                   random_state = 0)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
+
+    model.fit(X_train, Y_train)
+    predTree = model.predict(X_test)
+    
+    print("정답률 점수 : ",model.score(X_test, Y_test))
+    print("예측 갯수 :",collections.Counter(predTree))
+    print("실제 갯수 :",collections.Counter(Y_test))
+    print(confusion_matrix(Y_test,predTree))
+    print(classification_report(Y_test, predTree))
+    tempDF = DataFrame({'feature':X.columns,
+                        'importances':model.feature_importances_})
+    print(tempDF)
+    goty_suc = 0
+    goty_sum = 0
     for i in [1,2]:
         goty_suc += confusion_matrix(Y_test,predTree)[i][i]
         goty_sum += collections.Counter(Y_test)[i]
+    pro = goty_suc / goty_sum
+    print("원하는 부분의 정답률 (%):",pro * 100)
+    pred_z = model.predict(Z)
+    print("2019 goty 예측 : ",collections.Counter(pred_z))
+   
+X = mergeA.iloc[:,2:5]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:5]
+RFC(X,Y,Z,'entropy',10)
+RFC(X,Y,Z,'gini',10)
 
-    tempDF3.at[j,'goty score'] = goty_suc / goty_sum
-    j += 1
-
-tempDF3
-plt.plot(tempDF3['max depth'], tempDF3['goty score'])
-plt.show()
-
+#장르를 넣고 해 보자
+X = mergeA.iloc[:,2:-1]
+Y = mergeA['goty']
+Z = mergeB.iloc[:,2:]
+RFC(X,Y,Z,'entropy',10)
+RFC(X,Y,Z,'gini',10)
