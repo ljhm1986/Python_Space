@@ -78,7 +78,7 @@ len(gotyB)#73
 #metascoreDF[metascoreDF['name'].isin(gotyA)]
 
 
-mergeDF = pd.read_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/merge.csv")
+mergeDF = pd.read_csv("C:/WorkSpace/Python_Space/Project/merge.csv")
 mergeDF = mergeDF.iloc[:,1:]
 mergeDF.info()
 
@@ -359,7 +359,7 @@ import collections
 from sklearn.metrics import classification_report, confusion_matrix
 
 def knnClass(X,Y,Z):
-    X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
     clf = KNeighborsClassifier(n_neighbors = 3)
     #훈련시키기 
     clf.fit(X_train, Y_train)
@@ -380,6 +380,30 @@ def knnClass(X,Y,Z):
     print("원하는 부분의 정답률 (%):",pro * 100)
     print(classification_report(Y_test, pred_X))
       
+#n : 반복횟수
+#m : 이웃 수 
+def knnClass2(X,Y,Z,n,m):
+    tempDF = DataFrame(columns = ['n','score','goty score'])
+    for j in range(0,n):
+        X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
+        clf = KNeighborsClassifier(n_neighbors = m)
+        #훈련시키기 
+        clf.fit(X_train, Y_train)
+        tempDF.at[j,'score'] = clf.score(X_test, Y_test)
+        pred_X = clf.predict(X_test)
+        goty_suc = 0
+        goty_sum = 0
+        for k in [1,2]:
+            goty_suc += confusion_matrix(Y_test,pred_X)[k][k]
+            goty_sum += collections.Counter(Y_test)[k]
+        pro = goty_suc / goty_sum
+        tempDF.at[j,'goty score'] = pro * 100
+        tempDF.at[j,'n'] = j + 1
+    print("평균 정확도 : {}".format(tempDF['score'].mean()))
+    print("평균 goty score (%): {}".format(tempDF['goty score'].mean()))
+    plt.plot(tempDF['n'],tempDF['goty score'])
+    plt.show()
+
 
 #KNN도 2가지 방법으로 스케일링을 하자 
 ## 표준화(standardization) ##
@@ -389,6 +413,12 @@ X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
 Y = mergeA['goty']
 #이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
+
+standardScaler = StandardScaler()
+standardScaler.fit(mergeA.iloc[:,2:5])
+X = standardScaler.transform(mergeA.iloc[:,2:5])
+Y = mergeA['goty']
+Z = standardScaler.transform(mergeB.iloc[:,2:5])
 
 knnClass(X,Y,Z)
 #정답률 점수 : 0.9661016949152542
@@ -418,6 +448,15 @@ knnClass(X,Y,Z)
 #정답률이 높게 나왔던게 우리가 원하는 것과 거리가 멀다.
 #goty = 1,2 예측이 잘 안된다.
 
+for i in range(3,30,2):
+    print("neighbor 갯수 : {}".format(i))
+    knnClass2(X,Y,Z,30,i)
+
+from sklearn.model_selection import cross_val_score
+clf = KNeighborsClassifier(n_neighbors = 3)
+scores = cross_val_score(clf, X, Y, cv = 5)
+print(scores)
+
 colormatp = np.array(['yellow','blue','red'])
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
@@ -436,7 +475,7 @@ plt.show()
 #K의 갯수를 다르게 해 보자
 def knnK(X,Y,Z):
     tempDF = DataFrame(columns = ['k','score','goty score'])
-    X_train, X_test, Y_train, Y_test = train_test_split(X,label,test_size = 0.3)
+    X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
     j = 0
     for k in range(3,50,2):
         goty_sum = 0
@@ -463,38 +502,13 @@ def knnK(X,Y,Z):
 
 knnK(X,Y,Z)
 #집 다시 
-"""
-     k     score goty score
-0    3  0.968927  0.0555556
-1    5  0.970339  0.0555556
-2    7  0.971751  0.0555556
-3    9  0.974576  0.0555556
-4   11  0.974576  0.0555556
-5   13  0.974576  0.0555556
-6   15  0.974576  0.0555556
-7   17  0.974576  0.0555556
-8   19  0.974576  0.0555556
-9   21  0.974576  0.0555556
-10  23  0.974576  0.0555556
-11  25  0.974576  0.0555556
-12  27  0.974576  0.0555556
-13  29  0.974576  0.0555556
-14  31  0.974576  0.0555556
-15  33  0.974576  0.0555556
-16  35  0.974576  0.0555556
-17  37  0.974576  0.0555556
-18  39  0.974576  0.0555556
-19  41  0.974576  0.0555556
-20  43  0.974576  0.0555556
-21  45  0.974576  0.0555556
-22  47  0.974576  0.0555556
-23  49  0.974576  0.0555556"""
 
 #정규화 해서 해 보자 
 from sklearn.preprocessing import MinMaxScaler
-X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:5])
+minmax = MinMaxScaler()
+X = minmax.fit_transform(mergeA.iloc[:,2:5])
 Y = mergeA['goty']
-Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:5])
+Z = minmax.transform(mergeB.iloc[:,2:5])
 
 knnClass(X,Y,Z)
 #정답률 점수 : 0.9774011299435028
@@ -519,9 +533,10 @@ knnK(X,Y,Z)
 
 #이번에는 다르게 장르들도 포함해서 실행해보자 
 #먼저 정규화를 해서 실행하자 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
+standardScaler = StandardScaler()
+X = standardScaler.fit_transform(mergeA.iloc[:,2:-1])
 Y = mergeA['goty']
-Z = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+Z = standardScaler.transform(mergeB.iloc[:,2:])
 knnClass(X,Y,Z)
 #정답률 점수 : 0.9646892655367232
 #2019 goty 예상 : Counter({0: 322, 1: 3, 2: 1})
@@ -797,6 +812,7 @@ def DTCMD(X,Y,Z,cri):
     for i in range(3,50):
         tempDF.at[j,'max depth'] = i
         modelTree = DecisionTreeClassifier(criterion = cri, max_depth = i)
+        X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
         modelTree.fit(X_train, Y_train)
         predTree = modelTree.predict(X_test)
 
@@ -812,6 +828,8 @@ def DTCMD(X,Y,Z,cri):
         j += 1
     
     print(tempDF)
+    print("평균 정확도 : {}".format(tempDF['score'].mean()))
+    print("평균 goty score (%): {}".format(tempDF['goty score'].mean()))
     plt.plot(tempDF['max depth'], tempDF['goty score'])
     plt.show()
     
