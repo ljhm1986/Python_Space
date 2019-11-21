@@ -570,3 +570,477 @@ with tf.Session() as sess:
 #다음 자료형 shape는 다르다.
 x1 = np.array([1,2,3])#3행    
 x2 = np.array([[1,2,3]])#3행 1열
+
+##################################################################
+#11/21#
+#텐서 자료 구조
+#- 텐서 텐서플로의 기본 자료 구조
+#- 텐서 다차원 배열, 리스트로 구성
+#
+#1차원 텐서
+import numpy as np
+import tensorflow as tf
+
+arr = np.array([1,2,3])
+arr[0]
+arr.ndim
+arr.shape #(3,)
+arr.dtype
+
+#numpy array 를 ..
+with tf.Session() as sess:
+    print(sess.run(arr))
+#error가 난다, 변환작업을 해 줘야 한다.
+arr_tf = tf.convert_to_tensor(arr, dtype = tf.int32)
+with tf.Session() as sess:
+    sess.run(arr_tf)
+    print(sess.run(arr_tf[0]))
+
+arr_tf.dtype
+#tf.int32
+arr_tf.shape
+#TensorShape([Dimension(3)])
+arr_tf.ndim #안 됨
+
+x = np.array([1,2,3]) #(3,)
+w = np.array([[2],[2],[2]]) #(3,1)
+np.dot(x,w)
+print(np.dot(x,w))
+
+#tensor로 해 보자 
+x1 = tf.constant([1,2,3])
+w1 = tf.constant([[2],[2],[2]])
+y = tf.matmul(x1,w1) #안 됨, x1을 명확하게 (1,3)되도록 수정해야 한다. 
+
+x1 = tf.constant([[1,2,3]])
+w1 = tf.constant([[2],[2],[2]])
+y = tf.matmul(x1,w1)
+
+x1.shape
+print(x1.shape)
+x1.get_shape
+print(x1.get_shape())
+sess = tf.Session()
+sess.run(y)
+sess.close()
+
+#변수일 경우
+x1 = tf.Variable([[1,2,3]])
+w1 = tf.Variable([[2],[2],[2]])
+y = tf.matmul(x1,w1)
+
+x1.shape
+print(x1.shape)
+x1.get_shape
+print(x1.get_shape())
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+sess.run(y)
+
+xx = sess.run(x1)
+xx #array([[1, 2, 3]]) numpy array처럼 나온다.
+
+sess.close()
+
+#2차원 텐서 
+#numpy array 를  tensor에서 사용하기 
+arr_1 = np.array([[1,2,3],[4,5,6],[7,8,9]])
+arr_2 = np.array([[1,1,1],[2,2,2],[3,3,3]])
+type(arr_1)
+
+tm1 = tf.constant(arr_1)
+tm2 = tf.constant(arr_2)
+
+tm_product = tf.matmul(tm1, tm2)
+tm_add = tf.add(tm1, tm2)
+
+sess = tf.Session()
+sess.run(tm_product)
+sess.run(tm_add)
+sess.close()
+
+#3차원
+arr_3 = np.array([[[1,2],[3,4],[2,3]],[[3,2],[1,4],[9,5]]])
+arr_3.ndim
+arr_3.shape #(plane, row, column)
+print(arr_3)
+
+tm_3 = tf.constant(arr_3)
+sess = tf.Session()
+sess.run(tm_3)
+
+print(tm_3.get_shape())
+
+#[문제] 
+#x 변수는 1행 3열 모양의 값은 1,2,3
+#w 변수는 3행 1열 모양의 값은 2,2,2
+#y 변수는 x와 w를 행렬의 곱을 이용한 결과를 수행하세요
+x = np.array([[1,2,3]])
+w = np.array([[2],[2],[2]])
+y = np.dot(x,w)
+y
+
+tf_x = tf.constant(x)
+tf_w = tf.constant(w)
+tm_product = tf.matmul(tf_x, tf_w)
+
+sess = tf.Session()
+sess.run(tm_product)
+sess.close()
+
+
+points = [[1,2,3],[4,5,6]]
+vectors = tf.constant(points)
+print(points)
+print(vectors)
+
+#2차원 백터를 3차원으로 확장하자 
+expanded_vectors = tf.expand_dims(vectors,0)
+print(expanded_vectors)
+expanded_vectors.get_shape()
+print(expanded_vectors.get_shape())
+
+#0으로 채워넣은 행렬 만들기 
+zeros = tf.zeros_like([[0,0,0],[1,2,3]], dtype = tf.int32, name = 'zeros')
+zeros
+
+sess = tf.Session()
+sess.run(zeros)
+#array([[0, 0, 0],
+#       [0, 0, 0]])
+
+zeros1 = tf.zeros([2,3], dtype = tf.int32, name = 'zeros1')
+sess.run(zeros1)
+#array([[0, 0, 0],
+#       [0, 0, 0]])
+
+zeros2 = tf.zeros([3,4,5], dtype = tf.int32, name = 'zeros2')
+sess.run(zeros2)
+
+#1로 채워넣기 
+ones1 = tf.ones([3,4], dtype = tf.int32, name = 'ones1')
+sess.run(ones1)
+
+ones2 = tf.ones([3,4,5], dtype = tf.float32, name = 'ones2')
+sess.run(ones2)
+
+#특정 숫자로 채워넣기
+fill = tf.fill([2,3],7)
+sess.run(fill)
+
+x = tf.constant(7, shape = [2,3])
+sess.run(x)
+
+#정규분포 난수 추출
+norm = tf.random_normal([3,3])
+sess.run(norm)
+
+#표준정규분포 난수 추출
+z = tf.random_normal([3,3], mean = 0, stddev = 1)
+sess.run(z)
+
+#주어진 값들을 shuffle (위치를 임의로 바꾸기)
+s = tf.constant([[1,2],[3,4],[5,6]])
+shuff = tf.random_shuffle(s)
+sess.run(shuff)
+
+#uniform 분포에서 추출
+unif = tf.random_uniform([2,3], minval = 1, maxval = 3)
+sess.run(unif)
+
+#seed를 고정해서 추출하기 
+a = tf.random_uniform([1], seed = 1)
+b = tf.random_normal([1])
+print("session1")
+with tf.Session() as sess1:
+    print(sess1.run(a))
+    print(sess1.run(a))
+    print(sess1.run(b))
+    print(sess1.run(b))
+
+print("session2")
+with tf.Session() as sess1:
+    print(sess1.run(a))
+    print(sess1.run(a))
+    print(sess1.run(b))
+    print(sess1.run(b))  
+
+#다른 session에서 a의 값들이 같게 나온다. b는 다르게 나온다. 
+
+#처음부터 seed를 고정해서 추출하기 
+tf.set_random_seed(1234)
+x = tf.random_uniform([1])
+y = tf.random_normal([1])
+print("session1")
+with tf.Session() as sess1:
+    print(sess1.run(x))
+    print(sess1.run(x))
+    print(sess1.run(y))
+    print(sess1.run(y))
+    
+print("session2")
+with tf.Session() as sess1:
+    print(sess1.run(x))
+    print(sess1.run(x))
+    print(sess1.run(y))
+    print(sess1.run(y))  
+
+#수열 값을 표현, 단 실수형으로만 표시    
+lin = tf.linspace(10., 12., 5,#숫자들의 총 갯수
+                  name = "linspace")
+sess.run(lin)
+
+#정수로 수열을 만드려면 
+ran = tf.range(start = 1, limit = 10,
+               delta = 1)#숫자의 간격
+sess.run(ran)
+
+ran = tf.range(11)
+sess.run(ran)
+
+#y = in * w + b
+inputData = tf.Variable(tf.fill([1,32],7.))
+weight = tf.Variable(tf.random_normal(
+        [32,32],mean = 0, stddev = 1, name = 'weight'))
+
+bias = tf.Variable(tf.zeros([32]), name = 'bias')
+
+weight.get_shape()
+bias.get_shape()
+
+y = tf.matmul(inputData, weight) + bias
+y.shape
+
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+sess.run(weight)
+sess.run(bias)
+sess.run(y)
+sess.close()
+sess1.close()
+dir()
+
+#변수 초기화 
+w1 = tf.Variable(tf.random_normal([3,3], mean = 0, stddev = 1, name = 'w1'))
+w2 = tf.Variable(w1.initialized_value(), name = 'w2')
+w_twice = tf.Variable(w1.initialized_value() * 2.0, name = "w_twice")
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+sess.run(w1)
+sess.run(w2)
+sess.run(w_twice)
+sess.close()
+
+#------------
+#시간	점수
+#----	----
+#2	71
+#4	83
+#6	91
+#8	97
+#
+#3시간 공부하면 몇 점을? 
+#y = a * x + b
+#y : 종속변수, 목표변수
+#x : 독립변수, 설명변수
+#a : 기울기
+#b : 절편
+#최소제곱법(method of least squares)
+#- 일차함수의 기울기 a, 절편 b
+#- 회귀분석에서 사용하는 표준방식
+#- 실험이나 관찰을 통해 얻은 데이터를 분석하여 
+#미지의 상수를 구할 때 사용된다.
+#
+#	        Σ(x - x평균)(y - y평균)
+#기울기 = ---------------------------
+#	             Σ(x - x평균)^2
+#
+#절편 = Y평균 - (X평균 * 기울기)
+
+
+from sklearn.linear_model import LinearRegression
+x = np.array([2,4,6,8])
+y = np.array([71,83,91,97])
+
+x_mean = x.mean()
+y_mean = y.mean()
+
+d = sum([(i - x_mean)**2 for i in x])
+d
+
+def func(x,x_m,y,y_m):
+    s = 0
+    for i in range(len(x)):
+        s += (x[i] - x_m) * (y[i] - y_m)
+    return s
+
+n = func(x,x_mean,y,y_mean)
+n
+a = n/d
+a
+b = y_mean - (x_mean * a)
+b
+print("기울기 : ",a)
+print("절편 : ",b)
+z = a * 3 + b
+z
+
+predict = a * x + b
+error = predict - y
+
+#평균제곱오차(Mean Squared Error)
+#1/n * sum((predict - target)^2)
+
+print("평균제곱오차 : ", (1/4) *(sum((predict - y)**2)))
+print("평균제곱오차 : ", ((predict - y) **2).mean())
+
+from sklearn.metrics import mean_squared_error
+mean_squared_error(predict, y)
+
+#평균제곱근오차(root mean square error)
+def rmse(p,t):
+    return np.sqrt(((p - t)**2).mean())
+
+rmse(predict, y)
+np.sqrt(mean_squared_error(predict, y))
+
+#y = weight * x_data + bias
+x_data = [1,2,3,4,5,6]
+y_data = [2,4,6,8,10,12]
+
+#weight와 bias값을 찾아야 한다.
+x = tf.placeholder(tf.float32)
+y = tf.placeholder(tf.float32)
+w = tf.Variable(tf.random_normal([1], seed = 0, name = "weight"))
+b = tf.Variable(tf.random_normal([1], seed = 0, name = 'bias'))
+
+hypothesis = w * x + b
+#오차 = Σ(hypothesis - y)²
+cost = tf.reduce_mean(tf.square(hypothesis - y))
+
+optimizer = tf.train.GradientDescentOptimizer(
+        learning_rate = 0.001)#학습률, 조정을 잘 해야 한다. 
+#cost값을 보면서 잘 조정해야 한다.
+train = optimizer.minimize(cost)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for step in range(2001):
+    cost_v, w_v, b_v, _ = sess.run([cost,w,b,train],
+                                   feed_dict = {x:x_data,y:y_data})
+    if (step % 20) == 0:
+        print(step, cost_v, w_v, b_v)
+        
+sess.run(hypothesis, feed_dict = {x:3})
+sess.run(hypothesis, feed_dict = {x:6})
+
+###
+x_data = [2,4,6,8]
+y_data = [71,83,91,97]
+###
+data = [[2,71],[4,83],[6,91],[8,97]]
+data1 = [i[0] for i in data]
+data2 = [i[1] for i in data]
+data1
+data2
+
+dir()
+
+def GDO(X,Y,LR,N):
+    x = tf.placeholder(tf.float32)
+    y = tf.placeholder(tf.float32)
+    w = tf.Variable(tf.random_normal([1], seed = 0, name = "weight"))
+    b = tf.Variable(tf.random_normal([1], seed = 0, name = 'bias'))
+    hypothesis = w * x + b
+    cost = tf.reduce_mean(tf.square(hypothesis - y))
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate = LR)
+    train = optimizer.minimize(cost)
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+
+    for step in range(N+1):
+        cost_v, w_v, b_v, _ = sess.run([cost,w,b,train],
+                                   feed_dict = {x:X,y:Y})
+        if (step % 20) == 0:
+            print(step, cost_v, w_v, b_v)
+    sess.close()
+    
+GDO(x_data, y_data,0.002,10000)
+GDO([5,7,8,3], [2,3,6,4],0.002,10000)
+
+#[문제] linear regression 학습을 통해서 입력값에 대한 예측값을 출력해주세요
+#x1    x2    x3     y
+#--------------------
+#73    80    75     152
+#93    88    93     185
+#89    91    90     180
+#96    98   100     196
+#73    66    70     142
+#y = w1 * x1 + w2 * x2 + w3 * x3 + b
+#print("당신의 점수는 ",sess.run(hypothesis,feed_dict = {x1:100,x2:70,x3:60}))
+
+def GDO2(x_data1, x_data2,x_data3,y_data,LR,N,X):
+    x1 = tf.placeholder(tf.float32)
+    x2 = tf.placeholder(tf.float32)
+    x3 = tf.placeholder(tf.float32)
+    y = tf.placeholder(tf.float32)
+    w1 = tf.Variable(tf.random_normal([1], seed = 0, name = "weight1"))
+    w2 = tf.Variable(tf.random_normal([1], seed = 0, name = "weight2"))
+    w3 = tf.Variable(tf.random_normal([1], seed = 0, name = "weight3"))
+    b = tf.Variable(tf.random_normal([1], seed = 0, name = 'bias'))
+    hypothesis = w1 * x1 + w2 * x2 + w3 * x3 + b
+    cost = tf.reduce_mean(tf.square(hypothesis - y))
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate = LR)
+    train = optimizer.minimize(cost)
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+
+    for step in range(N+1):
+        cost_v, w1_v,w2_v,w3_v, b_v, _ = sess.run([cost,w1,w2,w3,b,train],
+                                                  feed_dict = {x1:x_data1,
+                                                               x2:x_data2,
+                                                               x3:x_data3,
+                                                               y:y_data})
+        
+        if (step % 20) == 0:
+            print(step, cost_v, w1_v,w2_v,w3_v, b_v)
+            
+    print("당신의 점수는 ",sess.run(hypothesis,feed_dict = {x1:X[0],
+                                                      x2:X[1],x3:X[2]}))
+    sess.close()
+
+x_data1 = [73,93,89,96,73]
+x_data2 = [80,88,91,98,66]
+x_data3 = [75,93,90,100,70]
+y_data = [152,185,180,196,142]
+X = [100,70,60]
+GDO2(x_data1, x_data2, x_data3, y_data, 0.000049, 10000,X)
+
+## 선생님의 풀이 ##
+#행렬을 배운것을 써 먹자 
+x_data = [[73,80,75],[93,88,93],[89,91,90],[96,98,100],[73,66,70]]
+y_data = [[152],[185],[180],[196],[142]]
+
+x = tf.placeholder(tf.float32, shape = [None,3])#행의 갯수는 나중에 정함
+y = tf.placeholder(tf.float32, shape = [None,1])
+w = tf.Variable(tf.random_normal([3,1],seed = 1), name = 'weight')
+b = tf.Variable(tf.random_normal([1],seed = 1), name = 'bias')
+
+hypothesis = tf.matmul(x,w) + b
+cost = tf.reduce_mean(tf.square(hypothesis - y))
+optimizer = tf.train.GradientDescentOptimizer(learning_rate = 0.0001)
+train = optimizer.minimize(cost)
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+for step in range(100001):
+    cost_v, hy_v, _ = sess.run([cost,hypothesis,train],
+                                   feed_dict = {x:x_data,y:y_data})
+        
+    if (step % 100) == 0:
+        print(step, cost_v, hy_v)
+        
+print("당신의 점수는 ",sess.run(hypothesis,feed_dict = {x:[[100,70,60]]}))
+sess.close()

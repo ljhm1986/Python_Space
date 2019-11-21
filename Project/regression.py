@@ -118,7 +118,7 @@ def estimateLine(x,y):
     #intercept
     b0 = y_mean - (b1*x_mean)
     
-    print("slope : {}, intercept : {}".format(b1,b0))
+    print("slope(b1) : {}, intercept(b0) : {}".format(b1,b0))
 
     SSE = 0
     SSR = 0
