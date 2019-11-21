@@ -208,6 +208,7 @@ opencriticDF['openscore'] = opencriticDF['openscore'].astype('int')
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic.csv")
 opencriticDF.to_csv("C:/WorkSpace/PythonSpace/Python_Space/Project/opencritic2019.csv")
 
+#####################################################################################
 ##metacritic에서 Genre 별로 
 header = {"User-Agent": "Mozilla/5.0 (Windows NT 6.1; Win64; x64)\
           AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97\

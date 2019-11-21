@@ -380,6 +380,8 @@ relu2(y)
 
 #conda install tensorflow
 import tensorflow as tf
+#import 를 할때 cudart64_100.dll 가 없다는 내용이 나오는데 GPU 사용 설정을 하지 않아서이다. 
+#(학원 컴퓨터로 할 때는 아무런 메시지가 안 나왔었는데??)
 
 #버전 확인 
 tf.__version__
@@ -396,6 +398,7 @@ session = tf.compat.v1.Session()
 #conda install tensorflow==1.15
 #버전 1.15.0 을 재설치했다.
 sess = tf.Session()
+#Session 여는 순간 여러 메시지가 나온다, GPU 관련된 내용이다. 
 sess.run(hello)
 
 a = tf.constant(1234)
@@ -419,7 +422,7 @@ v = tf.Variable(0, name = 'v')
 
 calc_op = x1 + x2 + x3
 
-#값을 지정해 놓기 
+#변수의 값을 지정해 놓기 
 assign_op = tf.assign(v, calc_op)
 
 sess = tf.Session()
@@ -431,14 +434,15 @@ v1 = tf.Variable(0, name = 'v1')
 v1 = calc_op
 sess.run(v1)#390
 
-#변수를 run할때 정하고 싶을때
+#변수를 run할때 정하고 싶을때 인스턴스화 하여 가동
 p1 = tf.placeholder('int32')
 p2 = tf.placeholder('int32')
 print(p1)
 
+#함수를 정함 
 y = tf.add(p1, p2)
 sess = tf.Session()
-#run할때 값을 넣자
+#run할때 함수와 값을 넣자, 
 sess.run(y, feed_dict = {p1: 10, p2:3})
 
 #함수        설명
@@ -461,12 +465,13 @@ sess.run(y, feed_dict = {p1: 10, p2:3})
 #tf.maximum  최대값
 #tf.minimun  최소값
 
+#3개의 행을 가진 형태로 선언
 a = tf.placeholder(tf.int32, [3])
 a
 b = tf.constant(2)
 x2_OP = a + b
 sess = tf.Session()
-r1 = sess.ru(v2)
+
 
 
 #
@@ -481,7 +486,6 @@ print(sess.run(z, feed_dict = {x:[2,3,4], y:[5,6,7]}))
 #
 x1 = tf.constant([[1,2,3],[4,5,6]])
 y1 = tf.constant([[1,2],[3,4],[5,6]])
-z1 = tf.Variable(0)
 z1 = tf.matmul(x1, y1)
 
 sess = tf.Session()
@@ -508,6 +512,8 @@ sess = tf.Session()
 #
 #tensorflow를 설치했던 cmd 창을 닫으니까 에러가 나지 않는다 ...
 sess.run(z, feed_dict = {x:[[1,2,3],[4,5,6]], y: [[1,2],[3,4],[5,6]]})
+# array([[22., 28.],
+#        [49., 64.]], dtype=float32
 
 #[문제] 상수를 이용해서 아래와 같이 결과를 출력하는 프로그램을 작성하세요
 #a + b = 6
@@ -547,6 +553,7 @@ b = tf.Variable(4)
 c = a + b
 d = a * b
 with tf.Session() as sess:
+    #변수 초기화
     sess.run(tf.global_variables_initializer())
     print("a + b = {}".format(sess.run(c)))
     print("a * b = {}".format(sess.run(d)))
@@ -688,7 +695,7 @@ sess = tf.Session()
 sess.run(tm_product)
 sess.close()
 
-
+#
 points = [[1,2,3],[4,5,6]]
 vectors = tf.constant(points)
 print(points)
