@@ -492,9 +492,11 @@ sess = tf.Session()
 sess.run(z1)
 sess.close()
 
-##
+##행렬 형태로 선언 
 x = tf.placeholder(tf.float32, shape = (2,3))
+print(x)
 y = tf.placeholder(tf.float32, shape = (3,2))
+print(y)
 z = tf.matmul(x,y)
 
 sess = tf.Session()
@@ -795,11 +797,13 @@ with tf.Session() as sess1:
 #수열 값을 표현, 단 실수형으로만 표시    
 lin = tf.linspace(10., 12., 5,#숫자들의 총 갯수
                   name = "linspace")
+print(lin)
 sess.run(lin)
 
 #정수로 수열을 만드려면 
 ran = tf.range(start = 1, limit = 10,
                delta = 1)#숫자의 간격
+print(ran)
 sess.run(ran)
 
 ran = tf.range(11)
@@ -807,6 +811,7 @@ sess.run(ran)
 
 #y = in * w + b
 inputData = tf.Variable(tf.fill([1,32],7.))
+print(inputData)
 weight = tf.Variable(tf.random_normal(
         [32,32],mean = 0, stddev = 1, name = 'weight'))
 
@@ -935,6 +940,7 @@ train = optimizer.minimize(cost)
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
+#2000번 반복 시행 
 for step in range(2001):
     cost_v, w_v, b_v, _ = sess.run([cost,w,b,train],
                                    feed_dict = {x:x_data,y:y_data})
@@ -1051,3 +1057,301 @@ for step in range(100001):
         
 print("당신의 점수는 ",sess.run(hypothesis,feed_dict = {x:[[100,70,60]]}))
 sess.close()
+
+##########################################################################
+#11/22#
+import tensorflow as tf
+import numpy as np
+
+#1~3열 독립변수, 4열 종속변수
+data = np.loadtxt("C:\\WorkSpace\\Python_Space\\data\\ex.csv",
+                  delimiter = ",",dtype = np.float32)
+
+data
+
+data[0][:-1]
+x_data = data[:,:-1]
+y_data = data[:,[-1]]
+len(x_data)
+len(x_data[0])
+Z = [[80.0,70.0,60.0]]
+
+outputData = []
+def GDO3(X,Y,LR,N,Z):
+    #X : 독립변수, Y : 종속변수, LR : 학습률, N : 학습횟수, Z : test data
+    x = tf.placeholder(tf.float32, shape = [None,X.shape[1]])
+    y = tf.placeholder(tf.float32, shape = [None,Y.shape[1]])
+    w = tf.Variable(tf.random_normal([X.shape[1],Y.shape[1]],
+                                      seed = 1, name = 'weight'))
+    b = tf.Variable(tf.random_normal([Y.shape[1]], seed = 1, name = 'bias'))
+    
+    hypo = tf.matmul(x,w) + b
+    cost = tf.reduce_mean(tf.square(hypo - y))
+    optimizer = tf.train.GradientDescentOptimizer(learning_rate = LR)
+    train = optimizer.minimize(cost)
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    
+    for step in range(N+1):
+        cost_v,hy_v,w_v,b_v,_ = sess.run([cost, hypo, w,b,train],
+                                         feed_dict = {x:X,y:Y})
+        
+        if (step % 50) == 0:
+            print("step : {}, cost : {},\n w : {}, b : {}"
+                  .format(step, cost_v,w_v,b_v))
+            print(hy_v)
+            
+            
+    print("추정 점수는 ",sess.run(hypo,feed_dict = {x:Z}))
+    sess.close()
+    
+GDO3(x_data, y_data, 0.00001, 10000,Z)
+
+Z_1 = np.array(Z)
+Z_1
+w_1 = np.array([[0.7970418], [0.5342614], [0.6883417]])
+b_1 = [-0.7836923]
+np.dot(Z_1,w_1) + b_1 #=hypo , 마지막 추정점수와 동일함 
+#y = w * x + b
+#입력 : 1, 목표 : 4
+#b : 1
+#4 = w * 1 + 1 -> w = 3인데 
+#다음과 같이 진행된다 (w값들을 대입하면서 )
+#w = 1 -> y = 2
+#w = 2 -> y = 3
+#w = 2.5 -> y = 3.5
+#w = 3 -> y = 4, cost = 0
+#계속 조정하면서 계산을 한다.
+
+#bias = ?, x = 1, weight = 2, y = 4
+4 == 2 * 1 + 2
+
+#logistic regression - 이진분류
+#- 분류를 하는데 있어서 가장 흔한 경우는 이분법을 기준으로 분류
+#- binary classification
+
+x_data = [[1,2],[2,3],[3,1],[4,3],[5,3],[6,2]]
+y_data = [[0],[0],[0],[1],[1],[1]]
+
+x = tf.placeholder(tf.float32, shape = [None, 2])
+y = tf.placeholder(tf.float32, shape = [None, 1])
+
+w = tf.Variable(tf.random_normal([2,1], name = 'weight'))
+b = tf.Variable(tf.random_normal([1], name = 'bias'))
+
+hypothesis = tf.matmul(x,w) + b
+#지금까지는 hypothesis에 활성화함수를 사용하지 않았다. 예측값 그대로 사용했다.
+#이를 0 또는 1 로 바꾸어야 한다. 
+hypothesis = tf.sigmoid(tf.matmul(x,w) + b)
+#그럼 cost값은 어떻게 계산해야 하나, 기존의 공식으로는 안되겠다.
+#
+#시그모이드 함수를 어떻게 해야 (그래프 형태가) 2차식처럼 
+#볼록하게 할수 있을까? 기존의 오차함수와 다른 형태일 것이다.
+
+#예측 1, 실제 0, log0 = -무한 
+#크로스 엔트로피 오차 함수를 만들어서 사용해야 한다.
+ 
+#y = 1   -y * log(h(x))
+#y = 0   (1 - y) * log(1-h(x))
+#그럼 위 두 식을 합치면 
+#y * tf.log(hypothesis) + (1 - y) * tf.log(1 - hypothesis)
+#
+cost = -tf.reduce_mean(y * tf.log(hypothesis) + (1 - y) * tf.log(1 - hypothesis))
+
+###
+
+
+###
+train = tf.train.GradientDescentOptimizer(learning_rate = 0.01).minimize(cost)
+#0.5 이상 -> 1, 미만 -> 0 표현
+predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
+
+#cast() 는 다음과 같이 작동한다. 
+#if hypothesis > 0.5 then:
+#    True(1,0)
+#else:
+#    False(0.0)
+
+#같은지 비교하자 
+accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+for step in range(10001):
+    cost_val, _ = sess.run([cost, train],
+                           feed_dict = {x:x_data, y:y_data})
+    
+    if step % 1000 == 0:
+        print(step, cost_val)
+        
+h,p,a = sess.run([hypothesis, predict, accuracy],
+                 feed_dict={x:x_data, y:y_data})
+
+print("hypothesis : ",h)
+print("predict : ",p)
+print("accurary : ",a)
+
+sess.run(hypothesis, feed_dict = {x:[[7,3]]})
+sess.run(hypothesis, feed_dict = {x:[[1,3]]})
+tf.cast( sess.run(hypothesis, feed_dict = {x:[[7,3]]}) > 0.5, dtype = tf.int32)
+
+
+#[문제] xor를 logistic regression classifier 를 이용해서 프로그램 생성하세요
+#0 0 0
+#0 1 1
+#1 0 1
+#1 1 0
+
+
+
+x_data = [[0,0],[0,1],[1,0],[1,1]]
+y_data1 = [[0],[1],[1],[1]]
+y_data2 = [[1],[1],[1],[0]]
+y_data3 = [[0],[1],[1],[0]]
+
+def LRC(X,Y,LR,N,Z):
+    #X : 독립변수, Y : 종속변수, LR : 학습률, N : 학습횟수, Z : test data
+    x = tf.placeholder(tf.float32, shape = [None, 2])
+    y = tf.placeholder(tf.float32, shape = [None, 1])
+
+    w = tf.Variable(tf.random_normal([2,1], name = 'weight'))
+    b = tf.Variable(tf.random_normal([1], name = 'bias'))
+
+    hypothesis = tf.sigmoid(tf.matmul(x,w) + b)
+    cost = -tf.reduce_mean(y * tf.log(hypothesis) + (1 - y) * tf.log(1 - hypothesis))
+    train = tf.train.GradientDescentOptimizer(learning_rate = LR).minimize(cost)
+
+    predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
+
+    accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    
+    for step in range(N+1):
+        cost_val, w_v, b_v,_ = sess.run([cost, w,b,train],
+                                        feed_dict = {x:X, y:Y})
+    
+        if step % 1000 == 0:
+            print(step, cost_val, w_v, b_v)
+            
+    h,p,a = sess.run([hypothesis, predict, accuracy],feed_dict={x:X, y:Y})
+
+    print("hypothesis : ",h)
+    print("predict : ",p)
+    print("accurary : ",a)
+
+    pro = tf.cast(sess.run(hypothesis,
+                          feed_dict = {x:Z}) > 0.5, dtype = tf.int32) 
+    print(sess.run(pro))
+    sess.close()
+    return sess.run(pro)
+    
+
+y_data = [[0],[1],[1],[0]]
+z = x_data
+def LRC_XOR(x_data,y_data1,y_data2,y_data3,0.01,10000,z):
+    temp1 = LRC(x_data,y_data1,0.01,10000,z)s
+    print(type(temp1))
+    temp2 = LRC(x_data,y_data2,0.01,10000,z)
+    print(type(temp2))
+    
+#음 별로다...
+    
+## 선생님의 풀이 ##
+x_data = [[0,0],[0,1],[1,0],[1,1]]
+y_data = [[0],[1],[1],[0]]
+x_data = np.array(x_data, dtype = np.float32)
+x_data.shape   
+y_data = np.array(y_data, dtype = np.float32) 
+y_data.shape
+
+x = tf.placeholder(tf.float32, shape = [None, 2])
+y = tf.placeholder(tf.float32, shape = [None, 1])
+
+w1 = tf.Variable(tf.random_normal([2,5], seed = 1), name = 'weight1')
+b1 = tf.Variable(tf.random_normal([5], seed = 1), name = 'bias1')#(5,)
+b1.shape # b1 = [b1,b2,b3,b4,b5]
+#나중에 b1 더할때 브로드캐스팅이 된다.
+layer1 = tf.sigmoid(tf.matmul(x,w1) + b1) #(None, 5)
+print(layer1) 
+
+w2 = tf.Variable(tf.random_normal([5,4], seed = 1), name = 'weight2')
+b2 = tf.Variable(tf.random_normal([4], seed = 1), name = 'bias2')
+layer2 = tf.sigmoid(tf.matmul(layer1,w2) + b2) #(None, 4)
+
+w3 = tf.Variable(tf.random_normal([4,4], seed = 1), name = 'weight3')
+b3 = tf.Variable(tf.random_normal([4], seed = 1), name = 'bias3')
+layer3 = tf.sigmoid(tf.matmul(layer2,w3) + b3) #(None, 4)
+
+w4 = tf.Variable(tf.random_normal([4,1], seed = 1), name = 'weight4')
+b4 = tf.Variable(tf.random_normal([1], seed = 1), name = 'bias4')
+hypothesis = tf.sigmoid(tf.matmul(layer3,w4) + b4)
+
+cost = -tf.reduce_mean(y * tf.log(hypothesis) + (1-y) * tf.log(1 - hypothesis))
+
+train = tf.train.GradientDescentOptimizer(learning_rate = 0.05).minimize(cost)
+
+predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
+
+accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+    
+for step in range(20001):
+    cost_val, w_v, b_v,_ = sess.run([cost, w,b,train],
+                                        feed_dict = {x:x_data, y:y_data})
+    
+    if step % 500 == 0:
+        print(step, cost_val, w_v, b_v)
+
+pro = tf.cast(sess.run(
+        hypothesis,
+        feed_dict = {x:[[0,0],[0,1],[1,0],[1,1]]}) > 0.5,
+        dtype = tf.int32) 
+print(sess.run(pro))
+sess.close()
+
+#######
+def layer(x,n):
+    w = tf.Variable(tf.random_normal([x.shape[1],n], seed = 1), name = 'weight1')
+    b = tf.Variable(tf.random_normal([n], seed = 1), name = 'bias1')
+    layer = tf.sigmoid(tf.matmul(x,w) + b)
+    
+    return layer 
+    
+def XOR(X,Y,LR,N,Z):
+    #X : 독립변수, Y : 종속변수, LR : 학습률, N : 학습횟수, Z : test data
+
+    x = tf.placeholder(tf.float32, shape = [None, X.shape[1]])
+    y = tf.placeholder(tf.float32, shape = [None, Y.shape[1]])
+
+    lay1 = layer(x_data,5)
+    #lay2 = layer(lay1,4)#음 꼭 레이어를 4개 있을 필요는 없어 보인다. 
+    #lay3 = layer(lay2,4)
+    hypo = layer(lay1,1)#layer 가 1개이면 cost가 어느 시점부터 줄어들지 않는다.
+
+    cost = -tf.reduce_mean(y * tf.log(hypo) + (1-y) * tf.log(1 - hypo))
+
+    train = tf.train.GradientDescentOptimizer(learning_rate = LR).minimize(cost)
+
+    predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
+
+    accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
+    sess = tf.Session()
+    sess.run(tf.global_variables_initializer())
+    
+    for step in range(N+1):
+        cost_val, w_v, b_v,_ = sess.run([cost, w,b,train],
+                                            feed_dict = {x:x_data, y:y_data})
+    
+        if step % 500 == 0:
+            print(step, cost_val, w_v, b_v)
+
+    pro = tf.cast(sess.run(hypo,feed_dict = {x:Z}) > 0.5,dtype = tf.int32) 
+    print(sess.run(pro))
+    sess.close()
+
+x_data
+y_data
+Z = [[0,0],[0,1],[1,0],[1,1]]
+
+XOR(x_data, y_data,0.1,30000,Z)
