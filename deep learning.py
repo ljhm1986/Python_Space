@@ -930,6 +930,7 @@ b = tf.Variable(tf.random_normal([1], seed = 0, name = 'bias'))
 
 hypothesis = w * x + b
 #오차 = Σ(hypothesis - y)²
+#reduce_mean() : 요소들의 평균값을 출력 
 cost = tf.reduce_mean(tf.square(hypothesis - y))
 
 optimizer = tf.train.GradientDescentOptimizer(
@@ -1173,6 +1174,7 @@ predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
 #    False(0.0)
 
 #같은지 비교하자 
+#equal() 같으면 true, 다르면 false
 accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
@@ -1332,7 +1334,7 @@ def XOR(X,Y,LR,N,Z):
     cost = -tf.reduce_mean(y * tf.log(hypo) + (1-y) * tf.log(1 - hypo))
 
     train = tf.train.GradientDescentOptimizer(learning_rate = LR).minimize(cost)
-
+    
     predict = tf.cast(hypothesis > 0.5, dtype = tf.float32)
 
     accuracy = tf.reduce_mean(tf.cast(tf.equal(predict, y), dtype = tf.float32))
@@ -1355,3 +1357,301 @@ y_data
 Z = [[0,0],[0,1],[1,0],[1,1]]
 
 XOR(x_data, y_data,0.1,30000,Z)
+
+#############################################################################
+#11/25#
+import numpy as np
+import pandas as pd
+import tensorflow as tf
+
+np.exp(1)
+np.exp(10000) # inf, 저장할 공간이 부족하다. 
+type(np.exp(10000))
+np.exp(10)
+
+x = np.array([10,6,5])
+np.exp(x) / np.sum(np.exp(x))
+np.sum(np.exp(x) / np.sum(np.exp(x))) == 1
+
+x = np.array([1010,1000,990])
+np.exp(x) / np.sum(np.exp(x))
+#이런 경우에는 모든 수에 최대값으로 빼주자 
+m = np.max(x)
+y = x - m
+np.exp(y) / np.sum(np.exp(y))
+
+def softmaxfunction(x):
+    max_x = np.max(x)
+    soft = np.exp(x - max_x) / np.sum(np.exp(x - max_x))
+    return soft
+
+softmaxfunction(x)
+np.sum(softmaxfunction(x))
+
+x = np.array([1010, 1000, 990])
+s = softmaxfunction(x)
+np.sum(s)
+np.argmax(s)
+s
+x = np.array([33,5,9,20000])
+
+#종속변수를 표시할 때 .. 이진분류때와 다르다 
+#
+xy = np.loadtxt("c:/WorkSpace/Python_Space/data/train.txt",
+                delimiter = ',', dtype = np.float32)
+
+xy
+x_data = xy[:,:-1]
+y_data = xy[:,[-1]]
+y_data.shape# (8,1)
+y_dataa = xy[:,-1]
+y_dataa.shape # (8,) 이러면 안 됨 
+
+x = tf.placeholder(tf.float32, shape = [None, 3])
+y = tf.placeholder(tf.int32, shape = [None, 1])
+y.shape
+#TensorShape([Dimension(None), Dimension(1)])
+
+#one hot 인코딩은 항상 정수로만 이루어진다. 
+y_one_hot = tf.one_hot(y,3) #one-hot 텐서 반환, column의 갯수가 3 
+y_one_hot
+print(y_one_hot)
+#Tensor("one_hot_8:0", shape=(?, 1, 3), dtype=float32)
+y_one_hot = tf.reshape(y_one_hot, [-1,3])
+print(y_one_hot)
+#Tensor("Reshape_8:0", shape=(?, 3), dtype=float32)
+w = tf.Variable(tf.random_normal([3,3]), name = 'weight')
+b = tf.Variable(tf.random_normal([3]), name = 'bias')
+
+logits = tf.matmul(x,w) + b
+hypothesis = tf.nn.softmax(logits)
+
+#cost는?? 
+cost_i = tf.nn.softmax_cross_entropy_with_logits(
+        logits = logits, labels = y_one_hot)
+cost = tf.reduce_mean(cost_i)
+
+train = tf.train.GradientDescentOptimizer(
+        learning_rate = 0.01).minimize(cost)
+
+#cost에 대해서 살펴보자 
+#cross entropy function
+# - Σ (Y * log(Y_))
+#f(Y_) =  Σ (Y * -log(Y_)) 로 보면 
+#     0
+#Y = [ ]
+#     1
+#
+# 0,1 이 나와야 하는데 0,1이 나왔을 때 f() 값은
+#      0 : 0     INF = 0
+#Y_ =  1 : 1  *   0  = 0  
+# 
+# 0,1 이 나와야 하는데 1,0이 나왔을 떄 f() 값은
+#     1 : 0    0  = 0
+#Y_ = 0 : 1 * INF = INF
+#cost 가  INF 이니까 다시 계산한다... 
+#이러한 작업을 softmax_cross_entropy_with_logits가 대신 해 주었다.
+
+#argmax() : 최대값인 요소의 번호를 반환함 
+predict = tf.argmax(hypothesis, 1)#0 : 축, 1 : 횡
+#0 이면 같은 column에 있는 원소들 중에서 고름,
+#1 이면 같은 row에 있는 원소들 중에서 고름
+correct_predict = tf.equal(predict, tf.argmax(y_one_hot,1))
+
+accuracy = tf.reduce_mean(tf.cast(correct_predict, dtype = tf.float32))
+#일치하면 1, 다르면 0일 것이고 거기에 평균을 내니 맞추는 비율이 나온다. 
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+    
+for step in range(10001):
+    cost_val,w_v,b_v,_ = sess.run([cost, w,b,train],
+                          feed_dict = {x:x_data, y:y_data})
+    
+    if step % 500 == 0:
+        print(step, cost_val)
+        
+loss, acc, hyp, logi = sess.run([cost, accuracy, hypothesis, logits],
+                                feed_dict ={x:x_data, y:y_data})
+print(loss, acc, hyp, logi)
+
+a = sess.run(hypothesis, feed_dict = {x: [[1,2,1]]})
+print(a, sess.run(tf.argmax(a,1)))
+b = sess.run(hypothesis, feed_dict = {x: [[1,7,7]]})
+print(b, sess.run(tf.argmax(b,1)))
+
+#학습된 신경망에 본래 x_data를 넣어보고 출력값을 비교해보자 
+score = sess.run(hypothesis, feed_dict = {x:x_data})
+print(score)
+print(sess.run(tf.argmax(score,1)))
+(sess.run(tf.argmax(score,1)).reshape(8,1) == y_data).sum() / 0.08
+
+###
+target = [1,0,0]
+h = [0.7, 0.2, 0.0]
+
+np.sum(target * - np.log(h))
+#h의 성분중 0 이 있으면 nan이 된다. 
+
+def cross_entropy_function(h,t):
+    h = np.array(h)
+    t = np.array(t)
+    #nan이 되는것을 방지하기 위해 작은 값을 넣자 
+    delta = 1e-7 
+    return -np.sum(t * np.log(h + delta))
+
+cross_entropy_function(h,target)
+
+#####
+bmi = pd.read_csv("C:/WorkSpace/Python_Space/data/bmi.csv")
+bmi
+bmi['label'].unique()
+#fat, normal, thin 3개가 있다 
+
+y_data = [0 if i == 'fat' else 1 if i == 'normal' else 2 for i in bmi['label']]
+y_data
+y_data = np.array(y_data)
+y_data.shape
+y_data = np.atleast_2d(y_data)
+y_data = np.transpose(y_data)
+y_data.shape
+
+x_data = bmi.iloc[:,:-1]
+x_data.shape
+
+x = tf.placeholder(tf.float32, shape = [None, 2])
+y = tf.placeholder(tf.int32, shape = [None, 1])
+
+y_one_hot = tf.one_hot(y,3)
+y_one_hot = tf.reshape(y_one_hot, [-1,3])
+
+w1 = tf.Variable(tf.random_normal([2,4]), name = 'weight1')
+b1 = tf.Variable(tf.random_normal([4]), name = 'bias1')
+layer1 = tf.matmul(x, w1) + b1
+
+w2 = tf.Variable(tf.random_normal([4,3]), name = 'weight2')
+b2 = tf.Variable(tf.random_normal([3]), name = 'bias2')
+
+logits = tf.matmul(layer1,w2) + b2
+hypothesis = tf.nn.softmax(logits)
+
+cost_i = tf.nn.softmax_cross_entropy_with_logits(
+        logits = logits, labels = y_one_hot)
+cost = tf.reduce_mean(cost_i)
+
+train = tf.train.GradientDescentOptimizer(learning_rate = 0.01).minimize(cost)
+
+predict = tf.argmax(hypothesis, 1)
+correct_predict = tf.equal(predict, tf.argmax(y_one_hot,1))
+accuracy = tf.reduce_mean(tf.cast(correct_predict, dtype = tf.float32))
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for step in range(20001):
+    cost_val,w_v,b_v,_ = sess.run([cost, w,b,train],
+                          feed_dict = {x:x_data, y:y_data})
+    
+    if step % 500 == 0:
+        print(step, cost_val, w_v, b_v)
+        
+        
+a = sess.run(hypothesis, feed_dict = {x: [[150,40]]})
+print(a, sess.run(tf.argmax(a,1)))
+
+xx = sess.run(hypothesis, feed_dict = {x:x_data})
+(sess.run(tf.argmax(xx,1)).reshape(20000,1) == y_data).sum() / 200
+
+#이번에는 단위가 동일하지 않았다. 그럼 스케일링 작업을 하고 
+#훈련을 하는게 좋겠다. 
+### 선생님의 풀이 ###
+import pandas as pd
+bmi.info()
+bmi['label']
+
+set(bmi['label'])
+bmi.loc[bmi.label == 'thin', 'label'] = 0
+bmi.loc[bmi.label == 'normal', 'label'] = 1
+bmi.loc[bmi.label == 'fat', 'label'] = 2
+bmi['label']
+
+x_data = bmi.iloc[:,0:2]
+y_data = bmi.iloc[:,[2]]
+x = tf.placeholder(tf.float32, [None,2])
+y = tf.placeholder(tf.int32, [None,1])
+
+y_one_hot = tf.one_hot(y, 3)
+y_one_hot = tf.reshape(y_one_hot, [-1,3])
+
+w = tf.Variable(tf.random_normal([2,3],seed = 1), name = 'weight')
+b = tf.Variable(tf.random_normal([3], seed = 1), name = 'bias')
+
+logits = tf.matmul(x,w) + b
+hypothesis = tf.nn.softmax(logits)
+
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+        logits = logits, labels = y_one_hot))
+
+train = tf.train.GradientDescentOptimizer(learning_rate = 0.01).minimize(cost)
+
+predict = tf.argmax(hypothesis,1)
+correct_predict = tf.equal(predict, tf.argmax(y_one_hot,1))
+accuracy = tf.reduce_mean(tf.cast(correct_predict, tf.float32))
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for step in range(10001):
+    sess.run(train, feed_dict = {x:x_data, y:y_data})
+    
+    if step % 1000 == 0:
+        loss, acc = sess.run([cost, accuracy],
+                             feed_dict = {x:x_data, y:y_data})
+        print("step{:5}\tloss:{:.3f}\tAcc{:.1%}".format(step,loss,acc))
+    
+#여기까지 보면 accuracy가 약 70% 정도 나온다.
+#scale 작업을 해 보자         
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+x_scale = scaler.fit_transform(x_data)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for step in range(10001):
+    sess.run(train, feed_dict = {x:x_scale, y:y_data})
+    
+    if step % 1000 == 0:
+        loss, acc = sess.run([cost, accuracy],
+                             feed_dict = {x:x_scale, y:y_data})
+        print("step{:5}\tloss:{:.3f}\tAcc{:.1%}".format(step,loss,acc))
+        
+#accuracy가 약 98% 나온다. 성공!!
+test_h = (166 - np.mean(bmi['height'])) / np.std(bmi['height'])
+test_w = (58 - np.mean(bmi['weight'])) / np.std(bmi['weight'])
+
+a = sess.run(hypothesis, feed_dict = {x:[[test_h,test_w]]})
+print(a, sess.run(tf.argmax(a,1)))
+
+#minmax로 해 보자 
+from sklearn.preprocessing import MinMaxScaler
+minmax = MinMaxScaler()
+x_minmax = minmax.fit_transform(x_data)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+for step in range(10001):
+    sess.run(train, feed_dict = {x:x_minmax, y:y_data})
+    
+    if step % 1000 == 0:
+        loss, acc = sess.run([cost, accuracy],
+                             feed_dict = {x:x_minmax, y:y_data})
+        print("step{:5}\tloss:{:.3f}\tAcc{:.1%}".format(step,loss,acc))
+#accuracy가 약 90% 나온다. standard 보다 낮은 수치이다.
+        
+test_h = (166 - bmi['height'].min()) / (bmi['height'].max() - bmi['height'].min())
+test_w = (68 - bmi['weight'].min()) / (bmi['weight'].max() - bmi['weight'].min())
+
+a = sess.run(hypothesis, feed_dict = {x:[[test_h,test_w]]})
+print(a, sess.run(tf.argmax(a,1)))
+

@@ -26,13 +26,13 @@ z = cost(X,Y)
 z
 
 import matplotlib.pyplot as plt
+from matplotlib import cm
 from mpl_toolkits.mplot3d import Axes3D
 
-fig = plt.figure(figsize = plt.figaspect(0.5))
+fig = plt.figure()
 
-axes = fig.add_subplot(projection = '3d')
+axes = Axes3D(fig)
 
-surf = axes.plot_surface(X,Y,z)
-fig.colorbar(surf, shrink = 0.5, aspect = 10)
-
+axes.plot_surface(X,Y,z,rstride = 1, cstride = 1, cmap = cm.viridis)
+plt.xlabel()
 plt.show()

@@ -882,12 +882,18 @@ def RFC(X,Y,Z,cri,esti):
 X = mergeA.iloc[:,2:5]
 Y = mergeA['goty']
 Z = mergeB.iloc[:,2:5]
-RFC(X,Y,Z,'entropy',10)
-RFC(X,Y,Z,'gini',10)
+#tree 생성 갯수를 25, 50, 100, 200으로 하고 해 보자 
+for cri in ['entropy','gini']:
+    for esti in [25,50,100,200]:
+        print("{}, tree 생성 갯수 : {}".format(cri, esti))
+        RFC(X,Y,Z,cri,esti)
+
 
 #장르를 넣고 해 보자
 X = mergeA.iloc[:,2:-1]
 Y = mergeA['goty']
 Z = mergeB.iloc[:,2:]
-RFC(X,Y,Z,'entropy',10)
-RFC(X,Y,Z,'gini',10)
+for cri in ['entropy','gini']:
+    for esti in [25,50,100,200]:
+        print("{}, tree 생성 갯수 : {}".format(cri, esti))
+        RFC(X,Y,Z,cri,esti)
