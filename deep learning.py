@@ -1417,7 +1417,7 @@ y_one_hot = tf.one_hot(y,3) #one-hot 텐서 반환, column의 갯수가 3
 y_one_hot
 print(y_one_hot)
 #Tensor("one_hot_8:0", shape=(?, 1, 3), dtype=float32)
-y_one_hot = tf.reshape(y_one_hot, [-1,3])
+y_one_hot = tf.reshape(y_one_hot, [-1,3])#-1은 모든 row 
 print(y_one_hot)
 #Tensor("Reshape_8:0", shape=(?, 3), dtype=float32)
 w = tf.Variable(tf.random_normal([3,3]), name = 'weight')
@@ -1515,9 +1515,11 @@ y_data.shape
 y_data = np.atleast_2d(y_data)
 y_data = np.transpose(y_data)
 y_data.shape
+y_data.dtype
 
 x_data = bmi.iloc[:,:-1]
 x_data.shape
+x_data.info()
 
 x = tf.placeholder(tf.float32, shape = [None, 2])
 y = tf.placeholder(tf.int32, shape = [None, 1])
@@ -1655,3 +1657,243 @@ test_w = (68 - bmi['weight'].min()) / (bmi['weight'].max() - bmi['weight'].min()
 a = sess.run(hypothesis, feed_dict = {x:[[test_h,test_w]]})
 print(a, sess.run(tf.argmax(a,1)))
 
+
+#####################################################################
+#11/26#
+
+#[문제] 0부터 143까지 원소로 이루어진 12행 12열 행렬을 만드시고
+#4행 4열(단위행렬) 필터를 이용해서 
+#합성곱하세요. 스트라이드 1로 해서 수행 
+
+inputData = np.arange(144).reshape(12,12)
+inputData
+
+filter1 = np.eye(4)
+filter1.shape
+filter1.shape[0]
+filter1.shape[1]
+
+stride = 1
+
+row = ((inputData.shape[0] - filter1.shape[0]) / stride) + 1
+column = ((inputData.shape[1] - filter1.shape[1])/ stride) + 1
+outputData = np.zeros(row*column).reshape(row,column)
+
+for n in range(0,row,stride):
+    for m in range(0,column, stride):
+        
+        sum = 0
+        for i in range(filter1.shape[0]):
+            for j in range(filter1.shape[1]):
+                sum += inputData[i + n][j + m] * filter1[i][j]
+        
+        outputData[n][m] = sum
+        
+print(outputData)
+
+##
+
+def CNN1(inputData,filter1,stri):
+    stride = stri
+
+    row = ((inputData.shape[0] - filter1.shape[0]) / stride) + 1
+    column = ((inputData.shape[1] - filter1.shape[1])/ stride) + 1
+    
+    if row != int(row):
+        print('row is not integer')
+        return
+    row = int(row)
+    
+    if column != int(column):
+        print('column is not integer')
+        return
+    column = int(column)
+    
+    outputData = np.zeros(row*column).reshape(row,column)
+
+    for n in range(0,row,stride):
+        for m in range(0,column, stride):
+        
+            sum = 0
+            for i in range(filter1.shape[0]):
+                for j in range(filter1.shape[1]):
+                    sum += inputData[i + n][j + m] * filter1[i][j]
+        
+            outputData[n][m] = sum
+        
+    print(outputData)
+    return outputData
+    
+def outSize(inSize,fiSize,padding, stride):
+    OH = (inSize + 2 * padding - fiSize) / stride 
+    OW = (inSize + 2 * padding - fiSize) / stride 
+    
+    print(OH, OW)
+
+outSize(7,5,2,2)
+
+#패딩
+data = np.array([[1,2],[3,4]])
+np.pad(data, ((1,2),(2,1)),#((top, bottom),(left,right))
+       mode = 'constant')
+
+np.pad(data, pad_width = 1,mode = 'constant')
+
+
+inputData = np.arange(16).reshape(4,4)
+filter1 = np.arange(9).reshape(3,3)
+
+inputData = np.pad(inputData, pad_width = 1, mode = 'constant')
+
+CNN1(inputData,filter1,1)
+
+## 선생님의 풀이 ##
+x = np.arange(16).reshape(4,4)
+f = np.arange(9).reshape(3,3)
+x
+f
+
+x_pad = np.pad(x, pad_width = 1, mode='constant')
+
+result = []
+for rn in range(len(x_pad) - 2):
+    for cn in range(len(x_pad) - 2):
+        
+        result.append(np.sum(x_pad[rn:rn+3, cn:cn+3] * f))
+        
+result
+result = np.array(result).reshape(4,4)
+result
+
+
+#
+def CNN2(inputData,filter1,padding_N,stride):
+    
+    inputData = np.pad(inputData,
+                       pad_width = padding_N, mode = 'constant')
+    
+    stride = stride
+
+    row = ((inputData.shape[0] - filter1.shape[0]) / stride) + 1
+    column = ((inputData.shape[1] - filter1.shape[1])/ stride) + 1
+    
+    if row != int(row):
+        print('row is not integer')
+        return
+    row = int(row)
+    
+    if column != int(column):
+        print('column is not integer')
+        return
+    column = int(column)
+    
+    outputData = np.zeros(row*column).reshape(row,column)
+
+    for n in range(0,row,stride):
+        for m in range(0,column, stride):
+        
+            sum = 0
+            for i in range(filter1.shape[0]):
+                for j in range(filter1.shape[1]):
+                    sum += inputData[i + n][j + m] * filter1[i][j]
+        
+            outputData[n][m] = sum
+        
+    print(outputData)
+    return outputData
+
+inputData = np.array([[4,3,2],[5,3,4],[8,4,3]])
+filter1 = np.array([[1,0,1],[0,0,1],[1,0,0]])
+CNN2(inputData, filter1,2,1)
+
+inputData = np.random.random((5,5))
+filter1 = np.random.random((3,3))
+CNN2(inputData, filter1,1,1)
+
+#
+#max_pooling... 가장 특징적인 것을 뽑아낸다. 
+
+####
+#image : 1,3,3,1 (이미지 n개,행,열,색수)
+#filter : 2,2,1,1 (행,열,색수,필터수)
+#stride : 1,1,1,1 ()
+
+image = np.array([[[1],[2],[3]],
+                  [[4],[5],[6]],
+                  [[7],[8],[9]]],dtype = np.float32)
+    
+image.shape
+#(3,3,1)
+
+image2 = np.array([[[[1],[2],[3]],
+                    [[4],[5],[6]],
+                    [[7],[8],[9]]]],dtype = np.float32)
+image2.shape
+#(1,3,3,1)
+
+import matplotlib.pyplot as plt
+plt.imshow(image2.reshape(3,3))
+plt.imshow(image2.reshape(3,3), cmap = 'Greys')
+plt.imshow(image2.reshape(3,3), cmap = 'Blues')
+
+dir(plt.cm) #어떤 색상을 써넣을 수 있는지 알 수 있다. 
+
+#모든 값이 1인 filter를 만들어 보자 , 형태는 (2,2,1,1)
+filter1 = np.array([[[[1]],[[1]]],
+                    [[[1]],[[1]]]],dtype = np.float32)
+filter1.shape
+
+#텐서 플로롤 하면
+Conv2d = tf.nn.conv2d(image2,filter1,
+             strides = [1,1,1,1],#[1,a,a,1] a <- strides값 
+             padding = 'VALID')#
+
+Conv2d.eval()#안 되네
+
+#대화형으로 즉시 나오게 하는 세션을 실행하자 
+sess = tf.InteractiveSession()
+Conv2d.eval()
+conv2d_img = Conv2d.eval()
+conv2d_img.shape
+
+plt.imshow(conv2d_img.reshape(2,2))
+plt.imshow(conv2d_img.reshape(2,2), cmap = 'Blues')
+
+#
+image = np.array([[[[1],[2],[3]],
+                   [[4],[5],[6]],
+                   [[7],[8],[9]]]],dtype = np.float32)
+    
+filter1 = np.array([[[[1,10,-1]],[[1,10,-1]]],
+                    [[[1,10,-1]],[[1,10,-1]]]])
+filter1.shape
+#(2, 2, 1, 3) 합성곱이 3개 만들어질 것이다.
+Conv2d = tf.nn.conv2d(image, filter1,
+                      strides = [1,1,1,1],
+                      padding = 'SAME')
+conv2d_img = Conv2d.eval()
+conv2d_img.shape
+#(1, 3, 3, 3) -> (3,3,3,1) 로 바꿔야 한다. 
+
+conv2d_img = np.swapaxes(conv2d_img,
+                         0,3)#축 들, 즉 0번하고 3번하고 바꾸기 
+conv2d_img.shape
+
+for i, img in enumerate(conv2d_img):
+    print(img.reshape(3,3))
+    plt.subplot(1,3,i+1), plt.imshow(img.reshape(3,3), cmap = 'gray')
+
+#pooling을 해 보자 
+pool = tf.nn.max_pool(conv2d_img, ksize = [1,2,2,1],
+                      strides = [1,1,1,1],
+                      padding = 'VALID')
+pool.shape
+pool.eval()
+pool_img = pool.eval()
+
+for i, img in enumerate(pool_img):
+    print(img.reshape(2,2))
+    plt.subplot(1,3,i+1), plt.imshow(img.reshape(2,2), cmap = 'gray')
+    
+#filter 가 기존의 weight이다. 
+#
