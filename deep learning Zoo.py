@@ -43,7 +43,6 @@ zoo_data = np.loadtxt("C:/WorkSpace/Python_Space/data/zoo_data.txt",
 
 zoo_data
 
-
 x_data = zoo_data[:,:-1]
 x_data.shape
 y_data = zoo_data[:,[-1]]
@@ -51,7 +50,6 @@ y_data.shape
 type(y_data)#numpy.ndarray
 x_data.dtype
 y_data.dtype
-y_data = np.int32(y_data)
 #import collections
 #collections.Counter(y_data)
 
@@ -83,6 +81,11 @@ predict = tf.argmax(hypothesis, 1)
 correct_predict = tf.equal(predict, tf.argmax(y_one_hot,1))
 accuracy = tf.reduce_mean(tf.cast(correct_predict, dtype = tf.float32))
 
+y_data = np.int32(y_data)
+# int형으로 바꾸지 않으면 accuracy를 구하는 부분에서 에러가 난다. 
+# feed_dict = {x:x_data, y:y_data} 
+y_data.dtype
+
 sess = tf.Session()
 sess.run(tf.global_variables_initializer())
 
@@ -95,9 +98,11 @@ for step in range(10001):
                                feed_dict = {x:x_data, y:y_data})
         print("step {:5}, cost : {:.3f}, acc : {:.1%}".format(step, cost_v, acc))
    
-#loss, acc, hyp, logi = sess.run([cost, accuracy, hypothesis, logits],
-#                                feed_dict ={x:x_data, y:y_data})
-#print(loss, acc, hyp, logi)
+loss, acc, hyp, logi = sess.run([cost, accuracy, hypothesis, logits],
+                                feed_dict ={x:x_data, y:y_data})
+print(loss, acc)
+print(hyp)
+print(logi)
 
 #clam,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,7
 a = sess.run(hypothesis, feed_dict = {x:

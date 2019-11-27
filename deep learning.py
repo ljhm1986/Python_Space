@@ -1660,6 +1660,8 @@ print(a, sess.run(tf.argmax(a,1)))
 
 #####################################################################
 #11/26#
+import numpy as np
+import tensorflow as tf
 
 #[문제] 0부터 143까지 원소로 이루어진 12행 12열 행렬을 만드시고
 #4행 4열(단위행렬) 필터를 이용해서 
@@ -1732,7 +1734,7 @@ def outSize(inSize,fiSize,padding, stride):
 
 outSize(7,5,2,2)
 
-#패딩
+#패딩(padding) : 입력데이터 주변을 특정값으로 채우기
 data = np.array([[1,2],[3,4]])
 np.pad(data, ((1,2),(2,1)),#((top, bottom),(left,right))
        mode = 'constant')
@@ -1766,7 +1768,7 @@ result = np.array(result).reshape(4,4)
 result
 
 
-#
+####
 def CNN2(inputData,filter1,padding_N,stride):
     
     inputData = np.pad(inputData,
@@ -1810,9 +1812,30 @@ inputData = np.random.random((5,5))
 filter1 = np.random.random((3,3))
 CNN2(inputData, filter1,1,1)
 
-#
+#####
 #max_pooling... 가장 특징적인 것을 뽑아낸다. 
+inputData = np.random.random_integers(0,20,(4,4))
+inputData
 
+stride = 2
+result = []
+np.max(inputData[0:2,0:2])# 가운데 , 로 ..
+for n in range(0,inputData.shape[0],stride):
+    for m in range(0,inputData.shape[1],stride):
+        result.append(np.max(inputData[n:n+stride, m:m+stride]))
+
+result = np.array(result).reshape(2,2)
+result
+
+def maxPooling(inputData,stride):
+    result = []
+    for n in range(0,inputData.shape[0],stride):
+        for m in range(0,inputData.shape[1],stride):
+            result.append(np.max(inputData[n:n+stride, m:m+stride]))
+    result = np.array(result).reshape(stride,stride)
+    return result
+
+maxPooling(inputData,2)
 ####
 #image : 1,3,3,1 (이미지 n개,행,열,색수)
 #filter : 2,2,1,1 (행,열,색수,필터수)
@@ -1897,3 +1920,399 @@ for i, img in enumerate(pool_img):
     
 #filter 가 기존의 weight이다. 
 #
+    
+########################################################################
+#11/27#
+import tensorflow as tf
+from tensorflow.examples.tutorials.mnist import input_data
+
+#다음을 실행하면 불러지면서 동시에 해당 경로에 파일이 저장된다. 
+mnist = input_data.read_data_sets(
+        'C:\\WorkSpace\\Python_Space\\data\\MNIST_data\\',one_hot = True)
+
+np.shape(mnist.train.images)
+np.shape(mnist.train.labels)
+np.shape(mnist.test.images)
+np.shape(mnist.test.labels)
+type(mnist.train.labels)
+#numpy.ndarray
+
+x = tf.placeholder(tf.float32, [None, 28, 28, 1])#28 * 28 = 784,색상이 흑백이라 1
+y = tf.placeholder(tf.float32, [None, 10])
+
+w1 = tf.Variable(tf.random_normal(
+        [5,5,1,32],stddev = 0.01))#5행, 5열, 색1개, 필터 32개
+#필터의 수는 0으로만 채우는걸 막기
+L1 = tf.nn.relu(tf.nn.conv2d(x,w1,strides = [1,1,1,1], padding = 'SAME'))
+print(L1)
+#Tensor("Relu_1:0", shape=(?, 28, 28, 32), dtype=float32)
+L1 = tf.nn.max_pool(L1, ksize = [1,2,2,1],
+                    strides = [1,2,2,1],#strides 크기에 따라 shape가 정해진다.
+                    padding = 'SAME')
+print(L1)
+#Tensor("MaxPool_4:0", shape=(?, 14, 14, 32), dtype=float32)
+
+#drop out: 과적합을 해결하기 위한 방법 
+L1 = tf.nn.dropout(L1,0.5)
+
+w2 = tf.Variable(tf.random_normal(
+        [5,5,32,64],#위에서 필터 32개로 만들었으니 32개로 받아야 한다. 
+        #그리고 64개로 출력한다. 
+        stddev = 0.01))
+
+L2 = tf.nn.relu(tf.nn.conv2d(L1,w2, strides = [1,1,1,1], padding = 'SAME'))
+print(L2)
+#Tensor("Relu_8:0", shape=(?, 14, 14, 64), dtype=float32)
+L2 = tf.nn.max_pool(L2, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME')
+print(L2)
+#Tensor("MaxPool_5:0", shape=(?, 7, 7, 64), dtype=float32)
+
+L2 = tf.nn.dropout(L2,0.5)
+
+#fully connected layer 펼치는 작업
+L2 = tf.reshape(L2, [-1,7*7*64])
+print(L2)
+#Tensor("Reshape_1:0", shape=(?, 3136), dtype=float32)
+
+w3 = tf.Variable(tf.random_normal([7*7*64,256],#256색상이다. 
+                                  stddev = 0.01))
+
+L3 = tf.nn.relu(tf.matmul(L2, w3))
+print(L3)
+#Tensor("Relu_9:0", shape=(?, 256), dtype=float32)
+
+L3 = tf.nn.dropout(L3, 0.5)
+
+w4 = tf.Variable(tf.random_normal([256,10], stddev = 0.01))
+model = tf.matmul(L3, w4)
+
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+        logits = model, labels = y))
+
+optimizer = tf.train.GradientDescentOptimizer(
+        learning_rate = 0.01).minimize(cost)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+#작동하는데 시간이 걸림, 데이터 양이 너무 많음 
+#시간을 줄이기 위해 100개씩 가져다가 학습을 시켜보자 
+batch_size = 100
+total_batch = int(mnist.train.num_examples/batch_size)
+print(total_batch)
+
+#시간 좀 걸림 
+for epoch in range(16):
+    total_cost = 0
+    for i in range(total_batch):
+        batch_xs, batch_ys = mnist.train.next_batch(batch_size)
+        
+        batch_xs = batch_xs.reshape(-1,28,28,1)
+        _, cost_val = sess.run([optimizer, cost],
+                               feed_dict = {x:batch_xs, y:batch_ys})
+        total_cost += cost_val
+        
+    print("Epoch : ",'%04d'%(epoch+1),
+          'Avg cost = ','{:.3f}'.format(total_cost/total_batch))
+    
+predict = tf.equal(tf.argmax(model,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(predict, tf.float32))
+print('정확도',sess.run(accuracy, feed_dict = {
+        x:mnist.test.images.reshape(-1,28,28,1),
+        y:mnist.test.labels}))
+#0.9752 가 나옴 
+    
+###
+from PIL import Image
+import matplotlib.pyplot as plt
+
+img7 = Image.open("C:\\WorkSpace\\Python_Space\\data\\7.png")
+plt.imshow(img7)
+
+#RGB 색상으로 바꾸자 
+img7 = img7.convert("L") #RGB와 L로 바꾼다 
+data = np.asarray(img7)
+data
+data.shape
+plt.imshow(data)
+#이미지의 데이터 형태를 맞추어 주자 
+sample = data.reshape(-1,28,28,1)
+sample.shape
+sess.run(tf.argmax(model,1),feed_dict = {x:sample})
+
+img8 = Image.open("C:\\WorkSpace\\Python_Space\\data\\8.png")
+
+img9 = Image.open("C:\\WorkSpace\\Python_Space\\data\\9.png")
+
+img5 = Image.open("C:\\WorkSpace\\Python_Space\\data\\5.png")
+
+img4 = Image.open("C:\\WorkSpace\\Python_Space\\data\\4.png")
+
+img6 = Image.open("C:\\WorkSpace\\Python_Space\\data\\6.png")
+
+
+def sessrun(x_data):
+    x_data = x_data.convert("1")
+    x_data = np.asarray(x_data)
+    
+    print(x_data.shape)
+    plt.imshow(x_data)
+    sample = x_data.reshape(-1,28,28,1)
+    print(x_data.shape)
+    print(sess.run(tf.argmax(model,1),feed_dict = {x:sample}))
+
+def sessrun2(x_data):
+
+    x_data = np.asarray(x_data)
+    
+    print(x_data.shape)
+    plt.imshow(x_data)
+    sample = x_data.reshape(-1,28,28,1)
+    print(x_data.shape)
+    print(sess.run(tf.argmax(model,1),feed_dict = {x:sample}))
+
+sessrun(img5)
+sessrun(img7)
+sessrun(img8)
+sessrun(img9)
+sessrun(img4)
+sessrun(img6)
+sessrun2(img5)
+sessrun2(img7)
+sessrun2(img8)
+sessrun2(img9)
+sessrun2(img4)
+sessrun2(img6)
+
+#drop out 을 추가한 다음 다시 훈련함 .. 정확도가 0.94로 떨어짐 
+
+##101_ObjectCategores.tar.gz 파일을 받음
+#이미지 학습을 할때 폴더를 만들고 동일 폴더에 동일 주제의 이미지를 넣음
+from PIL import Image
+import matplotlib.pyplot as plt
+import os, glob 
+
+caltech_dir = "C:\\WorkSpace\\101_ObjectCategories\\"
+#테스트 할 주제로만 categories를 만들어서 해당 폴더의 사진들을 추출하자 
+categories = ["chair","camera","butterfly","elephant","flamingo"]
+nb_class = len(categories)
+
+#이미지 픽셀의 크기는 64 * 64 로 정하자 
+image_w = 64
+image_h = 64
+pixels = image_w * image_h * 3 # 3은 RGB 색상
+
+X = []
+Y = []
+
+for idx, cat in enumerate(categories):
+    print(idx, cat)
+    
+    label = [0 for i in range(nb_class)]
+    label[idx] = 1
+    print(label)
+#0 chair
+#[1, 0, 0, 0, 0]
+#1 camera
+#[0, 1, 0, 0, 0]
+#2 butterfly
+#[0, 0, 1, 0, 0]
+#3 elephant
+#[0, 0, 0, 1, 0]
+#4 flamingo
+#[0, 0, 0, 0, 1]
+    
+for idx, cat in enumerate(categories):
+    label = [0 for i in range(nb_class)]
+    
+    label[idx] = 1
+    
+    image_dir = caltech_dir + cat
+    files = glob.glob(image_dir + "\\*.jpg")
+    #print(files)
+    
+    #이제 차례대로 이미지 파일을 불러와서 저장하자 
+    for i , f in enumerate(files):
+        #print(i, f)
+        img = Image.open(f)
+        img = img.convert("RGB")
+        img = img.resize((image_w, image_h))
+        data = np.asarray(img)
+        X.append(data)
+        Y.append(label)
+        
+        if i % 10 == 0:
+            print(i, "\n",data)
+
+for i in files:
+    print(i)
+    
+#list를 numpy array로 바꾸자 
+X = np.array(X)
+X.shape 
+#(334, 64, 64, 3) 이미지 갯수가 334개, 이미지 크기 64 * 64
+Y = np.array(Y)       
+Y.shape
+#(334, 5) #label 갯수가 5
+
+#저장해 두기 
+np.savez("C:\\WorkSpace\\Python_Space\\data\\XY.npz",x=X,y=Y)
+#불러오기 
+XY = np.load("C:\\WorkSpace\\Python_Space\\data\\XY.npz")
+x_data = XY['x']
+y_data = XY['y']
+
+categories
+#['chair', 'camera', 'butterfly', 'elephant', 'flamingo']
+
+x = tf.placeholder(tf.float32, [None,64,64,3])
+y = tf.placeholder(tf.float32, [None,5])
+
+w1 = tf.Variable(tf.random_normal([3,3,3,32],#3행 3열 3가지 색,32개 필터  
+                                  stddev = 0.01))
+print(w1)
+
+L1 = tf.nn.conv2d(x,w1,strides = [1,1,1,1], padding = 'SAME')
+print(L1)
+#Tensor("Conv2D_25:0", shape=(?, 64, 64, 32), dtype=float32)
+L1 = tf.nn.relu(L1)
+L1 = tf.nn.max_pool(L1, ksize = [1,1,1,1], strides = [1,2,2,1],padding='SAME')
+print(L1)
+#Tensor("MaxPool_11:0", shape=(?, 32, 32, 32), dtype=float32)
+
+w2 = tf.Variable(tf.random_normal([3,3,32,64],#32개로 받고 , 64개로 출력해 보자
+                                  stddev = 0.01))
+
+L2 = tf.nn.conv2d(L1, w2, strides = [1,1,1,1], padding = 'SAME')
+print(L2)
+#Tensor("Conv2D_28:0", shape=(?, 32, 32, 64), dtype=float32)
+L2 = tf.nn.relu(L2)
+L2 = tf.nn.max_pool(L2, ksize = [1,2,2,1],
+                    strides = [1,2,2,1], padding = 'SAME')
+print(L2)
+#Tensor("MaxPool_12:0", shape=(?, 16, 16, 64), dtype=float32)
+
+w3 = tf.Variable(tf.random_normal([3,3,64,64],
+                                  stddev = 0.01))
+L3 = tf.nn.conv2d(L2, w3, strides = [1,1,1,1], padding = 'SAME')
+print(L3)
+#Tensor("Conv2D_29:0", shape=(?, 16, 16, 64), dtype=float32)
+L3 = tf.nn.relu(L3)
+L3 = tf.nn.max_pool(L3, ksize = [1,2,2,1], strides = [1,2,2,1], padding = 'SAME')
+print(L3)
+#Tensor("MaxPool_13:0", shape=(?, 8, 8, 64), dtype=float32)
+
+w4 = tf.Variable(tf.random_normal([8*8*64,256], stddev = 0.01))
+#출력을 위해서 L3의 형태를 조정하자 
+L4 = tf.reshape(L3, [-1, 8*8*64])
+L4 = tf.nn.relu(tf.matmul(L4, w4))
+print(L4)
+#Tensor("Relu_21:0", shape=(?, 256), dtype=float32)
+
+w5 = tf.Variable(tf.random_normal([256,5],# 5는 분류할 갯수 
+                                  stddev = 0.01))
+model = tf.matmul(L4,w5)
+hypothesis = tf.nn.softmax(model)
+
+cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(
+        logits = model, labels = y))
+optimizer = tf.train.GradientDescentOptimizer(
+        learning_rate = 0.1).minimize(cost)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+#학습을 시켜보자 시간이 많이 걸린다.
+for i in range(1001):
+    _, cost_val = sess.run([optimizer, cost],
+                           feed_dict = {x:x_data, y:y_data})
+    
+    if i % 100 == 0:
+        print(cost_val)
+
+is_correct = tf.equal(tf.argmax(hypothesis,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+print('정확도 : ' , sess.run(accuracy, feed_dict = {x:x_data, y:y_data}))
+#정확도가 잘 안나온다. 약 0.18 ..., 자기꺼 넣었는데도 이렇네 
+#filter값을 조정해야 하는데... , 
+#학습을 하다보면 local에 빠질수도 있ㄷ. 그러면 learning_rate 을 조정해도 
+#별 소용이 없다. local minimum에서 어떻게 빠져 나올 수 있을 까
+#
+#adam optimizer(관성도 있고) 있고, 배치로 돌려보자 
+
+optimizer = tf.train.AdamOptimizer(0.001).minimize(cost)
+
+sess = tf.Session()
+sess.run(tf.global_variables_initializer())
+
+batch_size = 100
+
+for epoch in range(1,50):
+    avg_cost = 0
+    for i in range(int(np.ceil(len(x_data)/batch_size))):
+        #표본을 추출한다. 
+        x_ = x_data[batch_size * i : batch_size * (i + 1)]
+        y_ = y_data[batch_size * i : batch_size * (i + 1)]
+        
+        _, cost_val = sess.run([optimizer, cost], feed_dict = {x:x_, y:y_})
+    
+        avg_cost +=cost_val
+        
+    print('Epoch:','%04d'%(epoch), 'cost: ','{:.9f}'.format(avg_cost/len(x_data)))
+    
+is_correct = tf.equal(tf.argmax(hypothesis,1), tf.argmax(y,1))
+accuracy = tf.reduce_mean(tf.cast(is_correct, tf.float32))
+print('정확도 : ' , sess.run(accuracy, feed_dict = {x:x_data, y:y_data}))
+#정확도가 1.0이 나온다. (train data를 넣어서 그렇다. )
+
+#train set중에서 하나 골라서 넣어보자 
+plt.imshow(x_data[100], cmap = 'Greys')
+
+#형태는 처음 x 처럼 한다. 
+data = x_data[100].reshape([1,64,64,3])
+print(data)
+print('Prediction : ',sess.run(tf.argmax(hypothesis,1),feed_dict = {x:data}))
+
+
+#train data가 아닌 다른 데이터를 넣어서 확인해보자 
+img = Image.open("C:\WorkSpace\\elephant test 1.jpg")
+plt.imshow(img)
+plt.imshow(img.resize([64,64]))
+
+data = img.resize([64,64])
+data = np.asarray(data)
+plt.imshow(data)
+data.shape
+#(64,64,3) 
+data = data.reshape([1,64,64,3])
+plt.imshow(data)#error
+data.shape
+
+print('Prediction : ',sess.run(tf.argmax(hypothesis,1),feed_dict = {x:data}))
+#3 나옴 elephant !!!
+
+categories
+#['chair', 'camera', 'butterfly', 'elephant', 'flamingo']
+
+def test(img):
+    img = img.convert("RGB")
+    data = img.resize([64,64])
+    data = np.asarray(data)
+    plt.imshow(data)
+    data = data.reshape([1,64,64,3])
+    
+    predict = sess.run(tf.argmax(hypothesis,1),feed_dict = {x:data})
+    
+    print('Prediction : ',categories[predict[0]])
+    
+img2 = Image.open("C:\WorkSpace\\elephant test 2.jpg")
+test(img2)
+img3 = Image.open("C:\WorkSpace\\elephant test 3.jpg")
+test(img3)
+img1 = Image.open("C:\WorkSpace\\chair test 1.jpg")
+test(img1)
+img2 = Image.open("C:\WorkSpace\\chair test 2.jpg")
+test(img2)
+img1 = Image.open("C:\WorkSpace\\camera test 1.jpg")
+test(img1)
+img2 = Image.open("C:\WorkSpace\\camera test 2.jpg")
+test(img2)
