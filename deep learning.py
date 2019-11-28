@@ -2366,7 +2366,7 @@ for batch in data_datagen.flow(x,save_to_dir = "C:\\WorkSpace\\101_ObjectCategor
     if i > 3:
         break
 
-#이번에는 위의 과정을 반복문으로 실행해보자 
+#이번에는 위의 과정을 반복문으로 실행해보자  
 caltech_dir = "C:\\WorkSpace\\101_ObjectCategories\\"
 categories = ['chair','camera','butterfly','elephant','flamingo']
 nb_class = len(categories)
