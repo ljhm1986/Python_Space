@@ -8,7 +8,7 @@ import numpy as np
 import sys, os
 #부모 디렉터리의 파일을 가져올 수 있도록 설정
 sys.path.append(os.pardir)
-from dataset.mnist import load_mnist
+#from dataset.mnist import load_mnist
 
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
@@ -40,3 +40,6 @@ img = img.reshape(28, 28)
 print(img.shape)
 
 img_show(img)
+
+def get_data():
+    ()

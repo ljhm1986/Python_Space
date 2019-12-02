@@ -39,6 +39,7 @@ inputData[0][1]
 
 print('AND Perceptron')
 """
+다음처럼 출력되는 함수를 만들어 보자 
 [0,0] => 0
 [0,1] => 0
 [1,0] => 0
@@ -241,6 +242,7 @@ def sigmoid(x):
 
 sigmoid(x)
 
+plt.plot(x,y)
 
 #numpy 복습한 부분은 numpy.py로 이동 
 
@@ -396,7 +398,7 @@ session = tf.compat.v1.Session()
 #버전이 2.0.0 이라서 명령어가 다르다.
 
 #conda install tensorflow==1.15
-#버전 1.15.0 을 재설치했다.
+#버전 1.15.0 을 재설치했다. (1.14로 설치하자...)
 sess = tf.Session()
 #Session 여는 순간 여러 메시지가 나온다, GPU 관련된 내용이다. 
 sess.run(hello)
@@ -809,7 +811,7 @@ sess.run(ran)
 ran = tf.range(11)
 sess.run(ran)
 
-#y = in * w + b
+#y = inputData * w + b
 inputData = tf.Variable(tf.fill([1,32],7.))
 print(inputData)
 weight = tf.Variable(tf.random_normal(
@@ -871,8 +873,6 @@ sess.close()
 #
 #절편 = Y평균 - (X평균 * 기울기)
 
-
-from sklearn.linear_model import LinearRegression
 x = np.array([2,4,6,8])
 y = np.array([71,83,91,97])
 
