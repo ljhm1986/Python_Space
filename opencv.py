@@ -13,11 +13,13 @@ print(cv.__version__)
 #3.4.1
 #conda install -c conda-forge opencv ... 안되는뎅 
 
+#pip install opencv-python==3.4.7.28 로 설치함 
+
 #image file을 읽어들이자
 img = cv.imread("C:\\WorkSpace\\dog test 1.jpg",0)
 img
 
-#아래 3개 같이 실행 
+#아래 3개 같이 실행, 그럼 사진이 팝업이 뜨면서 나옴 
 cv.imshow('image',img)
 cv.waitKey(0)
 cv.destroyAllWindows()

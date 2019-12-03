@@ -1475,6 +1475,7 @@ loss, acc, hyp, logi = sess.run([cost, accuracy, hypothesis, logits],
                                 feed_dict ={x:x_data, y:y_data})
 print(loss, acc, hyp, logi)
 
+#특정 값을 넣어보고 어떻게 분류되는지 보자 
 a = sess.run(hypothesis, feed_dict = {x: [[1,2,1]]})
 print(a, sess.run(tf.argmax(a,1)))
 b = sess.run(hypothesis, feed_dict = {x: [[1,7,7]]})
@@ -1508,6 +1509,7 @@ bmi
 bmi['label'].unique()
 #fat, normal, thin 3개가 있다 
 
+#이를 0,1,2 로 바꾸어보자 
 y_data = [0 if i == 'fat' else 1 if i == 'normal' else 2 for i in bmi['label']]
 y_data
 y_data = np.array(y_data)
@@ -1679,9 +1681,13 @@ stride = 1
 
 row = ((inputData.shape[0] - filter1.shape[0]) / stride) + 1
 column = ((inputData.shape[1] - filter1.shape[1])/ stride) + 1
+#row가 int가 아니면 np.zeros()나 range()에서 되지 않는다
+row = int(row)
+column = int(column)
+
 outputData = np.zeros(row*column).reshape(row,column)
 
-for n in range(0,row,stride):
+for n in range(0,row,stride): 
     for m in range(0,column, stride):
         
         sum = 0
