@@ -14,6 +14,7 @@ print(cv.__version__)
 #conda install -c conda-forge opencv ... 안되는뎅 
 
 #pip install opencv-python==3.4.7.28 로 설치함 
+#pip install opencv-python==3.4.1.15 로 설치함 
 
 #image file을 읽어들이자
 img = cv.imread("C:\\WorkSpace\\dog test 1.jpg",0)

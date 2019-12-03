@@ -36,6 +36,7 @@ plt.imshow(full_img)
 plt.subplot(1, 2, 2)
 plt.title(len(free_list))
 plt.imshow(free_img)
+plt.show()
 
 #이미지 생성 
 train_datagen = ImageDataGenerator(
@@ -86,14 +87,102 @@ print(val_gen.class_indices)
 #Load model for transfer learning(전이학습)
 base_model = MobileNetV2(input_shape=(224, 224, 3),
                          weights='imagenet',
-                         include_top=False)
+                         include_top=False)#output은 직접 정의할 것이라서
 
+#
 x = base_model.output
+#1차원으로 데이터를 펴줌
 x = GlobalAveragePooling2D()(x)
+#output은 2종류 
 output = Dense(2, activation='softmax')(x)
 
 model = Model(inputs=base_model.input, outputs=output)
 
-model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['acc'])
+model.compile(optimizer='adam', loss='categorical_crossentropy',
+ metrics=['acc'])
 
 model.summary()
+
+#
+for layer in model.layers:
+    layer.trainable = True#False이면 학습이 진행 안됨
+
+#학습을 시켜보자 
+history = model.fit_generator(
+    train_gen,
+    validation_data=val_gen,
+    epochs=10,
+    callbacks=[
+        ModelCheckpoint('model.h5', monitor='val_acc',
+         save_best_only=True, verbose=1)
+    ]
+)
+#시간이 많이 걸리네 
+
+#모델 저장한걸 불러들이자 
+model = load_model('model.h5')
+
+#마지막 layer의 weights
+last_weight = model.layers[-1].get_weights()[0] # (1280, 2)
+   
+new_model = Model(
+    inputs=model.input,
+    outputs=(
+        model.layers[-3].output, # the layer just before GAP, for using spatial features
+        model.layers[-1].output
+    )
+)
+
+new_model.summary()
+
+'''
+Free/img_129173058.jpg
+Free/img_723080007.jpg
+Free/img_815061601.jpg
+Full/img_127040601.jpg
+Full/img_809172559.jpg
+'''
+test_img = img_to_array(load_img(os.path.join(BASE_PATH, 'Free/img_815061601.jpg'), target_size=(224, 224)))
+
+test_input = preprocess_input(np.expand_dims(test_img.copy(), axis=0))
+
+pred = model.predict(test_input)
+
+#
+plt.figure(figsize=(8, 8))
+plt.title('%.2f%% Free' % (pred[0][1] * 100))
+plt.imshow(test_img.astype(np.uint8))
+plt.show()
+#비어있다고 나옴, 어디가 비어있는지는 나오지 않음
+
+#Draw Activation Map
+last_conv_output, pred = new_model.predict(test_input)
+
+last_conv_output = np.squeeze(last_conv_output) # (7, 7, 1280)
+#이미지 확대 
+feature_activation_maps = scipy.ndimage.zoom(
+    last_conv_output, (32, 32, 1), order=1) # (7, 7, 1280) -> (224, 224, 1280)
+
+pred_class = np.argmax(pred) # 0: Full, 1: Free
+predicted_class_weights = last_weight[:, pred_class] # (1280, 1)
+
+final_output = np.dot(feature_activation_maps.reshape((224*224, 1280)),
+ predicted_class_weights).reshape((224, 224)) # (224*224, 1280) dot_product (1280, 1) = (224*224, 1)
+
+#class activation map 출력 
+plt.imshow(final_output, cmap='jet')
+plt.show()
+
+#같이 출력, 빨간색을 집중적으로 보고 판단한다.  
+fig, ax = plt.subplots(nrows=1, ncols=2)
+fig.set_size_inches(16, 20)
+
+ax[0].imshow(test_img.astype(np.uint8))
+ax[0].set_title('image')
+ax[0].axis('off')
+
+ax[1].imshow(test_img.astype(np.uint8), alpha=0.5)
+ax[1].imshow(final_output, cmap='jet', alpha=0.5)
+ax[1].set_title('class activation map')
+ax[1].axis('off')
+plt.show()

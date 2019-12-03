@@ -1929,6 +1929,7 @@ for i, img in enumerate(pool_img):
     
 ########################################################################
 #11/27#
+import numpy as np
 import tensorflow as tf
 from tensorflow.examples.tutorials.mnist import input_data
 
