@@ -96,6 +96,7 @@ x = GlobalAveragePooling2D()(x)
 #output은 2종류 
 output = Dense(2, activation='softmax')(x)
 
+#Model(Network) : network에 훈련과 평가과정을 추가함 
 model = Model(inputs=base_model.input, outputs=output)
 
 model.compile(optimizer='adam', loss='categorical_crossentropy',
@@ -107,17 +108,26 @@ model.summary()
 for layer in model.layers:
     layer.trainable = True#False이면 학습이 진행 안됨
 
+model
+
 #학습을 시켜보자 
 history = model.fit_generator(
     train_gen,
     validation_data=val_gen,
     epochs=10,
+    #steps_per_epoch = ceil(),
     callbacks=[
+        #ModelCheckpoint : 모든 epoch 이후에 model을 저장한다. 
         ModelCheckpoint('model.h5', monitor='val_acc',
          save_best_only=True, verbose=1)
     ]
 )
 #시간이 많이 걸리네 
+#집에서는 작동했는데 학원 컴퓨터로 작동하지 않는다. 이유가 뭐지 ?
+#학원 karas version = 2.2.4
+#steps_per_epoch : 정수.
+#한 epoch 종료를 선언하고 다음 epoch를 시작하기 전에, generator에서 산출될 총 단계의 수
+#
 
 #모델 저장한걸 불러들이자 
 model = load_model('model.h5')
