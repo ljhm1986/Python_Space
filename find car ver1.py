@@ -20,7 +20,7 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 
-caltech_dir = "C:/WorkSpace/SCREENSHOTS"
+caltech_dir = "C:/WorkSpace/screen shots test"
 categories = ["Full","Free"]
 nb_class = len(categories)
 image_w = 224
@@ -75,8 +75,16 @@ for layer in model.layers:
 #Train
 ###################################################
 
-hist = model.fit(X_train,Y_train,batch_size=32,epochs=10,verbose=1,validation_data=(X_test,Y_test),
-                 callbacks=[ModelCheckpoint('model.h5',monitor='val_acc',save_best_only=True,verbose=1)])
+hist = model.fit(X_train,Y_train,batch_size=32,
+                 epochs=10,verbose=1,
+                 validation_data=(X_test,Y_test),
+                 callbacks=[
+                         ModelCheckpoint('model.h5',
+                                         monitor='val_acc',
+                                         save_best_only=True,
+                                         verbose=1)
+                         ]
+                 )
 
 #################################################
 #Create New Model
@@ -97,8 +105,8 @@ new_model.summary()
 test_img = img_to_array(load_img(
         os.path.join(
         caltech_dir,
-        'Free/20191203220742_1.jpg'),
-                target_size=(224,224)))
+        'Free/20191204234937_1.jpg'),
+                target_size=(224,224,3)))
 
 test_input = preprocess_input(np.expand_dims(test_img.copy(),axis=0))
 
@@ -108,11 +116,93 @@ plt.figure(figsize=(8,8))
 plt.title('%.2f%% Free'%(pred[0][1]*100))
 plt.imshow(test_img.astype(np.uint8))
 
+
+pred2 = model.predict(X_test)
+pred2.argmax(axis = 1)
+Y_test.argmax(axis = 1)
+
+(pred2.argmax(axis = 1) == Y_test.argmax(axis = 1)).sum() / len(Y_test)
+
+def test_data_show(i):
+    print(categories[pred2[i].argmax()])
+    plt.imshow(X_test[i])
+
+test_data_show(2)
+test_data_show(12)
+test_data_show(44)
+
+def train_data_show(i):
+    test_train_data = X_train[i].reshape(1,224,224,3)
+    predict_sample = model.predict(test_train_data)
+    print(categories[predict_sample.argmax()])
+    plt.imshow(X_train[i])
+    
+    
+train_data_show(5)
+train_data_show(33)
+train_data_show(44)
+
+test_data1 = X_train[44]
+
+test_input = preprocess_input(np.expand_dims(test_data1.copy(),axis=0))
+pred = model.predict(test_input)
+
+plt.figure(figsize=(8,8))
+plt.title('%.2f%% Free'%(pred[0][1]*100))
+plt.imshow(X_train[44])
+
+###
+caltech_dir = "C:/WorkSpace/car test"
+categories = ["Full","Free"]
+nb_class = len(categories)
+image_w = 224
+image_h = 224
+pixels = image_w * image_h * 3
+X_car = []
+Y_car = []
+for idx, cat in enumerate(categories):
+	label = [0 for i in range(nb_class)]
+	label[idx] = 1
+	image_dir = caltech_dir+"/"+cat
+	files = glob.glob(image_dir+"/*.jpg")
+	print(files)
+	for i, f in enumerate(files):
+		img = Image.open(f)
+		img = img.convert("RGB")
+		img = img.resize((image_w,image_h))
+		data = np.asarray(img)
+		X_car.append(data)
+		Y_car.append(label)
+		if i % 10 == 0:
+			print(i,"\n",data)
+            
+X_car = np.array(X_car)
+Y_car = np.array(Y_car)
+
+pred_car = model.predict(X_car)
+(pred_car.argmax(axis = 1) == Y_car.argmax(axis = 1)).sum() / len(X_car)
+
+Y_FREE = []
+for i in Y_car:
+    if i.argmax() == 1:
+        Y_FREE.append(i)
+        
+Y_FREE = np.array(Y_FREE)
+len(Y_FREE)
+len(Y_car)
+
+X_FREE = X_car[24-15:]
+len(X_FREE)
+pred_car[24-15,:].argmax(axis = 0)
+
+input_test = X_FREE[4].reshape(1,224,224,3)
+
 ####################################################
 #Draw Activation Map
 ####################################################
 
-last_conv_output, pred = new_model.predict(test_input)
+#last_conv_output, pred = new_model.predict(test_input)
+last_conv_output, pred = new_model.predict(input_test)
 
 last_conv_output = np.squeeze(last_conv_output) #(7,7,1280)
 feature_activation_maps = scipy.ndimage.zoom(last_conv_output,(32,32,1),order=1)#order값 안보임
@@ -131,11 +221,11 @@ plt.imshow(final_output,cmap='jet')
 fig, ax = plt.subplots(nrows=1,ncols=2)
 fig.set_size_inches(16,20)
 
-ax[0].imshow(test_img.astype(np.uint8))
+ax[0].imshow(input_test[0])
 ax[0].set_title('image')
 ax[0].axis('off')
 
-ax[1].imshow(test_img.astype(np.uint8),alpha=0.5)
+ax[1].imshow(input_test[0],alpha=0.5)
 ax[1].imshow(final_output,cmap='jet',alpha=0.5)
 ax[1].set_title('class activation map')
 ax[1].axis('off')

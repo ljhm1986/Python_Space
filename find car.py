@@ -81,13 +81,20 @@ val_gen = val_datagen.flow_from_directory(
 )
 #Found 325 images belonging to 2 classes.
 
+print(train_gen.class_indices)
+
 print(val_gen.class_indices)
 #{'Full': 0, 'Free': 1}
 
 #Load model for transfer learning(전이학습)
+#MobileNetV2 : keras에서 사용가능한 이미지 분류 모델, 
+#ImageNet 데이터셋에서 사전 훈련된 네트워크 중 하나
 base_model = MobileNetV2(input_shape=(224, 224, 3),
+                         #모델을 초기화할 가중치 체크포인트를 지정
                          weights='imagenet',
-                         include_top=False)#output은 직접 정의할 것이라서
+                         #네트워크의 최상위 완전 연결 분류기의 포함 여부  
+                         include_top=False)
+#output은 직접 정의할 것이라서
 
 #
 x = base_model.output
@@ -97,29 +104,37 @@ x = GlobalAveragePooling2D()(x)
 output = Dense(2, activation='softmax')(x)
 
 #Model(Network) : network에 훈련과 평가과정을 추가함 
+#입력과 출력 텐서만으로 Model 객체를 생성 
+#이 경우에는 MobileNetV2 네트워크로 입력하고 output으로 출력함 
 model = Model(inputs=base_model.input, outputs=output)
 
-model.compile(optimizer='adam', loss='categorical_crossentropy',
- metrics=['acc'])
+#환경설정
+model.compile(optimizer='adam',
+              loss='categorical_crossentropy',
+              metrics=['acc'])
 
 model.summary()
 
-#
+#model의 층들이 학습이 가능하도록 설정하자 
 for layer in model.layers:
     layer.trainable = True#False이면 학습이 진행 안됨
 
 model
 
-#학습을 시켜보자 
+#학습을 시켜보자, history객체에 훈련하는 동안 발생한 정보들을 저장한다. 
 history = model.fit_generator(
     train_gen,
-    validation_data=val_gen,
+    validation_data=val_gen,#검증 데이터 전달, epoch마다 손실과 정확도를 계산함 
     epochs=10,
-    #steps_per_epoch = ceil(),
+    verbose = 1,
+    steps_per_epoch = ceil(),
     callbacks=[
-        #ModelCheckpoint : 모든 epoch 이후에 model을 저장한다. 
-        ModelCheckpoint('model.h5', monitor='val_acc',
-         save_best_only=True, verbose=1)
+        #ModelCheckpoint : 모든 epoch 이후에 model의 가중치를 저장한다. 
+        ModelCheckpoint('model.h5',
+                        #아래 둘은 
+                        monitor='val_acc',
+                        save_best_only=True,
+                        verbose = 1)
     ]
 )
 #시간이 많이 걸리네 
@@ -128,6 +143,21 @@ history = model.fit_generator(
 #steps_per_epoch : 정수.
 #한 epoch 종료를 선언하고 다음 epoch를 시작하기 전에, generator에서 산출될 총 단계의 수
 #
+
+history = model.fit(
+    train_gen,
+    validation_data=val_gen,#검증 데이터 전달, epoch마다 손실과 정확도를 계산함 
+    epochs=10,
+    #steps_per_epoch = ceil(),
+    callbacks=[
+        #ModelCheckpoint : 모든 epoch 이후에 model의 가중치를 저장한다. 
+        ModelCheckpoint('model.h5',
+                        #아래 둘은 
+                        monitor='val_acc',
+                        save_best_only=True,
+                        verbose=1)
+    ]
+)
 
 #모델 저장한걸 불러들이자 
 model = load_model('model.h5')

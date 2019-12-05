@@ -357,10 +357,13 @@ model = Sequential()
 #add() : layer instance를 layer stack 꼭대기에 추가한다.
 
 #Conv2D() : 합성곱 
-#filters : 필터의 갯수, kernel_size : 필터의 window 크기 (높이, 너비),
-#strides : 스트라이드 간격 (높이, 너비), padding : 'valid'나 'same'
-#input shape : (batch, channels, rows, columns)
-#output shape : (batch, filters, new_rows, new_columns)
+#filters : 필터의 채널 갯수 (=channels), kernel_size : 필터의 window 크기 (높이, 너비),
+#strides : 스트라이드 간격 (높이, 너비), padding : 'valid'(padding을 사용하지 않음) 
+#or 'same'(입력과 출력의 크기를 같게 하기위해 padding을 사용함)
+#input shape : (batch, channels, rows, columns) or
+#(batch, rows, columns, channels) <- 기본형
+#output shape : (batch, filters, new_rows, new_columns) or
+#(batch, new_rows, new_columns, filters) <- 기본형 
 model.add(Conv2D(filters=32, kernel_size=(3,3), strides=(1, 1),
                  padding = "same",
                  input_shape =(64,64,3), activation='relu'))
@@ -387,7 +390,7 @@ model.summary()#다음층으로 갈때 어떻게 가는지 나옴
 #Non-trainable params: 0
 #_________________________________________________________________
 
-#param이 무엇을 의미하는 건지 모르겠다. 
+#param = parameter 
 
 
 model.add(Conv2D(filters=64,kernel_size=(3,3),padding ="same",
