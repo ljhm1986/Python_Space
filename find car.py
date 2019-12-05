@@ -126,8 +126,7 @@ history = model.fit_generator(
     train_gen,
     validation_data=val_gen,#검증 데이터 전달, epoch마다 손실과 정확도를 계산함 
     epochs=10,
-    verbose = 1,
-    steps_per_epoch = ceil(),
+    #steps_per_epoch = ceil(),
     callbacks=[
         #ModelCheckpoint : 모든 epoch 이후에 model의 가중치를 저장한다. 
         ModelCheckpoint('model.h5',
@@ -140,6 +139,7 @@ history = model.fit_generator(
 #시간이 많이 걸리네 
 #집에서는 작동했는데 학원 컴퓨터로 작동하지 않는다. 이유가 뭐지 ?
 #학원 karas version = 2.2.4
+#집 karas version = 2.3.1
 #steps_per_epoch : 정수.
 #한 epoch 종료를 선언하고 다음 epoch를 시작하기 전에, generator에서 산출될 총 단계의 수
 #

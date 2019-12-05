@@ -20,6 +20,8 @@ from PIL import Image
 import numpy as np
 import tensorflow as tf
 
+keras.__version__
+
 caltech_dir = "C:/WorkSpace/screen shots test"
 categories = ["Full","Free"]
 nb_class = len(categories)
@@ -126,6 +128,7 @@ Y_test.argmax(axis = 1)
 def test_data_show(i):
     print(categories[pred2[i].argmax()])
     plt.imshow(X_test[i])
+    plt.show()
 
 test_data_show(2)
 test_data_show(12)
@@ -136,6 +139,7 @@ def train_data_show(i):
     predict_sample = model.predict(test_train_data)
     print(categories[predict_sample.argmax()])
     plt.imshow(X_train[i])
+    plt.show()
     
     
 train_data_show(5)
@@ -181,6 +185,30 @@ Y_car = np.array(Y_car)
 
 pred_car = model.predict(X_car)
 (pred_car.argmax(axis = 1) == Y_car.argmax(axis = 1)).sum() / len(X_car)
+
+def car_test_show(i):
+        car_test_data = X_car[i].reshape(1,224,224,3)
+        pred_car1 = model.predict(car_test_data)
+        print(categories[pred_car1.argmax()])
+        plt.imshow(X_car[i])
+        plt.show()
+
+car_test_show(0)
+car_test_show(2)
+car_test_show(4)
+car_test_show(5)
+car_test_show(6)
+car_test_show(7)
+
+#틀린것만 보기 
+for j in range(len(X_car)):
+        if pred_car[j].argmax() != Y_car[j].argmax():
+                car_test_show(j)
+
+#맞는것만 보기 
+for j in range(len(X_car)):
+        if pred_car[j].argmax() == Y_car[j].argmax():
+                car_test_show(j)
 
 Y_FREE = []
 for i in Y_car:
