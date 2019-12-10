@@ -144,31 +144,21 @@ history = model.fit_generator(
 #한 epoch 종료를 선언하고 다음 epoch를 시작하기 전에, generator에서 산출될 총 단계의 수
 #
 
-history = model.fit(
-    train_gen,
-    validation_data=val_gen,#검증 데이터 전달, epoch마다 손실과 정확도를 계산함 
-    epochs=10,
-    #steps_per_epoch = ceil(),
-    callbacks=[
-        #ModelCheckpoint : 모든 epoch 이후에 model의 가중치를 저장한다. 
-        ModelCheckpoint('model.h5',
-                        #아래 둘은 
-                        monitor='val_acc',
-                        save_best_only=True,
-                        verbose=1)
-    ]
-)
-
 #모델 저장한걸 불러들이자 
 model = load_model('model.h5')
 
 #마지막 layer의 weights
-last_weight = model.layers[-1].get_weights()[0] # (1280, 2)
-   
+last_weight = model.layers[-1].get_weights()[0] 
+last_weight.shape  # (1280, 2)
+
+#입력에 대하여 원본 model의 활성화값을 반환하는 model 
 new_model = Model(
     inputs=model.input,
     outputs=(
-        model.layers[-3].output, # the layer just before GAP, for using spatial features
+        #마지막에서 3번째 layer의 출력을 추출함
+        model.layers[-3].output, 
+        # the layer just before GAP, for using spatial features
+        #마지막 layer의 출력을 추출함 
         model.layers[-1].output
     )
 )
@@ -182,11 +172,19 @@ Free/img_815061601.jpg
 Full/img_127040601.jpg
 Full/img_809172559.jpg
 '''
-test_img = img_to_array(load_img(os.path.join(BASE_PATH, 'Free/img_815061601.jpg'), target_size=(224, 224)))
+#PIL객체로 불러들인 후, numpy array로 변환합니다.
+test_img = img_to_array(load_img(os.path.join(BASE_PATH,
+                                              'Free/img_815061601.jpg'),
+                                 target_size=(224, 224)))
+test_img.shape # (224, 224, 3)
 
+#차원을 추가하고, 데이터를 전처리합니다.
 test_input = preprocess_input(np.expand_dims(test_img.copy(), axis=0))
+test_input.shape # (1,224,224,3)
 
 pred = model.predict(test_input)
+print(pred)
+#[[0.9924616  0.00753842]] 형태로 나옴  
 
 #
 plt.figure(figsize=(8, 8))
@@ -197,17 +195,23 @@ plt.show()
 
 #Draw Activation Map
 last_conv_output, pred = new_model.predict(test_input)
+last_conv_output.shape # (1, 7, 7, 1280)
 
-last_conv_output = np.squeeze(last_conv_output) # (7, 7, 1280)
+#array의 형태에서 단일 차원 성분은 제거한다 
+last_conv_output = np.squeeze(last_conv_output) # (1, 7, 7, 1280) -> (7, 7, 1280)
+last_conv_output.shape 
+
 #이미지 확대 
 feature_activation_maps = scipy.ndimage.zoom(
     last_conv_output, (32, 32, 1), order=1) # (7, 7, 1280) -> (224, 224, 1280)
+feature_activation_maps.shape # 
 
 pred_class = np.argmax(pred) # 0: Full, 1: Free
 predicted_class_weights = last_weight[:, pred_class] # (1280, 1)
 
 final_output = np.dot(feature_activation_maps.reshape((224*224, 1280)),
- predicted_class_weights).reshape((224, 224)) # (224*224, 1280) dot_product (1280, 1) = (224*224, 1)
+ predicted_class_weights).reshape((224, 224)) 
+# (224*224, 1280) dot_product (1280, 1) = (224*224, 1)
 
 #class activation map 출력 
 plt.imshow(final_output, cmap='jet')

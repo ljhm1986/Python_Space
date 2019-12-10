@@ -29,8 +29,8 @@ import tensorflow as tf
 
 
 
-#흑백으로 해 보자 
-caltech_dir = "C:/WorkSpace/screen shots test"
+#으로 해 보자 
+caltech_dir = "C:/WorkSpace/find-a-car-park/data"
 categories = ["Full","Free"]
 nb_class = len(categories)
 image_w = 224
@@ -46,7 +46,7 @@ for idx, cat in enumerate(categories):
 	print(files)
 	for i, f in enumerate(files):
 		img = Image.open(f)
-		img = img.convert("1")
+		img = img.convert("RGB")
 		img = img.resize((image_w,image_h))
 		data = np.asarray(img)
 		X.append(data)
@@ -63,7 +63,7 @@ Y.shape
 X_RE = X.reshape(X.shape + (1,))
 X_RE.shape
 
-X_train, X_test, Y_train,Y_test = train_test_split(X_RE,Y,test_size=0.2)
+X_train, X_test, Y_train,Y_test = train_test_split(X,Y,test_size=0.2)
 
 
 base_model = MobileNetV2(input_shape=(224,224,3),
@@ -90,12 +90,14 @@ for layer in model.layers:
 ###################################################
 #Train
 ###################################################
+#kaggle : model.h5
+#GTA5 : modelGTA.h5
 
 hist = model.fit(X_train,Y_train,batch_size=32,
                  epochs=10,verbose=1,
                  validation_data=(X_test,Y_test),
                  callbacks=[
-                         ModelCheckpoint('modelBW.h5',
+                         ModelCheckpoint('model.h5',
                                          monitor='val_acc',
                                          save_best_only=True,
                                          verbose=1)
@@ -105,8 +107,11 @@ hist = model.fit(X_train,Y_train,batch_size=32,
 #################################################
 #Create New Model
 #################################################
+#(미리 만들어 놓자...)
+#kaggle : model.h5
+#GTA5 : modelGTA.h5                 
 
-model = load_model('modelBW.h5')
+model = load_model('model.h5')
 
 last_weight = model.layers[-1].get_weights()[0]#(1280,2)
 
@@ -184,7 +189,7 @@ for idx, cat in enumerate(categories):
 	print(files)
 	for i, f in enumerate(files):
 		img = Image.open(f)
-		img = img.convert("1")
+		img = img.convert("RGB")
 		img = img.resize((image_w,image_h))
 		data = np.asarray(img)
 		X_car.append(data)
