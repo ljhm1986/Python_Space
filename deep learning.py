@@ -388,6 +388,12 @@ import tensorflow as tf
 #버전 확인 
 tf.__version__
 
+#나중에 추가한 부분
+config = tf.ConfigProto()
+config.gpu_options.allow_growth = True
+Session = tf.Session(config=config)
+######
+
 #상수 선언(객체 생성)
 hello = tf.constant("hello")
 hello

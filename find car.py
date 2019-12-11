@@ -17,7 +17,7 @@ from keras.layers import GlobalAveragePooling2D, Dense
 from keras.models import Model, load_model
 from keras.callbacks import ModelCheckpoint
 
-#다운로드한 경로를 입력하고 
+#데이터를 다운로드한 경로를 입력하고 
 BASE_PATH = 'C:\\WorkSpace\\find-a-car-park\\data'
 
 #이미지 파일 경로를 담은 list를 만들자 
@@ -49,7 +49,7 @@ train_datagen = ImageDataGenerator(
     validation_split=0.1,
     #10%를 검증용으로 사용한다. 
     preprocessing_function=preprocess_input
-    #mobilenet_v2에 있는 전처리 함수를 사용하겠다.
+    #mobilenet_v2에 넣을때 사용할 전처리 함수를 사용하겠다.
 )
 
 val_datagen = ImageDataGenerator(
@@ -147,19 +147,28 @@ history = model.fit_generator(
 #모델 저장한걸 불러들이자 
 model = load_model('model.h5')
 
-#마지막 layer의 weights
+#마지막 layer의 weights를 불러오기
 last_weight = model.layers[-1].get_weights()[0] 
 last_weight.shape  # (1280, 2)
+# __________________________________________________________________________________________________
+# global_average_pooling2d_1 (Glo (None, 1280)         0           out_relu[0][0]
+
+# __________________________________________________________________________________________________
+# dense_1 (Dense)                 (None, 2)            2562        global_average_pooling2d_1[0][0]
+# ==================================================================================================
+#을 보면 free connected layer이니까 1280에 2를 곱해주는 것이다. 행렬을 곱해주는 거라 생각하면 
 
 #입력에 대하여 원본 model의 활성화값을 반환하는 model 
 new_model = Model(
     inputs=model.input,
     outputs=(
-        #마지막에서 3번째 layer의 출력을 추출함
+        #마지막에서 3번째 layer의 출력을 추출함, out_relu (ReLU) layer
         model.layers[-3].output, 
         # the layer just before GAP, for using spatial features
-        #마지막 layer의 출력을 추출함 
-        model.layers[-1].output
+        #convolution layer까지가 spatial feature를 가지기 때문이다.
+        #이것은 global_average_pooling을 지나면 사라진다.
+        #마지막 layer의 출력을 추출함, dense_1 (Dense) layer 
+        model.layers[-1].output 
     )
 )
 
@@ -174,7 +183,7 @@ Full/img_809172559.jpg
 '''
 #PIL객체로 불러들인 후, numpy array로 변환합니다.
 test_img = img_to_array(load_img(os.path.join(BASE_PATH,
-                                              'Free/img_815061601.jpg'),
+                                              'Free/img_129173058.jpg'),
                                  target_size=(224, 224)))
 test_img.shape # (224, 224, 3)
 
@@ -201,23 +210,27 @@ last_conv_output.shape # (1, 7, 7, 1280)
 last_conv_output = np.squeeze(last_conv_output) # (1, 7, 7, 1280) -> (7, 7, 1280)
 last_conv_output.shape 
 
-#이미지 확대 
+#마지막 convolution에서 나온걸 이미지 확대 
 feature_activation_maps = scipy.ndimage.zoom(
     last_conv_output, (32, 32, 1), order=1) # (7, 7, 1280) -> (224, 224, 1280)
 feature_activation_maps.shape # 
 
+#예측값을 알아내기
 pred_class = np.argmax(pred) # 0: Full, 1: Free
-predicted_class_weights = last_weight[:, pred_class] # (1280, 1)
 
+#global_average_pooling을 건너뛰기 위해서, 이런식으로 추출하고
+predicted_class_weights = last_weight[:, pred_class] # (1280, 1)
+#바로 곱해준다.
 final_output = np.dot(feature_activation_maps.reshape((224*224, 1280)),
  predicted_class_weights).reshape((224, 224)) 
 # (224*224, 1280) dot_product (1280, 1) = (224*224, 1)
+# 
 
 #class activation map 출력 
 plt.imshow(final_output, cmap='jet')
 plt.show()
 
-#같이 출력, 빨간색을 집중적으로 보고 판단한다.  
+#같이 출력, 빨간색을 집중적으로 보고 비어있는지 차있는지 판단한다.   
 fig, ax = plt.subplots(nrows=1, ncols=2)
 fig.set_size_inches(16, 20)
 
