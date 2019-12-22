@@ -94,7 +94,7 @@ for layer in model2.layers:
 #GTA5 : modelGTA.h5
 
 hist = model2.fit(X_train,Y_train,batch_size=32,
-                 epochs=10,verbose=1,
+                 epochs=10,
                  validation_data=(X_test,Y_test),
                  callbacks=[
                          ModelCheckpoint('model2.h5',
@@ -156,7 +156,7 @@ plt.imshow(test_img.astype(np.uint8))
 plt.show()
 
 
-pred22 = model2.predict(X_test)
+pred2 = model2.predict(X_test)
 pred22.argmax(axis = 1)
 Y_test.argmax(axis = 1)
 

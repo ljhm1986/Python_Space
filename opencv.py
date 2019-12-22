@@ -18,6 +18,8 @@ print(cv.__version__)
 
 #image file을 읽어들이자
 img = cv.imread("C:\\WorkSpace\\dog test 1.jpg",0)
+img = cv.imread("C:\\WorkSpace\\img_1992_1717_2053.jpg",
+    cv.IMREAD_COLOR)
 img
 
 #아래 3개 같이 실행, 그럼 사진이 팝업이 뜨면서 나옴 
@@ -25,6 +27,7 @@ cv.imshow('image',img)
 cv.waitKey(0)
 cv.destroyAllWindows()
 
+cv.imwrite('test',img)
 
 #선분을 그려보자
 #color 설정
