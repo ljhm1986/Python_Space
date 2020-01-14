@@ -1,7 +1,7 @@
 import pandas as pd
 import numpy as np 
 ### 불러오기 ###
-metascore = pd.read_csv("c:/WorkSpace/PythonSpace/Python_Space/Project/metascoreDF_NAME.csv")
+metascore = pd.read_csv("c:/WorkSpace/Python_Space/Project/metascoreDF_NAME.csv")
 metascore = metascore.iloc[:,1:]
 
 opencritic = pd.read_csv("c:/WorkSpace/Python_Space/Project/opencriticAll.csv")

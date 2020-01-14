@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np 
 from pandas import Series, DataFrame
+import collections 
+import matplotlib.pyplot as plt 
 
 #3등 이내 2점, 2개 이상 1점, 그외 0점 
 
@@ -408,16 +410,12 @@ def knnClass2(X,Y,Z,n,m):
 #KNN도 2가지 방법으로 스케일링을 하자 
 ## 표준화(standardization) ##
 from sklearn.preprocessing import StandardScaler
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
-#분류기준 
-Y = mergeA['goty']
-#이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
-Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
-
 standardScaler = StandardScaler()
 standardScaler.fit(mergeA.iloc[:,2:5])
 X = standardScaler.transform(mergeA.iloc[:,2:5])
+#분류기준 
 Y = mergeA['goty']
+#이제 새로운 점을 넣어보자 #[metascore, userscore, openscore](0 ~ 100)
 Z = standardScaler.transform(mergeB.iloc[:,2:5])
 
 knnClass(X,Y,Z)
@@ -559,9 +557,10 @@ knnClass(X,Y,Z)
 knnK(X,Y,Z)
 
 #이번에는 표준화를 해서 실행하자
-X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:-1])
+minmax = MinMaxScaler()
+X = minmax.fit_transform(mergeA.iloc[:,2:-1])
 Y = mergeA['goty']
-Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:])
+Z = minmax.transform(mergeB.iloc[:,2:])
 knnClass(X,Y,Z)
 #정답률 점수 : 0.9646892655367232
 #2019 goty 예상 : Counter({0: 320, 1: 5, 2: 1})
@@ -598,7 +597,7 @@ def logisticRegression(X,Y,Z):
     X_train, X_test, Y_train, Y_test = train_test_split(X,Y,test_size = 0.3)
     log.fit(X_train, Y_train)
     pred_X = log.predict(X_test)
-    print("정답률 점수 :",clf.score(X_test, Y_test))
+    print("정답률 점수 :",log.score(X_test, Y_test))
     print("예측 갯수 :",collections.Counter(pred_X))
     print("실제 갯수 :",collections.Counter(Y_test))
     print(confusion_matrix(Y_test,pred_X))
@@ -660,10 +659,11 @@ logisticRegression(X,Y,Z)
 #원하는 부분의 정답률 (%): 0.0
 #2019 goty 예상 : Counter({0: 326})
 
-#표준화 스케일링을 해 보자 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:5])
+#표준화 스케일링을 해 보자
+standardScaler = StandardScaler()
+X = standardScaler.fit_transform(mergeA.iloc[:,2:5])
 Y = mergeA['goty']
-Z = StandardScaler().fit_transform(mergeB.iloc[:,2:5])
+Z = standardScaler.transform(mergeB.iloc[:,2:5])
 logisticRegression(X,Y,Z) 
 #예측 갯수 : Counter({0: 708})
 #실제 갯수 : Counter({0: 680, 1: 23, 2: 5})
@@ -683,10 +683,11 @@ logisticRegression(X,Y,Z)
 #원하는 부분의 정답률 (%): 0.0
 #2019 goty 예상 : Counter({0: 326})
 
-#정규화 스케일링을 해 보자 
-X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:5])
+#정규화 스케일링을 해 보자
+minmax = MinMaxScaler()
+X = minmax.fit_transform(mergeA.iloc[:,2:5])
 Y = mergeA['goty']
-Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:5])
+Z = minmax.transform(mergeB.iloc[:,2:5])
 logisticRegression(X,Y,Z) 
 #예측 갯수 : Counter({0: 708})
 #실제 갯수 : Counter({0: 689, 1: 12, 2: 7})
@@ -706,10 +707,11 @@ logisticRegression(X,Y,Z)
 #원하는 부분의 정답률 (%): 0.0
 #2019 goty 예상 : Counter({0: 326})
 
-#장르를 포함해서 표준화 스케일링을 해보자 
-X = StandardScaler().fit_transform(mergeA.iloc[:,2:-1])
+#장르를 포함해서 표준화 스케일링을 해보자
+standardScaler = StandardScaler() 
+X = standardScaler().fit_transform(mergeA.iloc[:,2:-1])
 Y = mergeA['goty']
-Z = StandardScaler().fit_transform(mergeB.iloc[:,2:])
+Z = standardScaler().transform(mergeB.iloc[:,2:])
 logisticRegression(X,Y,Z) 
 #예측 갯수 : Counter({0: 703, 1: 5})
 #실제 갯수 : Counter({0: 688, 1: 13, 2: 7})
@@ -729,10 +731,11 @@ logisticRegression(X,Y,Z)
 #원하는 부분의 정답률 (%): 5.0
 #2019 goty 예상 : Counter({0: 326})
 
-#장르를 포함해서 정규화 스케일링을 해보자 
-X = MinMaxScaler().fit_transform(mergeA.iloc[:,2:-1])
+#장르를 포함해서 정규화 스케일링을 해보자
+minmax = MinMaxScaler() 
+X = minmax.fit_transform(mergeA.iloc[:,2:-1])
 Y = mergeA['goty']
-Z = MinMaxScaler().fit_transform(mergeB.iloc[:,2:])
+Z = minmax.transform(mergeB.iloc[:,2:])
 logisticRegression(X,Y,Z) 
 #예측 갯수 : Counter({0: 708})
 #실제 갯수 : Counter({0: 691, 1: 14, 2: 3})
