@@ -479,8 +479,8 @@ a
 b = tf.constant(2)
 x2_OP = a + b
 sess = tf.Session()
-
-
+sess.run(x2_OP, feed_dict= {a : (1,2,3)})
+#array([3, 4, 5])
 
 #
 x = tf.placeholder('float32')
